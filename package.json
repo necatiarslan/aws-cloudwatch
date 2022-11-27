@@ -16,7 +16,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onView:aws-cloudwatch-vscode-extension"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -24,8 +24,50 @@
       {
         "command": "aws-cloudwatch-vscode-extension.CheckAccessibility",
         "title": "Aws CloudWatch:Check Accessibility"
-      }
-    ]
+      },
+      {
+				"command": "aws-cloudwatch-vscode-extension.Filter",
+				"title": "Filter",
+				"icon": "$(filter)"
+			},
+      {
+				"command": "aws-cloudwatch-vscode-extension.ShowOnlyFavorite",
+				"title": "Show Only Favorite",
+				"icon": "$(bookmark)"
+			},
+      {
+				"command": "aws-cloudwatch-vscode-extension.AddToFav",
+				"title": "Fav"
+			},
+			{
+				"command": "aws-cloudwatch-vscode-extension.DeleteFromFav",
+				"title": "UnFav"
+			}
+    ],
+    "viewsContainers": {
+			"activitybar": [
+				{
+					"id": "aws-cloudwatch-vscode-extension",
+					"title": "Aws Cloud Watch",
+					"icon": "media/aws-cloudwatch-logo.svg"
+				}
+			]
+		},
+		"views": {
+			"aws-cloudwatch-vscode-extension": [
+				{
+					"id": "aws-cloudwatch-vscode-extension.TreeView",
+					"name": "Aws Cloud Watch",
+					"icon": "media/aws-cloudwatch-logo.svg"
+				}
+			]
+		},
+		"viewsWelcome": [
+			{
+				"view": "aws-cloudwatch-vscode-extension.TreeView",
+				"contents": "Can Not Connect to Aws Cloud Watch"
+			}
+		]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
