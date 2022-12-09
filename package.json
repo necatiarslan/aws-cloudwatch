@@ -15,56 +15,96 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "AWS",
+    "CloudWatch"
+],
   "activationEvents": [
-    "onView:aws-cloudwatch-vscode-extension"
+    "onView:CloudWatchTreeView"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "aws-cloudwatch-vscode-extension.CheckAccessibility",
+        "command": "CloudWatchTreeView.CheckAccessibility",
         "title": "Aws CloudWatch:Check Accessibility"
       },
       {
-				"command": "aws-cloudwatch-vscode-extension.Filter",
+				"command": "CloudWatchTreeView.Refresh",
+				"title": "Refresh",
+				"icon": "$(refresh)"
+			},
+      {
+				"command": "CloudWatchTreeView.Filter",
 				"title": "Filter",
 				"icon": "$(filter)"
 			},
       {
-				"command": "aws-cloudwatch-vscode-extension.ShowOnlyFavorite",
+				"command": "CloudWatchTreeView.ShowOnlyFavorite",
 				"title": "Show Only Favorite",
 				"icon": "$(bookmark)"
 			},
       {
-				"command": "aws-cloudwatch-vscode-extension.AddToFav",
+				"command": "CloudWatchTreeView.AddToFav",
 				"title": "Fav"
 			},
 			{
-				"command": "aws-cloudwatch-vscode-extension.DeleteFromFav",
+				"command": "CloudWatchTreeView.DeleteFromFav",
 				"title": "UnFav"
 			}
     ],
+    "menus": {
+			"view/title": [
+				{
+					"command": "CloudWatchTreeView.Refresh",
+					"when": "view == CloudWatchTreeView",
+					"group": "navigation"
+				},
+				{
+					"command": "CloudWatchTreeView.Filter",
+					"when": "view == CloudWatchTreeView",
+					"group": "navigation"
+				},
+        {
+					"command": "CloudWatchTreeView.ShowOnlyFavorite",
+					"when": "view == CloudWatchTreeView",
+					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "CloudWatchTreeView.AddToFav",
+					"when": "view == CloudWatchTreeView",
+					"group": "fav"
+				},
+				{
+					"command": "CloudWatchTreeView.DeleteFromFav",
+					"when": "view == CloudWatchTreeView",
+					"group": "fav"
+				}
+			]
+		},
     "viewsContainers": {
 			"activitybar": [
 				{
 					"id": "aws-cloudwatch-vscode-extension",
 					"title": "Aws Cloud Watch",
-					"icon": "media/aws-cloudwatch-logo.svg"
+					"icon": "media/aws-cloudwatch-logo.png"
 				}
 			]
 		},
 		"views": {
 			"aws-cloudwatch-vscode-extension": [
 				{
-					"id": "aws-cloudwatch-vscode-extension.TreeView",
+					"id": "CloudWatchTreeView",
 					"name": "Aws Cloud Watch",
-					"icon": "media/aws-cloudwatch-logo.svg"
+					"icon": "media/aws-cloudwatch-logo.png"
 				}
 			]
 		},
 		"viewsWelcome": [
 			{
-				"view": "aws-cloudwatch-vscode-extension.TreeView",
+				"view": "CloudWatchTreeView",
 				"contents": "Can Not Connect to Aws Cloud Watch"
 			}
 		]

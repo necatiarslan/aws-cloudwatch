@@ -3,23 +3,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
 const ui = require("./common/ui");
-const treeView_1 = require("./cloudwatch/treeView");
+const CloudWatchTreeView_1 = require("./cloudwatch/CloudWatchTreeView");
 function activate(context) {
     ui.logToOutput('Aws CloudWatch Extension activation started');
-    let treeView = new treeView_1.TreeView(context);
-    vscode.commands.registerCommand('aws-cloudwatch-vscode-extension.CheckAccessibility', () => {
+    let treeView = new CloudWatchTreeView_1.CloudWatchTreeView(context);
+    vscode.commands.registerCommand('CloudWatchTreeView.CheckAccessibility', () => {
         ui.showInfoMessage("CheckAccessibility DONE");
     });
-    vscode.commands.registerCommand('aws-cloudwatch-vscode-extension.Filter', () => {
+    vscode.commands.registerCommand('CloudWatchTreeView.Refresh', () => {
+        treeView.Refresh();
+    });
+    vscode.commands.registerCommand('CloudWatchTreeView.Filter', () => {
         treeView.Filter();
     });
-    vscode.commands.registerCommand('aws-cloudwatch-vscode-extension.ShowOnlyFavorite', () => {
+    vscode.commands.registerCommand('CloudWatchTreeView.ShowOnlyFavorite', () => {
         treeView.ShowOnlyFavorite();
     });
-    vscode.commands.registerCommand('aws-cloudwatch-vscode-extension.AddToFav', (node) => {
+    vscode.commands.registerCommand('CloudWatchTreeView.AddToFav', (node) => {
         treeView.AddToFav(node);
     });
-    vscode.commands.registerCommand('aws-cloudwatch-vscode-extension.DeleteFromFav', (node) => {
+    vscode.commands.registerCommand('CloudWatchTreeView.DeleteFromFav', (node) => {
         treeView.DeleteFromFav(node);
     });
     ui.logToOutput('Aws CloudWatch Extension activation completed');

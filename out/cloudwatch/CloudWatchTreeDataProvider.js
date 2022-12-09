@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TreeDataProvider = void 0;
+exports.CloudWatchTreeDataProvider = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const vscode = require("vscode");
-const treeItem_1 = require("./treeItem");
+const CloudWatchTreeItem_1 = require("./CloudWatchTreeItem");
 const CloudWatchTreeView_1 = require("./CloudWatchTreeView");
-class TreeDataProvider {
+class CloudWatchTreeDataProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -17,10 +17,11 @@ class TreeDataProvider {
     }
     LoadTreeItems() {
         this.treeItemList = [];
-        let treeItem = new treeItem_1.TreeItem();
+        //TODO aws code
+        let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem();
         this.treeItemList.push(treeItem);
     }
-    GetChildren(element) {
+    getChildren(element) {
         if (!element) {
             this.visibletreeItemList = this.GetVisibleTreeItemList();
             return Promise.resolve(this.visibletreeItemList);
@@ -30,19 +31,19 @@ class TreeDataProvider {
     GetVisibleTreeItemList() {
         var result = [];
         for (var node of this.treeItemList) {
-            if (CloudWatchTreeView_1.TreeView.Current && CloudWatchTreeView_1.TreeView.Current.FilterString && !node.doesFilterMatch(CloudWatchTreeView_1.TreeView.Current.FilterString)) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.doesFilterMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
                 continue;
             }
-            if (CloudWatchTreeView_1.TreeView.Current && CloudWatchTreeView_1.TreeView.Current.isShowOnlyFavorite && !node.IsFav) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !node.IsFav) {
                 continue;
             }
             result.push(node);
         }
         return result;
     }
-    GetTreeItem(element) {
+    getTreeItem(element) {
         return element;
     }
 }
-exports.TreeDataProvider = TreeDataProvider;
-//# sourceMappingURL=treeDataProvider.js.map
+exports.CloudWatchTreeDataProvider = CloudWatchTreeDataProvider;
+//# sourceMappingURL=CloudWatchTreeDataProvider.js.map

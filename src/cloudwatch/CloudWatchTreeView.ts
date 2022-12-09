@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
-import { TreeItem } from './treeItem';
-import { TreeDataProvider } from './treeDataProvider';
+import { CloudWatchTreeItem } from './CloudWatchTreeItem';
+import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
 import * as ui from '../common/ui';
 
-export class TreeView {
+export class CloudWatchTreeView {
 
-	public static Current: TreeView | undefined;
-	public view: vscode.TreeView<TreeItem>;
-	public treeDataProvider: TreeDataProvider;
+	public static Current: CloudWatchTreeView | undefined;
+	public view: vscode.TreeView<CloudWatchTreeItem>;
+	public treeDataProvider: CloudWatchTreeDataProvider;
 	public context: vscode.ExtensionContext;
 	public FilterString: string = '';
 	public isShowOnlyFavorite: boolean = false;
@@ -17,16 +17,16 @@ export class TreeView {
 		ui.logToOutput('TreeView.constructor Started');
 		this.context = context;
 		this.LoadState();
-		this.treeDataProvider = new TreeDataProvider();
-		this.view = vscode.window.createTreeView('dagTreeView', { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
+		this.treeDataProvider = new CloudWatchTreeDataProvider();
+		this.view = vscode.window.createTreeView('CloudWatchTreeView', { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
 		this.Refresh();
 		context.subscriptions.push(this.view);
-		TreeView.Current = this;
+		CloudWatchTreeView.Current = this;
 		this.SetFilterMessage();
 	}
 
 	Refresh(): void {
-		ui.logToOutput('TreeView.refresh Started');
+		ui.logToOutput('CloudWatchTreeView.refresh Started');
 
 		vscode.window.withProgress({
 			location: vscode.ProgressLocation.Window,
@@ -41,7 +41,7 @@ export class TreeView {
 	}
 
 	LoadTreeItems(){
-		ui.logToOutput('TreeView.loadTreeItems Started');
+		ui.logToOutput('CloudWatchTreeView.loadTreeItems Started');
 
 		//TODO: Get TreeItems from Aws
 		this.treeDataProvider.LoadTreeItems();
@@ -50,7 +50,7 @@ export class TreeView {
 	}
 
 	ResetView(): void {
-		ui.logToOutput('TreeView.resetView Started');
+		ui.logToOutput('CloudWatchTreeView.resetView Started');
 		this.FilterString = '';
 
 		this.treeDataProvider.Refresh();
@@ -60,19 +60,19 @@ export class TreeView {
 		this.Refresh();
 	}
 
-	async AddToFav(node: TreeItem) {
-		ui.logToOutput('TreeView.addToFavDAG Started');
+	async AddToFav(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.AddToFav Started');
 		node.IsFav = true;
 	}
 
-	async DeleteFromFav(node: TreeItem) {
-		ui.logToOutput('TreeView.deleteFromFavDAG Started');
+	async DeleteFromFav(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.DeleteFromFav Started');
 		node.IsFav = false;
 	}
 
 
 	async Filter() {
-		ui.logToOutput('TreeView.filter Started');
+		ui.logToOutput('CloudWatchTreeView.Filter Started');
 		let filterStringTemp = await vscode.window.showInputBox({ value: this.FilterString, placeHolder: 'Enter your filters seperated by comma' });
 
 		if (filterStringTemp === undefined) { return; }
@@ -84,7 +84,7 @@ export class TreeView {
 	}
 
 	async ShowOnlyFavorite() {
-		ui.logToOutput('TreeView.showOnlyFavorite Started');
+		ui.logToOutput('CloudWatchTreeView.ShowOnlyFavorite Started');
 		this.isShowOnlyFavorite = !this.isShowOnlyFavorite;
 		this.treeDataProvider.Refresh();
 		this.SetFilterMessage();
@@ -96,22 +96,22 @@ export class TreeView {
 	}
 
 	SaveState() {
-		ui.logToOutput('TreeView.saveState Started');
+		ui.logToOutput('CloudWatchTreeView.saveState Started');
 		try {
 
 			this.context.globalState.update('FilterString', this.FilterString);
 			this.context.globalState.update('ShowOnlyFavorite', this.ShowOnlyFavorite);
 
 		} catch (error) {
-			ui.logToOutput("TreeView.saveState Error !!!");
+			ui.logToOutput("CloudWatchTreeView.saveState Error !!!");
 		}
 	}
 
 	LoadState() {
-		ui.logToOutput('TreeView.loadState Started');
+		ui.logToOutput('CloudWatchTreeView.loadState Started');
 		try {
 
-			let filterStringTemp: string | undefined = this.context.globalState.get('filterString');
+			let filterStringTemp: string | undefined = this.context.globalState.get('FilterString');
 			if (filterStringTemp) {
 				this.FilterString = filterStringTemp;
 				this.SetFilterMessage();
@@ -121,7 +121,7 @@ export class TreeView {
 			if (ShowOnlyFavoriteTemp) { this.isShowOnlyFavorite = ShowOnlyFavoriteTemp; }
 
 		} catch (error) {
-			ui.logToOutput("dagTreeView.loadState Error !!!");
+			ui.logToOutput("CloudWatchTreeView.loadState Error !!!");
 		}
 	}
 

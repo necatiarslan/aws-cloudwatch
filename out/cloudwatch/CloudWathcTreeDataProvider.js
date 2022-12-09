@@ -45,4 +45,4 @@ class TreeDataProvider {
     }
 }
 exports.TreeDataProvider = TreeDataProvider;
-//# sourceMappingURL=treeDataProvider.js.map
+//# sourceMappingURL=CloudWathcTreeDataProvider.js.map

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
 
-export class TreeItem extends vscode.TreeItem {
+export class CloudWatchTreeItem extends vscode.TreeItem {
 	public IsFav: boolean = false;
 
 	constructor() {
