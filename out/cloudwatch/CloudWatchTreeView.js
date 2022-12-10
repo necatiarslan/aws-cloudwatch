@@ -142,6 +142,19 @@ class CloudWatchTreeView {
         }
         this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, selectedLogStream);
     }
+    async AddAllLogStreams(node) {
+        ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
+        if (!node.Region || !node.LogGroup) {
+            return;
+        }
+        var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
+        if (!resultLogStream.isSuccessful) {
+            return;
+        }
+        for (var logStream of resultLogStream.result) {
+            this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, logStream);
+        }
+    }
     async RemoveLogStream(node) {
         ui.logToOutput('CloudWatchTreeView.RemoveLogStream Started');
     }

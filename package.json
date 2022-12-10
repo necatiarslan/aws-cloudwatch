@@ -68,6 +68,10 @@
       {
         "command": "CloudWatchTreeView.RemoveLogStream",
         "title": "Remove Log Stream"
+      },
+      {
+        "command": "CloudWatchTreeView.AddAllLogStreams",
+        "title": "Add All Log Streams"
       }
     ],
     "menus": {
@@ -116,6 +120,11 @@
         },
         {
           "command": "CloudWatchTreeView.RemoveLogStream",
+          "when": "view == CloudWatchTreeView",
+          "group": "LogStream"
+        },
+        {
+          "command": "CloudWatchTreeView.AddAllLogStreams",
           "when": "view == CloudWatchTreeView",
           "group": "LogStream"
         }

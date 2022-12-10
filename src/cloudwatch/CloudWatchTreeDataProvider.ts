@@ -17,6 +17,14 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	}
 
 	AddLogGroup(Region:string, LogGroup:string){
+		for(var lg of this.LogGroupList)
+		{
+			if(lg[0] === Region && lg[1] === LogGroup)
+			{
+				return;
+			}
+		}
+
 		this.LogGroupList.push([Region, LogGroup]);
 		this.LoadLogGroupNodeList();
 		this.Refresh();
@@ -27,6 +35,15 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	}
 
 	AddLogStream(Region:string, LogGroup:string, LogStream:string){
+		for(var ls of this.LogStreamList)
+		{
+			if(ls[0] === Region && ls[1] === LogGroup && ls[2] === LogStream)
+			{
+				return;
+			}
+		}
+
+
 		this.LogStreamList.push([Region, LogGroup, LogStream]);
 		this.LoadLogStreamNodeList();
 		this.Refresh();

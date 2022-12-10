@@ -18,6 +18,11 @@ class CloudWatchTreeDataProvider {
         this._onDidChangeTreeData.fire();
     }
     AddLogGroup(Region, LogGroup) {
+        for (var lg of this.LogGroupList) {
+            if (lg[0] === Region && lg[1] === LogGroup) {
+                return;
+            }
+        }
         this.LogGroupList.push([Region, LogGroup]);
         this.LoadLogGroupNodeList();
         this.Refresh();
@@ -26,6 +31,11 @@ class CloudWatchTreeDataProvider {
         //TODO
     }
     AddLogStream(Region, LogGroup, LogStream) {
+        for (var ls of this.LogStreamList) {
+            if (ls[0] === Region && ls[1] === LogGroup && ls[2] === LogStream) {
+                return;
+            }
+        }
         this.LogStreamList.push([Region, LogGroup, LogStream]);
         this.LoadLogStreamNodeList();
         this.Refresh();
