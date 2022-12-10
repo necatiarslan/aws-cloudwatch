@@ -18,7 +18,7 @@
   "keywords": [
     "AWS",
     "CloudWatch"
-],
+  ],
   "activationEvents": [
     "onView:CloudWatchTreeView"
   ],
@@ -30,84 +30,121 @@
         "title": "Aws CloudWatch:Check Accessibility"
       },
       {
-				"command": "CloudWatchTreeView.Refresh",
-				"title": "Refresh",
-				"icon": "$(refresh)"
-			},
+        "command": "CloudWatchTreeView.Refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
       {
-				"command": "CloudWatchTreeView.Filter",
-				"title": "Filter",
-				"icon": "$(filter)"
-			},
+        "command": "CloudWatchTreeView.Filter",
+        "title": "Filter",
+        "icon": "$(filter)"
+      },
       {
-				"command": "CloudWatchTreeView.ShowOnlyFavorite",
-				"title": "Show Only Favorite",
-				"icon": "$(bookmark)"
-			},
+        "command": "CloudWatchTreeView.ShowOnlyFavorite",
+        "title": "Show Only Favorite",
+        "icon": "$(bookmark)"
+      },
       {
-				"command": "CloudWatchTreeView.AddToFav",
-				"title": "Fav"
-			},
-			{
-				"command": "CloudWatchTreeView.DeleteFromFav",
-				"title": "UnFav"
-			}
+        "command": "CloudWatchTreeView.AddToFav",
+        "title": "Fav"
+      },
+      {
+        "command": "CloudWatchTreeView.DeleteFromFav",
+        "title": "UnFav"
+      },
+      {
+        "command": "CloudWatchTreeView.AddLogGroup",
+        "title": "Add Log Group",
+        "icon": "$(add)"
+      },
+      {
+        "command": "CloudWatchTreeView.RemoveLogGroup",
+        "title": "Remove Log Group"
+      },
+      {
+        "command": "CloudWatchTreeView.AddLogStream",
+        "title": "Add Log Stream"
+      },
+      {
+        "command": "CloudWatchTreeView.RemoveLogStream",
+        "title": "Remove Log Stream"
+      }
     ],
     "menus": {
-			"view/title": [
-				{
-					"command": "CloudWatchTreeView.Refresh",
-					"when": "view == CloudWatchTreeView",
-					"group": "navigation"
-				},
-				{
-					"command": "CloudWatchTreeView.Filter",
-					"when": "view == CloudWatchTreeView",
-					"group": "navigation"
-				},
+      "view/title": [
         {
-					"command": "CloudWatchTreeView.ShowOnlyFavorite",
-					"when": "view == CloudWatchTreeView",
-					"group": "navigation"
-				}
-			],
-			"view/item/context": [
-				{
-					"command": "CloudWatchTreeView.AddToFav",
-					"when": "view == CloudWatchTreeView",
-					"group": "fav"
-				},
-				{
-					"command": "CloudWatchTreeView.DeleteFromFav",
-					"when": "view == CloudWatchTreeView",
-					"group": "fav"
-				}
-			]
-		},
+          "command": "CloudWatchTreeView.Refresh",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation"
+        },
+        {
+          "command": "CloudWatchTreeView.Filter",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation"
+        },
+        {
+          "command": "CloudWatchTreeView.ShowOnlyFavorite",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation"
+        },
+        {
+          "command": "CloudWatchTreeView.AddLogGroup",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "CloudWatchTreeView.AddToFav",
+          "when": "view == CloudWatchTreeView",
+          "group": "Fav"
+        },
+        {
+          "command": "CloudWatchTreeView.DeleteFromFav",
+          "when": "view == CloudWatchTreeView",
+          "group": "Fav"
+        },
+        {
+          "command": "CloudWatchTreeView.RemoveLogGroup",
+          "when": "view == CloudWatchTreeView",
+          "group": "LogGroup"
+        },
+        {
+          "command": "CloudWatchTreeView.AddLogStream",
+          "when": "view == CloudWatchTreeView",
+          "group": "LogStream"
+        },
+        {
+          "command": "CloudWatchTreeView.RemoveLogStream",
+          "when": "view == CloudWatchTreeView",
+          "group": "LogStream"
+        }
+      ]
+    },
     "viewsContainers": {
-			"activitybar": [
-				{
-					"id": "aws-cloudwatch-vscode-extension",
-					"title": "Aws Cloud Watch",
-					"icon": "media/aws-cloudwatch-logo.png"
-				}
-			]
-		},
-		"views": {
-			"aws-cloudwatch-vscode-extension": [
-				{
-					"id": "CloudWatchTreeView",
-					"name": "Aws Cloud Watch",
-					"icon": "media/aws-cloudwatch-logo.png"
-				}
-			]
-		},
-		"viewsWelcome": [
-			{
-				"view": "CloudWatchTreeView",
-				"contents": "Can Not Connect to Aws Cloud Watch"
-			}
-		]
+      "activitybar": [
+        {
+          "id": "aws-cloudwatch-vscode-extension",
+          "title": "Aws Cloud Watch",
+          "icon": "media/aws-cloudwatch-logo.png"
+        }
+      ]
+    },
+    "views": {
+      "aws-cloudwatch-vscode-extension": [
+        {
+          "id": "CloudWatchTreeView",
+          "name": "Aws Cloud Watch",
+          "icon": "media/aws-cloudwatch-logo.png"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "CloudWatchTreeView",
+        "contents": "Can Not Connect to Aws Cloud Watch"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -131,6 +168,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@aws-sdk/credential-provider-node": "^3.181.0"
+    "@aws-sdk/credential-provider-node": "^3.181.0",
+    "aws-sdk": "^2.1271.0"
   }
 }

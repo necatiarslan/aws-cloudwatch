@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
-const ui = require("./common/ui");
+const ui = require("./common/UI");
 const CloudWatchTreeView_1 = require("./cloudwatch/CloudWatchTreeView");
 function activate(context) {
     ui.logToOutput('Aws CloudWatch Extension activation started');
@@ -24,6 +24,18 @@ function activate(context) {
     });
     vscode.commands.registerCommand('CloudWatchTreeView.DeleteFromFav', (node) => {
         treeView.DeleteFromFav(node);
+    });
+    vscode.commands.registerCommand('CloudWatchTreeView.AddLogGroup', () => {
+        treeView.AddLogGroup();
+    });
+    vscode.commands.registerCommand('CloudWatchTreeView.RemoveLogGroup', (node) => {
+        treeView.RemoveLogGroup(node);
+    });
+    vscode.commands.registerCommand('CloudWatchTreeView.AddLogStream', (node) => {
+        treeView.AddLogStream(node);
+    });
+    vscode.commands.registerCommand('CloudWatchTreeView.RemoveLogStream', (node) => {
+        treeView.RemoveLogStream(node);
     });
     ui.logToOutput('Aws CloudWatch Extension activation completed');
 }

@@ -32,7 +32,7 @@ export function showOutputMessage(message: any, popupMessage: string = "Results 
   }
 }
 
-export function logToOutput(message: any): void {
+export function logToOutput(message: any, error?: Error): void {
   let now = new Date().toLocaleString();
 
   if (!logsOutputChannel) {
@@ -44,6 +44,15 @@ export function logToOutput(message: any): void {
   }
   else {
     logsOutputChannel.appendLine("[" + now + "] " + message);
+  }
+
+  if (error) {
+    logsOutputChannel.appendLine(error.name);
+    logsOutputChannel.appendLine(error.message);
+    if(error.stack)
+    {
+      logsOutputChannel.appendLine(error.stack);
+    }
   }
 }
 

@@ -26,7 +26,7 @@ function showOutputMessage(message, popupMessage = "Results are printed to OUTPU
     }
 }
 exports.showOutputMessage = showOutputMessage;
-function logToOutput(message) {
+function logToOutput(message, error) {
     let now = new Date().toLocaleString();
     if (!logsOutputChannel) {
         logsOutputChannel = vscode.window.createOutputChannel("AwsCloudWatch-Log");
@@ -36,6 +36,13 @@ function logToOutput(message) {
     }
     else {
         logsOutputChannel.appendLine("[" + now + "] " + message);
+    }
+    if (error) {
+        logsOutputChannel.appendLine(error.name);
+        logsOutputChannel.appendLine(error.message);
+        if (error.stack) {
+            logsOutputChannel.appendLine(error.stack);
+        }
     }
 }
 exports.logToOutput = logToOutput;
@@ -129,4 +136,4 @@ function isValidDate(dateString) {
     return d.toISOString().slice(0, 10) === dateString;
 }
 exports.isValidDate = isValidDate;
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

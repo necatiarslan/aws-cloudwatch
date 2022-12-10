@@ -2,7 +2,9 @@
 import * as vscode from 'vscode';
 import { CloudWatchTreeItem } from './CloudWatchTreeItem';
 import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
-import * as ui from '../common/ui';
+import * as ui from '../common/UI';
+import * as api from '../common/API';
+import { APIGateway } from 'aws-sdk';
 
 export class CloudWatchTreeView {
 
@@ -12,6 +14,7 @@ export class CloudWatchTreeView {
 	public context: vscode.ExtensionContext;
 	public FilterString: string = '';
 	public isShowOnlyFavorite: boolean = false;
+	
 
 	constructor(context: vscode.ExtensionContext) {
 		ui.logToOutput('TreeView.constructor Started');
@@ -43,8 +46,6 @@ export class CloudWatchTreeView {
 	LoadTreeItems(){
 		ui.logToOutput('CloudWatchTreeView.loadTreeItems Started');
 
-		//TODO: Get TreeItems from Aws
-		this.treeDataProvider.LoadTreeItems();
 		this.treeDataProvider.Refresh();
 		this.SetViewTitle();
 	}
@@ -132,5 +133,49 @@ export class CloudWatchTreeView {
 	GetBoolenSign(variable: boolean){
 		return variable ? "✓" : "𐄂";
 	}
+
+	async AddLogGroup(){
+		ui.logToOutput('CloudWatchTreeView.AddLogGroup Started');
+
+		//TODO
+		//var resultRegions = await api.GetRegionList();
+		//if(!resultRegions.isSuccessful){ return; }
+		//let selectedRegion = await vscode.window.showQuickPick(resultRegions.result, {canPickMany:false, placeHolder: 'Select Region'});
+		//if(!selectedRegion){ return; }
+		let selectedRegion:string = "us-east-1";
+
+		var resultLogGroup = await api.GetLogGroupList(selectedRegion);
+		if(!resultLogGroup.isSuccessful){ return; }
+
+		let selectedLogGroup = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:false, placeHolder: 'Select Log Group'});
+		if(!selectedLogGroup){ return; }
+
+		this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+	}
+
+	async RemoveLogGroup(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.RemoveLogGroup Started');
+		
+	}
+
+	async AddLogStream(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
+		if(!node.Region || !node.LogGroup) { return; }
+
+		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
+		if(!resultLogStream.isSuccessful){ return; }
+
+		let selectedLogStream = await vscode.window.showQuickPick(resultLogStream.result, {canPickMany:false, placeHolder: 'Select Log Stream'});
+		if(!selectedLogStream){ return; }
+
+		this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, selectedLogStream);
+
+	}
+
+	async RemoveLogStream(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.RemoveLogStream Started');
+		
+	}
+
 
 }

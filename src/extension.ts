@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as ui from './common/ui';
+import * as ui from './common/UI';
 import { CloudWatchTreeView } from './cloudwatch/CloudWatchTreeView';
 import { CloudWatchTreeItem } from './cloudwatch/CloudWatchTreeItem';
 
@@ -30,6 +30,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('CloudWatchTreeView.DeleteFromFav', (node: CloudWatchTreeItem) => {
 		treeView.DeleteFromFav(node);
+	});
+
+	vscode.commands.registerCommand('CloudWatchTreeView.AddLogGroup', () => {
+		treeView.AddLogGroup();
+	});
+
+	vscode.commands.registerCommand('CloudWatchTreeView.RemoveLogGroup', (node: CloudWatchTreeItem) => {
+		treeView.RemoveLogGroup(node);
+	});
+
+	vscode.commands.registerCommand('CloudWatchTreeView.AddLogStream', (node: CloudWatchTreeItem) => {
+		treeView.AddLogStream(node);
+	});
+
+	vscode.commands.registerCommand('CloudWatchTreeView.RemoveLogStream', (node: CloudWatchTreeItem) => {
+		treeView.RemoveLogStream(node);
 	});
 
 	ui.logToOutput('Aws CloudWatch Extension activation completed');

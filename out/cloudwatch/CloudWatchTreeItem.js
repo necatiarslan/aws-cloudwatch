@@ -1,29 +1,37 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CloudWatchTreeItem = void 0;
+exports.TreeItemType = exports.CloudWatchTreeItem = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const vscode = require("vscode");
 class CloudWatchTreeItem extends vscode.TreeItem {
-    constructor() {
-        super("1234");
+    constructor(text, treeItemType) {
+        super(text);
         this.IsFav = false;
+        this.Text = text;
+        this.TreeItemType = treeItemType;
         this.refreshUI();
     }
     refreshUI() {
-        super.label = "1234";
-        this.iconPath = new vscode.ThemeIcon('circle-outline');
-    }
-    doesFilterMatch(filterString) {
-        let words = filterString.split(',');
-        let matchingWords = [];
-        for (var word of words) {
-            if (word === 'fav' && this.IsFav) {
-                matchingWords.push(word);
-                continue;
-            }
+        super.label = this.Text;
+        if (this.TreeItemType === TreeItemType.Region) {
+            this.iconPath = new vscode.ThemeIcon('archive');
         }
-        return words.length === matchingWords.length;
+        else if (this.TreeItemType === TreeItemType.LogGroup) {
+            this.iconPath = new vscode.ThemeIcon('folder');
+        }
+        else if (this.TreeItemType === TreeItemType.LogStream) {
+            this.iconPath = new vscode.ThemeIcon('output');
+        }
+        else {
+            this.iconPath = new vscode.ThemeIcon('circle-outline');
+        }
     }
 }
 exports.CloudWatchTreeItem = CloudWatchTreeItem;
+var TreeItemType;
+(function (TreeItemType) {
+    TreeItemType[TreeItemType["Region"] = 1] = "Region";
+    TreeItemType[TreeItemType["LogGroup"] = 2] = "LogGroup";
+    TreeItemType[TreeItemType["LogStream"] = 3] = "LogStream";
+})(TreeItemType = exports.TreeItemType || (exports.TreeItemType = {}));
 //# sourceMappingURL=CloudWatchTreeItem.js.map
