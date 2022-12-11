@@ -19,8 +19,8 @@ export class CloudWatchTreeView {
 	constructor(context: vscode.ExtensionContext) {
 		ui.logToOutput('TreeView.constructor Started');
 		this.context = context;
-		this.LoadState();
 		this.treeDataProvider = new CloudWatchTreeDataProvider();
+		this.LoadState();
 		this.view = vscode.window.createTreeView('CloudWatchTreeView', { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
 		this.Refresh();
 		context.subscriptions.push(this.view);
@@ -66,11 +66,13 @@ export class CloudWatchTreeView {
 	async AddToFav(node: CloudWatchTreeItem) {
 		ui.logToOutput('CloudWatchTreeView.AddToFav Started');
 		node.IsFav = true;
+		node.refreshUI();
 	}
 
 	async DeleteFromFav(node: CloudWatchTreeItem) {
 		ui.logToOutput('CloudWatchTreeView.DeleteFromFav Started');
 		node.IsFav = false;
+		node.refreshUI();
 	}
 
 	async Filter() {
@@ -103,6 +105,8 @@ export class CloudWatchTreeView {
 
 			this.context.globalState.update('FilterString', this.FilterString);
 			this.context.globalState.update('ShowOnlyFavorite', this.ShowOnlyFavorite);
+			this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
+			this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
 
 		} catch (error) {
 			ui.logToOutput("CloudWatchTreeView.saveState Error !!!");
@@ -121,6 +125,18 @@ export class CloudWatchTreeView {
 
 			let ShowOnlyFavoriteTemp: boolean | undefined = this.context.globalState.get('ShowOnlyFavorite');
 			if (ShowOnlyFavoriteTemp) { this.isShowOnlyFavorite = ShowOnlyFavoriteTemp; }
+
+			let LogGroupListTemp:[[string,string]] | undefined  = this.context.globalState.get('LogGroupList');
+			if(LogGroupListTemp)
+			{
+				this.treeDataProvider.LogGroupList = LogGroupListTemp;
+			}
+
+			let LogStreamListTemp:[[string,string,string]] | undefined  = this.context.globalState.get('LogStreamList');
+			if(LogStreamListTemp)
+			{
+				this.treeDataProvider.LogStreamList = LogStreamListTemp;
+			}
 
 		} catch (error) {
 			ui.logToOutput("CloudWatchTreeView.loadState Error !!!");
@@ -152,6 +168,7 @@ export class CloudWatchTreeView {
 		if(!selectedLogGroup){ return; }
 
 		this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+		this.SaveState();
 	}
 
 	async RemoveLogGroup(node: CloudWatchTreeItem) {
@@ -161,6 +178,7 @@ export class CloudWatchTreeView {
 		if(!node.Region || !node.LogGroup) { return; }
 		
 		this.treeDataProvider.RemoveLogGroup(node.Region, node.LogGroup);
+		this.SaveState();
 	}
 
 	async AddLogStream(node: CloudWatchTreeItem) {
@@ -174,7 +192,7 @@ export class CloudWatchTreeView {
 		if(!selectedLogStream){ return; }
 
 		this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, selectedLogStream);
-
+		this.SaveState();
 	}
 
 	async AddAllLogStreams(node: CloudWatchTreeItem) {
@@ -188,7 +206,7 @@ export class CloudWatchTreeView {
 		{
 			this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, logStream);
 		}
-
+		this.SaveState();
 	}
 
 	async RemoveLogStream(node: CloudWatchTreeItem) {
@@ -198,7 +216,7 @@ export class CloudWatchTreeView {
 		if(!node.Region || !node.LogGroup || !node.LogStream ) { return; }
 		
 		this.treeDataProvider.RemoveLogStream(node.Region, node.LogGroup, node.LogStream);
-
+		this.SaveState();
 	}
 
 	async RemoveAllLogStreams(node: CloudWatchTreeItem) {
@@ -208,6 +226,7 @@ export class CloudWatchTreeView {
 		if(!node.Region || !node.LogGroup) { return; }
 		
 		this.treeDataProvider.RemoveAllLogStreams(node.Region, node.LogGroup);
+		this.SaveState();
 	}
 
 

@@ -108,7 +108,7 @@ class CloudWatchTreeDataProvider {
             return Promise.resolve(nodes);
         }
         if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.LogGroup && node.Region && node.LogGroup) {
-            let nodes = this.GetLogStreamNodes(node.Region, node.LogGroup);
+            let nodes = this.GetLogStreamNodes(node);
             return Promise.resolve(nodes);
         }
         return Promise.resolve([]);
@@ -116,27 +116,31 @@ class CloudWatchTreeDataProvider {
     GetLogGroupNodes() {
         var result = [];
         for (var node of this.LogGroupNodeList) {
-            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
                 continue;
             }
-            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !node.IsFav) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) {
                 continue;
             }
             result.push(node);
         }
         return result;
     }
-    GetLogStreamNodes(Region, LogGroup) {
+    GetLogStreamNodes(LogGroupNode) {
         var result = [];
         for (var node of this.LogStreamNodeList) {
-            if (!(node.Region === Region && node.LogGroup === LogGroup)) {
+            if (!(node.Region === LogGroupNode.Region && node.LogGroup === LogGroupNode.LogGroup)) {
                 continue;
             }
-            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
                 continue;
             }
-            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !node.IsFav) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) {
                 continue;
+            }
+            node.Parent = LogGroupNode;
+            if (LogGroupNode.Children.indexOf(node) === -1) {
+                LogGroupNode.Children.push(node);
             }
             result.push(node);
         }

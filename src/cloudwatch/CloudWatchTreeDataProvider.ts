@@ -133,7 +133,7 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 			return Promise.resolve(nodes);
 		}
 		if(node.TreeItemType === TreeItemType.LogGroup && node.Region && node.LogGroup){
-			let nodes = this.GetLogStreamNodes(node.Region, node.LogGroup);
+			let nodes = this.GetLogStreamNodes(node);
 			return Promise.resolve(nodes);
 		}
 
@@ -143,21 +143,26 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	GetLogGroupNodes(): CloudWatchTreeItem[]{
 		var result: CloudWatchTreeItem[] = [];
 		for (var node of this.LogGroupNodeList) {
-			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.FilterString) { continue; }
-			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.isShowOnlyFavorite && !node.IsFav) { continue; }
+			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView.Current.FilterString)) { continue; }
+			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) { continue; }
 
 			result.push(node);
 		}
 		return result;
 	}
 
-	GetLogStreamNodes(Region:string, LogGroup:string): CloudWatchTreeItem[]{
+	GetLogStreamNodes(LogGroupNode:CloudWatchTreeItem): CloudWatchTreeItem[]{
 		var result: CloudWatchTreeItem[] = [];
 		for (var node of this.LogStreamNodeList) {
-			if(!(node.Region === Region && node.LogGroup === LogGroup)) { continue; }
-			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.FilterString) { continue; }
-			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.isShowOnlyFavorite && !node.IsFav) { continue; }
+			if(!(node.Region === LogGroupNode.Region && node.LogGroup === LogGroupNode.LogGroup)) { continue; }
+			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView.Current.FilterString)) { continue; }
+			if (CloudWatchTreeView.Current && CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) { continue; }
 
+			node.Parent = LogGroupNode;
+			if(LogGroupNode.Children.indexOf(node) === -1)
+			{
+				LogGroupNode.Children.push(node);
+			}
 			result.push(node);
 		}
 		return result;

@@ -8,6 +8,8 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 	public Region:string | undefined;
 	public LogGroup:string | undefined;
 	public LogStream:string | undefined;
+	public Parent:CloudWatchTreeItem | undefined;
+	public Children:CloudWatchTreeItem[] = [];
 
 	constructor(text:string, treeItemType:TreeItemType) {
 		super(text);
@@ -16,9 +18,7 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 		this.refreshUI();
 	}
 
-
 	public refreshUI() {
-		super.label = this.Text;
 
 		if(this.TreeItemType === TreeItemType.Region)
 		{
@@ -36,6 +36,48 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 		{
 			this.iconPath = new vscode.ThemeIcon('circle-outline');
 		}
+	}
+
+	public IsAnyChidrenFav(){
+		return this.IsAnyChidrenFavInternal(this);
+	}
+
+	public IsAnyChidrenFavInternal(node:CloudWatchTreeItem): boolean{
+		for(var n of node.Children)
+		{
+			if(n.IsFav)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public IsFilterStringMatch(FilterString:string){
+		if(this.Text.includes(FilterString))
+		{
+			return true;
+		}
+
+		if(this.IsFilterStringMatchAnyChildren(this, FilterString))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	public IsFilterStringMatchAnyChildren(node:CloudWatchTreeItem, FilterString:string): boolean{
+		for(var n of node.Children)
+		{
+			if(n.Text.includes(FilterString))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
 
