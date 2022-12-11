@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CloudWatchTreeView = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const vscode = require("vscode");
+const CloudWatchTreeItem_1 = require("./CloudWatchTreeItem");
 const CloudWatchTreeDataProvider_1 = require("./CloudWatchTreeDataProvider");
 const ui = require("../common/UI");
 const api = require("../common/API");
@@ -33,6 +34,8 @@ class CloudWatchTreeView {
     }
     LoadTreeItems() {
         ui.logToOutput('CloudWatchTreeView.loadTreeItems Started');
+        this.treeDataProvider.LoadLogGroupNodeList();
+        this.treeDataProvider.LoadLogStreamNodeList();
         this.treeDataProvider.Refresh();
         this.SetViewTitle();
     }
@@ -126,6 +129,13 @@ class CloudWatchTreeView {
     }
     async RemoveLogGroup(node) {
         ui.logToOutput('CloudWatchTreeView.RemoveLogGroup Started');
+        if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogGroup) {
+            return;
+        }
+        if (!node.Region || !node.LogGroup) {
+            return;
+        }
+        this.treeDataProvider.RemoveLogGroup(node.Region, node.LogGroup);
     }
     async AddLogStream(node) {
         ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
@@ -157,6 +167,23 @@ class CloudWatchTreeView {
     }
     async RemoveLogStream(node) {
         ui.logToOutput('CloudWatchTreeView.RemoveLogStream Started');
+        if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogStream) {
+            return;
+        }
+        if (!node.Region || !node.LogGroup || !node.LogStream) {
+            return;
+        }
+        this.treeDataProvider.RemoveLogStream(node.Region, node.LogGroup, node.LogStream);
+    }
+    async RemoveAllLogStreams(node) {
+        ui.logToOutput('CloudWatchTreeView.RemoveAllLogStreams Started');
+        if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogGroup) {
+            return;
+        }
+        if (!node.Region || !node.LogGroup) {
+            return;
+        }
+        this.treeDataProvider.RemoveAllLogStreams(node.Region, node.LogGroup);
     }
 }
 exports.CloudWatchTreeView = CloudWatchTreeView;

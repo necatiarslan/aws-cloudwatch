@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
-import { CloudWatchTreeItem } from './CloudWatchTreeItem';
+import { CloudWatchTreeItem, TreeItemType } from './CloudWatchTreeItem';
 import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
 import * as ui from '../common/UI';
 import * as api from '../common/API';
@@ -46,6 +46,8 @@ export class CloudWatchTreeView {
 	LoadTreeItems(){
 		ui.logToOutput('CloudWatchTreeView.loadTreeItems Started');
 
+		this.treeDataProvider.LoadLogGroupNodeList();
+		this.treeDataProvider.LoadLogStreamNodeList();
 		this.treeDataProvider.Refresh();
 		this.SetViewTitle();
 	}
@@ -70,7 +72,6 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.DeleteFromFav Started');
 		node.IsFav = false;
 	}
-
 
 	async Filter() {
 		ui.logToOutput('CloudWatchTreeView.Filter Started');
@@ -156,6 +157,10 @@ export class CloudWatchTreeView {
 	async RemoveLogGroup(node: CloudWatchTreeItem) {
 		ui.logToOutput('CloudWatchTreeView.RemoveLogGroup Started');
 		
+		if(node.TreeItemType !== TreeItemType.LogGroup) { return;}
+		if(!node.Region || !node.LogGroup) { return; }
+		
+		this.treeDataProvider.RemoveLogGroup(node.Region, node.LogGroup);
 	}
 
 	async AddLogStream(node: CloudWatchTreeItem) {
@@ -188,7 +193,21 @@ export class CloudWatchTreeView {
 
 	async RemoveLogStream(node: CloudWatchTreeItem) {
 		ui.logToOutput('CloudWatchTreeView.RemoveLogStream Started');
+
+		if(node.TreeItemType !== TreeItemType.LogStream) { return;}
+		if(!node.Region || !node.LogGroup || !node.LogStream ) { return; }
 		
+		this.treeDataProvider.RemoveLogStream(node.Region, node.LogGroup, node.LogStream);
+
+	}
+
+	async RemoveAllLogStreams(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.RemoveAllLogStreams Started');
+		
+		if(node.TreeItemType !== TreeItemType.LogGroup) { return;}
+		if(!node.Region || !node.LogGroup) { return; }
+		
+		this.treeDataProvider.RemoveAllLogStreams(node.Region, node.LogGroup);
 	}
 
 

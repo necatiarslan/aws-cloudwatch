@@ -40,6 +40,9 @@ function activate(context) {
     vscode.commands.registerCommand('CloudWatchTreeView.AddAllLogStreams', (node) => {
         treeView.AddAllLogStreams(node);
     });
+    vscode.commands.registerCommand('CloudWatchTreeView.RemoveAllLogStreams', (node) => {
+        treeView.RemoveAllLogStreams(node);
+    });
     ui.logToOutput('Aws CloudWatch Extension activation completed');
 }
 exports.activate = activate;

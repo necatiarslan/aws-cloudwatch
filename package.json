@@ -72,6 +72,10 @@
       {
         "command": "CloudWatchTreeView.AddAllLogStreams",
         "title": "Add All Log Streams"
+      },
+      {
+        "command": "CloudWatchTreeView.RemoveAllLogStreams",
+        "title": "Remove All Log Streams"
       }
     ],
     "menus": {
@@ -116,7 +120,7 @@
         {
           "command": "CloudWatchTreeView.AddLogStream",
           "when": "view == CloudWatchTreeView",
-          "group": "LogStream"
+          "group": "LogGroup"
         },
         {
           "command": "CloudWatchTreeView.RemoveLogStream",
@@ -126,7 +130,12 @@
         {
           "command": "CloudWatchTreeView.AddAllLogStreams",
           "when": "view == CloudWatchTreeView",
-          "group": "LogStream"
+          "group": "LogGroup"
+        },
+        {
+          "command": "CloudWatchTreeView.RemoveAllLogStreams",
+          "when": "view == CloudWatchTreeView",
+          "group": "LogGroup"
         }
       ]
     },

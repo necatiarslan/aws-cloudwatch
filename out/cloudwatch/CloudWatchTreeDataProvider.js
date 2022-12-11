@@ -13,6 +13,8 @@ class CloudWatchTreeDataProvider {
         this.LogStreamNodeList = [];
         this.LogGroupList = [["???", "???"]];
         this.LogStreamList = [["???", "???", "???"]];
+        this.LogGroupList.splice(0, 1);
+        this.LogStreamList.splice(0, 1);
     }
     Refresh() {
         this._onDidChangeTreeData.fire();
@@ -28,7 +30,31 @@ class CloudWatchTreeDataProvider {
         this.Refresh();
     }
     RemoveLogGroup(Region, LogGroup) {
-        //TODO
+        for (let i = 0; i < this.LogStreamList.length; i++) {
+            if (this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup) {
+                this.LogStreamList.splice(i, 1);
+                i--;
+            }
+        }
+        this.LoadLogStreamNodeList();
+        for (let i = 0; i < this.LogGroupList.length; i++) {
+            if (this.LogGroupList[i][0] === Region && this.LogGroupList[i][1] === LogGroup) {
+                this.LogGroupList.splice(i, 1);
+                i--;
+            }
+        }
+        this.LoadLogGroupNodeList();
+        this.Refresh();
+    }
+    RemoveAllLogStreams(Region, LogGroup) {
+        for (let i = 0; i < this.LogStreamList.length; i++) {
+            if (this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup) {
+                this.LogStreamList.splice(i, 1);
+                i--;
+            }
+        }
+        this.LoadLogStreamNodeList();
+        this.Refresh();
     }
     AddLogStream(Region, LogGroup, LogStream) {
         for (var ls of this.LogStreamList) {
@@ -41,7 +67,14 @@ class CloudWatchTreeDataProvider {
         this.Refresh();
     }
     RemoveLogStream(Region, LogGroup, LogStream) {
-        //TODO
+        for (let i = 0; i < this.LogStreamList.length; i++) {
+            if (this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup && this.LogStreamList[i][2] === LogStream) {
+                this.LogStreamList.splice(i, 1);
+                i--;
+            }
+        }
+        this.LoadLogStreamNodeList();
+        this.Refresh();
     }
     LoadLogGroupNodeList() {
         this.LogGroupNodeList = [];

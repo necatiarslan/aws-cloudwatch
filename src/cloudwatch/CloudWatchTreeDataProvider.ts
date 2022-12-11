@@ -12,6 +12,11 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	LogGroupList: [[string,string]] = [["???","???"]];
 	LogStreamList: [[string,string,string]] = [["???","???","???"]];
 
+	constructor() {
+		this.LogGroupList.splice(0,1);
+		this.LogStreamList.splice(0,1);
+	}
+
 	Refresh(): void {
 		this._onDidChangeTreeData.fire();
 	}
@@ -31,7 +36,39 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	}
 
 	RemoveLogGroup(Region:string, LogGroup:string){
-		//TODO
+		for(let i = 0; i < this.LogStreamList.length; i++)
+		{
+			if(this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup)
+			{
+				this.LogStreamList.splice(i, 1);
+				i--;
+			}
+		}
+		this.LoadLogStreamNodeList();
+
+		for(let i = 0; i < this.LogGroupList.length; i++)
+		{
+			if(this.LogGroupList[i][0] === Region && this.LogGroupList[i][1] === LogGroup)
+			{
+				this.LogGroupList.splice(i, 1);
+				i--;
+			}
+		}
+		this.LoadLogGroupNodeList();
+		this.Refresh();
+	}
+
+	RemoveAllLogStreams(Region:string, LogGroup:string){
+		for(let i = 0; i < this.LogStreamList.length; i++)
+		{
+			if(this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup)
+			{
+				this.LogStreamList.splice(i, 1);
+				i--;
+			}
+		}
+		this.LoadLogStreamNodeList();
+		this.Refresh();
 	}
 
 	AddLogStream(Region:string, LogGroup:string, LogStream:string){
@@ -50,7 +87,16 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	}
 
 	RemoveLogStream(Region:string, LogGroup:string, LogStream:string){
-		//TODO
+		for(let i = 0; i < this.LogStreamList.length; i++)
+		{
+			if(this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup && this.LogStreamList[i][2] === LogStream)
+			{
+				this.LogStreamList.splice(i, 1);
+				i--;
+			}
+		}
+		this.LoadLogStreamNodeList();
+		this.Refresh();
 	}
 
 	LoadLogGroupNodeList(){
