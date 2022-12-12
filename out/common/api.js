@@ -79,7 +79,7 @@ async function GetLogEvents(Region, LogGroupName, LogStreamName, StartTime) {
         const params = {
             logGroupName: LogGroupName,
             logStreamName: LogStreamName,
-            limit: 100,
+            limit: 20,
             startFromHead: false,
             startTime: StartTime
         };

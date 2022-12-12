@@ -161,10 +161,12 @@ export class CloudWatchLogView {
         <br>
         <table>
             <tr>
-                <th>
-                <vscode-button appearance="primary" id="export_logs"}>
-                Export
-                </vscode-button>
+                <th style="text-align:left" width="50px">
+                <vscode-progress-ring></vscode-progress-ring>
+                </th>
+                <th style="text-align:left">
+                <vscode-button appearance="primary" id="pause_timer" disabled>Pause</vscode-button>
+                <vscode-button appearance="primary" id="export_logs" disabled>Export Logs</vscode-button>
                 </th>
             </tr>
         </table>

@@ -96,7 +96,7 @@ export async function GetLogEvents(Region:string, LogGroupName:string, LogStream
     const params = {
       logGroupName: LogGroupName,
       logStreamName: LogStreamName,
-      limit: 100,
+      limit: 20,
       startFromHead: false,
       startTime:StartTime
     };
