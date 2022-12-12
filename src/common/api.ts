@@ -9,14 +9,17 @@ import { join } from "path";
 import { parseKnownFiles, SourceProfileInit } from "../aws-sdk/parseKnownFiles";
 import { ParsedIniData } from "@aws-sdk/types";
 
-export async function GetLogGroupList(Region:string): Promise<MethodResult<string[]>> {
+
+export async function GetLogGroupList(Profile:string, Region:string): Promise<MethodResult<string[]>> {
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
   try 
   {
+    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
+
     // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region});
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
 
     // Set the parameters for the describeLogGroups API
     const params = {
@@ -47,13 +50,14 @@ export async function GetLogGroupList(Region:string): Promise<MethodResult<strin
   }
 }
 
-export async function GetLogStreamList(Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
+export async function GetLogStreamList(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
   try 
   {
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region});
+    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
 
     const params = {
       logGroupName: LogGroupName,
@@ -82,15 +86,16 @@ export async function GetLogStreamList(Region:string, LogGroupName:string): Prom
   }
 }
 
-export async function GetLogEvents(Region:string, LogGroupName:string, LogStreamName:string, StartTime?:number): Promise<MethodResult<AWS.CloudWatchLogs.OutputLogEvents>> {
+export async function GetLogEvents(Profile:string, Region:string, LogGroupName:string, LogStreamName:string, StartTime?:number): Promise<MethodResult<AWS.CloudWatchLogs.OutputLogEvents>> {
   if(!StartTime) {StartTime=0;}
   
   let result:MethodResult<AWS.CloudWatchLogs.OutputLogEvents> = new MethodResult<AWS.CloudWatchLogs.OutputLogEvents>();
 
   try 
   {
+    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
     // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region});
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
 
     // Set the parameters for the describeLogGroups API
     const params = {
@@ -122,13 +127,14 @@ export async function GetLogEvents(Region:string, LogGroupName:string, LogStream
 
 }
 
-export async function GetRegionList(): Promise<MethodResult<string[]>> {
+export async function GetRegionList(Profile:string): Promise<MethodResult<string[]>> {
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
   try 
   {
-    const ec2 = new AWS.EC2({region: 'us-east-1'});
+    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
+    const ec2 = new AWS.EC2({region: 'us-east-1', credentials:credentials});
     let response = await ec2.describeRegions().promise();
 
     result.isSuccessful = true;

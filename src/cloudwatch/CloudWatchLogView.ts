@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import * as ui from '../common/UI';
 import * as api from '../common/API';
 import * as AWS from "aws-sdk";
+import { CloudWatchTreeView } from "./CloudWatchTreeView";
 
 export class CloudWatchLogView {
     public static Current: CloudWatchLogView | undefined;
@@ -45,7 +46,9 @@ export class CloudWatchLogView {
 
     public async LoadLogs(){
         ui.logToOutput('CloudWatchLogView.LoadLogs Started');
-        var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
+        if(!CloudWatchTreeView.Current){return;}
+
+        var result = await api.GetLogEvents(CloudWatchTreeView.Current.AwsProfile, this.Region, this.LogGroup, this.LogStream, this.StartTime);
         if(result.isSuccessful)
         {
             if(result.result.length > 0)
@@ -77,8 +80,8 @@ export class CloudWatchLogView {
             CloudWatchLogView.Current.Region = Region;
             CloudWatchLogView.Current.LogGroup = LogGroup;
             CloudWatchLogView.Current.LogStream = LogStream;
-            CloudWatchLogView.Current._panel.reveal(vscode.ViewColumn.One);
             CloudWatchLogView.Current.LoadLogs();
+            CloudWatchLogView.Current.RenderHmtl();
         } 
         else 
         {

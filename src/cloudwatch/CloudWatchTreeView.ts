@@ -124,13 +124,11 @@ export class CloudWatchTreeView {
 			let AwsProfileTemp: string | undefined = this.context.globalState.get('AwsProfile');
 			if (AwsProfileTemp) {
 				this.AwsProfile = AwsProfileTemp;
-				this.SetFilterMessage();
 			}
 
 			let filterStringTemp: string | undefined = this.context.globalState.get('FilterString');
 			if (filterStringTemp) {
 				this.FilterString = filterStringTemp;
-				this.SetFilterMessage();
 			}
 
 			let ShowOnlyFavoriteTemp: boolean | undefined = this.context.globalState.get('ShowOnlyFavorite');
@@ -148,7 +146,9 @@ export class CloudWatchTreeView {
 				this.treeDataProvider.LogStreamList = LogStreamListTemp;
 			}
 
-		} catch (error) {
+		} 
+		catch (error) 
+		{
 			ui.logToOutput("CloudWatchTreeView.loadState Error !!!");
 		}
 	}
@@ -171,7 +171,7 @@ export class CloudWatchTreeView {
 		//if(!selectedRegion){ return; }
 		let selectedRegion:string = "us-east-1";
 
-		var resultLogGroup = await api.GetLogGroupList(selectedRegion);
+		var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion);
 		if(!resultLogGroup.isSuccessful){ return; }
 
 		let selectedLogGroup = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:false, placeHolder: 'Select Log Group'});
@@ -195,7 +195,7 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
+		var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
 
 		let selectedLogStream = await vscode.window.showQuickPick(resultLogStream.result, {canPickMany:false, placeHolder: 'Select Log Stream'});
@@ -209,7 +209,7 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
+		var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
 
 		for(var logStream of resultLogStream.result)
@@ -259,6 +259,7 @@ export class CloudWatchTreeView {
 
 		this.AwsProfile = selectedAwsProfile;
 		this.SaveState();
+		this.SetFilterMessage();
 	}
 
 }

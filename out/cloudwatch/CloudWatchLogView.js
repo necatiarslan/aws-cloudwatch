@@ -5,6 +5,7 @@ exports.CloudWatchLogView = void 0;
 const vscode = require("vscode");
 const ui = require("../common/UI");
 const api = require("../common/API");
+const CloudWatchTreeView_1 = require("./CloudWatchTreeView");
 class CloudWatchLogView {
     constructor(panel, extensionUri, Region, LogGroup, LogStream) {
         this._disposables = [];
@@ -29,7 +30,10 @@ class CloudWatchLogView {
     }
     async LoadLogs() {
         ui.logToOutput('CloudWatchLogView.LoadLogs Started');
-        var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
+        if (!CloudWatchTreeView_1.CloudWatchTreeView.Current) {
+            return;
+        }
+        var result = await api.GetLogEvents(CloudWatchTreeView_1.CloudWatchTreeView.Current.AwsProfile, this.Region, this.LogGroup, this.LogStream, this.StartTime);
         if (result.isSuccessful) {
             if (result.result.length > 0) {
                 this.LogEvents = this.LogEvents.concat(result.result);
@@ -55,8 +59,8 @@ class CloudWatchLogView {
             CloudWatchLogView.Current.Region = Region;
             CloudWatchLogView.Current.LogGroup = LogGroup;
             CloudWatchLogView.Current.LogStream = LogStream;
-            CloudWatchLogView.Current._panel.reveal(vscode.ViewColumn.One);
             CloudWatchLogView.Current.LoadLogs();
+            CloudWatchLogView.Current.RenderHmtl();
         }
         else {
             const panel = vscode.window.createWebviewPanel("CloudWatchLogView", "CloudWatch Logs", vscode.ViewColumn.One, {

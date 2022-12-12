@@ -99,12 +99,10 @@ class CloudWatchTreeView {
             let AwsProfileTemp = this.context.globalState.get('AwsProfile');
             if (AwsProfileTemp) {
                 this.AwsProfile = AwsProfileTemp;
-                this.SetFilterMessage();
             }
             let filterStringTemp = this.context.globalState.get('FilterString');
             if (filterStringTemp) {
                 this.FilterString = filterStringTemp;
-                this.SetFilterMessage();
             }
             let ShowOnlyFavoriteTemp = this.context.globalState.get('ShowOnlyFavorite');
             if (ShowOnlyFavoriteTemp) {
@@ -137,7 +135,7 @@ class CloudWatchTreeView {
         //let selectedRegion = await vscode.window.showQuickPick(resultRegions.result, {canPickMany:false, placeHolder: 'Select Region'});
         //if(!selectedRegion){ return; }
         let selectedRegion = "us-east-1";
-        var resultLogGroup = await api.GetLogGroupList(selectedRegion);
+        var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion);
         if (!resultLogGroup.isSuccessful) {
             return;
         }
@@ -164,7 +162,7 @@ class CloudWatchTreeView {
         if (!node.Region || !node.LogGroup) {
             return;
         }
-        var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
+        var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
         if (!resultLogStream.isSuccessful) {
             return;
         }
@@ -180,7 +178,7 @@ class CloudWatchTreeView {
         if (!node.Region || !node.LogGroup) {
             return;
         }
-        var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
+        var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
         if (!resultLogStream.isSuccessful) {
             return;
         }
@@ -233,6 +231,7 @@ class CloudWatchTreeView {
         }
         this.AwsProfile = selectedAwsProfile;
         this.SaveState();
+        this.SetFilterMessage();
     }
 }
 exports.CloudWatchTreeView = CloudWatchTreeView;
