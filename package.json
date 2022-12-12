@@ -81,6 +81,11 @@
         "command": "CloudWatchTreeView.ShowCloudWatchLogView",
         "title": "Show Logs",
         "icon": "$(open-preview)"
+      },
+      {
+        "command": "CloudWatchTreeView.SelectAwsProfile",
+        "title": "Select Aws Profile",
+        "icon": "$(account)"
       }
     ],
     "menus": {
@@ -88,22 +93,27 @@
         {
           "command": "CloudWatchTreeView.Refresh",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation"
+          "group": "navigation@5"
         },
         {
           "command": "CloudWatchTreeView.Filter",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "CloudWatchTreeView.ShowOnlyFavorite",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "CloudWatchTreeView.AddLogGroup",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation"
+          "group": "navigation@3"
+        },
+        {
+          "command": "CloudWatchTreeView.SelectAwsProfile",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [

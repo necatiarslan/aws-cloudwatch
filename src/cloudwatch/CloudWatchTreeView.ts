@@ -13,8 +13,9 @@ export class CloudWatchTreeView {
 	public view: vscode.TreeView<CloudWatchTreeItem>;
 	public treeDataProvider: CloudWatchTreeDataProvider;
 	public context: vscode.ExtensionContext;
-	public FilterString: string = '';
+	public FilterString: string = "";
 	public isShowOnlyFavorite: boolean = false;
+	public AwsProfile: string = "default";
 	
 
 	constructor(context: vscode.ExtensionContext) {
@@ -104,10 +105,12 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.saveState Started');
 		try {
 
+			this.context.globalState.update('AwsProfile', this.AwsProfile);
 			this.context.globalState.update('FilterString', this.FilterString);
 			this.context.globalState.update('ShowOnlyFavorite', this.ShowOnlyFavorite);
 			this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
 			this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
+			
 
 		} catch (error) {
 			ui.logToOutput("CloudWatchTreeView.saveState Error !!!");
@@ -117,6 +120,12 @@ export class CloudWatchTreeView {
 	LoadState() {
 		ui.logToOutput('CloudWatchTreeView.loadState Started');
 		try {
+
+			let AwsProfileTemp: string | undefined = this.context.globalState.get('AwsProfile');
+			if (AwsProfileTemp) {
+				this.AwsProfile = AwsProfileTemp;
+				this.SetFilterMessage();
+			}
 
 			let filterStringTemp: string | undefined = this.context.globalState.get('FilterString');
 			if (filterStringTemp) {
@@ -145,7 +154,7 @@ export class CloudWatchTreeView {
 	}
 
 	SetFilterMessage(){
-		this.view.message = this.GetBoolenSign(this.isShowOnlyFavorite) + 'Fav, ' + this.FilterString;
+		this.view.message = "Profile:" + this.AwsProfile + " " + this.GetBoolenSign(this.isShowOnlyFavorite) + "Fav, " + this.FilterString;
 	}
 
 	GetBoolenSign(variable: boolean){
@@ -237,6 +246,19 @@ export class CloudWatchTreeView {
 		if(!node.Region || !node.LogGroup || !node.LogStream) { return; }
 		
 		CloudWatchLogView.Render(this.context.extensionUri, node.Region, node.LogGroup, node.LogStream);
+	}
+
+	async SelectAwsProfile(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.SelectAwsProfile Started');
+
+		var result = await api.GetAwsProfileList();
+		if(!result.isSuccessful){ return; }
+
+		let selectedAwsProfile = await vscode.window.showQuickPick(result.result, {canPickMany:false, placeHolder: 'Select Aws Profile'});
+		if(!selectedAwsProfile){ return; }
+
+		this.AwsProfile = selectedAwsProfile;
+		this.SaveState();
 	}
 
 }

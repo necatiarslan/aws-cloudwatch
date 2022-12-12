@@ -60,6 +60,10 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.ShowCloudWatchLogView(node);
 	});
 
+	vscode.commands.registerCommand('CloudWatchTreeView.SelectAwsProfile', (node: CloudWatchTreeItem) => {
+		treeView.SelectAwsProfile(node);
+	});
+
 	ui.logToOutput('Aws CloudWatch Extension activation completed');
 }
 
