@@ -2,7 +2,6 @@
 import * as AWS from "aws-sdk";
 import * as ui from "./UI";
 import { MethodResult } from './MethodResult';
-import { Response } from "aws-sdk";
 
 export async function GetLogGroupList(Region:string): Promise<MethodResult<string[]>> {
   let result:MethodResult<string[]> = new MethodResult<string[]>();
@@ -77,15 +76,13 @@ export async function GetLogStreamList(Region:string, LogGroupName:string): Prom
   }
 }
 
-export async function GetLogEvents(LogGroupName:string, LogStreamName:string): Promise<MethodResult<AWS.CloudWatchLogs.OutputLogEvents>> {
-  AWS.config.update({
-    region: "us-east-1",
-  });
-
+export async function GetLogEvents(Region:string, LogGroupName:string, LogStreamName:string, StartTime?:number): Promise<MethodResult<AWS.CloudWatchLogs.OutputLogEvents>> {
+  if(!StartTime) {StartTime=0}
+  
   let result:MethodResult<AWS.CloudWatchLogs.OutputLogEvents> = new MethodResult<AWS.CloudWatchLogs.OutputLogEvents>();
 
   // Initialize the CloudWatchLogs client
-  const cloudwatchlogs = new AWS.CloudWatchLogs();
+  const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region});
 
   // Set the parameters for the describeLogGroups API
   const params = {
@@ -93,8 +90,9 @@ export async function GetLogEvents(LogGroupName:string, LogStreamName:string): P
     logStreamName: LogStreamName,
     limit: 100,
     startFromHead: false,
+    startTime:StartTime
   };
-
+  //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
   let response = await cloudwatchlogs.getLogEvents(params).promise();
   if(response.events)
   {

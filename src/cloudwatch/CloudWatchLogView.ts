@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import * as ui from '../common/UI';
+import * as api from '../common/API';
+import * as AWS from "aws-sdk";
 
 export class CloudWatchLogView {
     public static Current: CloudWatchLogView | undefined;
@@ -12,7 +14,10 @@ export class CloudWatchLogView {
     public LogGroup:string;
     public LogStream:string;
 
-    private dagStatusInterval: NodeJS.Timer | undefined;
+    public StartTime:number = 0;
+    public LogEvents:AWS.CloudWatchLogs.OutputLogEvents = [];
+
+    private Timer: NodeJS.Timer | undefined;
 
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, Region: string, LogGroup:string, LogStream:string) {
         ui.logToOutput('CloudWatchLogView.constructor Started');
@@ -27,6 +32,7 @@ export class CloudWatchLogView {
         this._panel.onDidDispose(this.dispose, null, this._disposables);
         this._setWebviewMessageListener(this._panel.webview);
         this.LoadLogs();
+        this.StartTimer();
         ui.logToOutput('CloudWatchLogView.constructor Completed');
     }
 
@@ -38,25 +44,52 @@ export class CloudWatchLogView {
     }
 
     public async LoadLogs(){
+        ui.logToOutput('CloudWatchLogView.LoadLogs Started');
+        var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
+        if(result.isSuccessful)
+        {
+            this.LogEvents = this.LogEvents.concat(result.result);
+            this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
+            if(this.LogEvents.length>0 && this.LogEvents[0].timestamp)
+            {
+                this.StartTime = this.LogEvents[0].timestamp + 1;
+            }
+            this.RenderHmtl();
+        }   
+    }
 
-        this.RenderHmtl();
+    public ResetCurrentState(){
+        this.LogEvents = [];
+        this.StartTime = 0;
     }
 
     public static Render(extensionUri: vscode.Uri, Region: string, LogGroup:string, LogStream:string) {
         ui.logToOutput('CloudWatchLogView.Render Started');
         if (CloudWatchLogView.Current) {
+            CloudWatchLogView.Current.ResetCurrentState();
             CloudWatchLogView.Current.Region = Region;
             CloudWatchLogView.Current.LogGroup = LogGroup;
             CloudWatchLogView.Current.LogStream = LogStream;
             CloudWatchLogView.Current._panel.reveal(vscode.ViewColumn.One);
-            CloudWatchLogView.Current.RenderHmtl();
-        } else {
+            CloudWatchLogView.Current.LoadLogs();
+        } 
+        else 
+        {
             const panel = vscode.window.createWebviewPanel("CloudWatchLogView", "CloudWatch Logs", vscode.ViewColumn.One, {
                 enableScripts: true,
             });
 
             CloudWatchLogView.Current = new CloudWatchLogView(panel, extensionUri, Region, LogGroup, LogStream);
         }
+    }
+
+    private CompareEventsFunction(a:AWS.CloudWatchLogs.OutputLogEvent, b:AWS.CloudWatchLogs.OutputLogEvent):number
+    {
+        if(a.timestamp && b.timestamp)
+        {
+            return a.timestamp > b.timestamp ? -1 : 1;
+        }
+        return 1;
     }
 
     private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
@@ -74,8 +107,25 @@ export class CloudWatchLogView {
         const mainUri = ui.getUri(webview, extensionUri, ["media", "main.js"]);
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
 
-
-
+        let logRowHtml:string="";
+        let rowNumber:number=1;
+        if(this.LogEvents)
+        {
+            rowNumber = this.LogEvents.length;
+            for(var event of this.LogEvents){
+                let timeString:string = "";
+                if(event.timestamp)
+                {
+                    timeString = new Date(event.timestamp).toLocaleTimeString();
+                }
+                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + event.message + '</td><td>' + timeString + '</td></tr>';
+                rowNumber--;
+            }
+        }
+        else
+        {
+            logRowHtml += '<tr><td colspan=3> no log </td></tr>';
+        }
 
         let result = /*html*/ `
     <!DOCTYPE html>
@@ -89,6 +139,29 @@ export class CloudWatchLogView {
         <title>Logs</title>
       </head>
       <body>  
+        
+        <div style="display: flex; align-items: center;">
+            <h2>${this.LogStream}</h2>
+        </div>
+
+        <table>
+            <tr><th width="5px">#</th><th>Message</th><th width="75px">Time</th></tr>
+            ${logRowHtml}
+            <tr>
+                <th colspan=3></th>
+            </tr>
+        </table>
+        <br>
+        <table>
+            <tr>
+                <th>
+                <vscode-button appearance="primary" id="export_logs"}>
+                Export
+                </vscode-button>
+                </th>
+            </tr>
+        </table>
+        <br>
         ${this.Region} / ${this.LogGroup} / ${this.LogStream}
       </body>
     </html>
@@ -128,6 +201,29 @@ export class CloudWatchLogView {
                 disposable.dispose();
             }
         }
+    }
+
+    async StartTimer() {
+        ui.logToOutput('CloudWatchLogView.StartTimer Started');
+
+        if (this.Timer) {
+            clearInterval(this.Timer);//stop prev checking
+        }
+
+        this.Timer = setInterval(this.OnTimerTick, 5 * 1000, this);
+    }
+
+    async StopTimer() {
+        ui.logToOutput('CloudWatchLogView.StopTimer Started');
+        if (this.Timer) {
+            clearInterval(this.Timer);//stop prev checking
+        }
+    }
+
+    async OnTimerTick(CloudWatchLogView: CloudWatchLogView) {
+        ui.logToOutput('CloudWatchLogView.OnTimerTick Started');
+
+        CloudWatchLogView.LoadLogs();
     }
 
 }

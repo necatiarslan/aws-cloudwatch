@@ -63,20 +63,22 @@ async function GetLogStreamList(Region, LogGroupName) {
     }
 }
 exports.GetLogStreamList = GetLogStreamList;
-async function GetLogEvents(LogGroupName, LogStreamName) {
-    AWS.config.update({
-        region: "us-east-1",
-    });
+async function GetLogEvents(Region, LogGroupName, LogStreamName, StartTime) {
+    if (!StartTime) {
+        StartTime = 0;
+    }
     let result = new MethodResult_1.MethodResult();
     // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs();
+    const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region });
     // Set the parameters for the describeLogGroups API
     const params = {
         logGroupName: LogGroupName,
         logStreamName: LogStreamName,
         limit: 100,
         startFromHead: false,
+        startTime: StartTime
     };
+    //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
     let response = await cloudwatchlogs.getLogEvents(params).promise();
     if (response.events) {
         result.isSuccessful = true;
