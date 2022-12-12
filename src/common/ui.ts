@@ -7,6 +7,10 @@ var logsOutputChannel: vscode.OutputChannel;
 
 var NEW_LINE:string = "\n\n";
 
+export function getUri(webview: vscode.Webview, extensionUri: vscode.Uri, pathList: string[]) {
+  return webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, ...pathList));
+}
+
 export function showOutputMessage(message: any, popupMessage: string = "Results are printed to OUTPUT / AwsCloudWatch-Extension", clearPrevMessages:boolean=true): void {
 
   if (!outputChannel) {

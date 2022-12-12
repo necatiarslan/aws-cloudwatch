@@ -5,6 +5,7 @@ import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
 import * as ui from '../common/UI';
 import * as api from '../common/API';
 import { APIGateway } from 'aws-sdk';
+import { CloudWatchLogView } from './CloudWatchLogView';
 
 export class CloudWatchTreeView {
 
@@ -229,5 +230,13 @@ export class CloudWatchTreeView {
 		this.SaveState();
 	}
 
+	async ShowCloudWatchLogView(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.ShowCloudWatchLogView Started');
+		
+		if(node.TreeItemType !== TreeItemType.LogStream) { return;}
+		if(!node.Region || !node.LogGroup || !node.LogStream) { return; }
+		
+		CloudWatchLogView.Render(this.context.extensionUri, node.Region, node.LogGroup, node.LogStream);
+	}
 
 }

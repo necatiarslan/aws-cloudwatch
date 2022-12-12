@@ -1,12 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isValidDate = exports.isJsonString = exports.convertMsToTime = exports.getDuration = exports.getSeconds = exports.getMilliSeconds = exports.openFile = exports.getExtensionVersion = exports.showErrorMessage = exports.showWarningMessage = exports.showInfoMessage = exports.logToOutput = exports.showOutputMessage = void 0;
+exports.isValidDate = exports.isJsonString = exports.convertMsToTime = exports.getDuration = exports.getSeconds = exports.getMilliSeconds = exports.openFile = exports.getExtensionVersion = exports.showErrorMessage = exports.showWarningMessage = exports.showInfoMessage = exports.logToOutput = exports.showOutputMessage = exports.getUri = void 0;
 const vscode = require("vscode");
 const fs_1 = require("fs");
 const path_1 = require("path");
 var outputChannel;
 var logsOutputChannel;
 var NEW_LINE = "\n\n";
+function getUri(webview, extensionUri, pathList) {
+    return webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, ...pathList));
+}
+exports.getUri = getUri;
 function showOutputMessage(message, popupMessage = "Results are printed to OUTPUT / AwsCloudWatch-Extension", clearPrevMessages = true) {
     if (!outputChannel) {
         outputChannel = vscode.window.createOutputChannel("AwsCloudWatch-Extension");

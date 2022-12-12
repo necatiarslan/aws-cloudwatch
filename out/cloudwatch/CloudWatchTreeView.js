@@ -7,6 +7,7 @@ const CloudWatchTreeItem_1 = require("./CloudWatchTreeItem");
 const CloudWatchTreeDataProvider_1 = require("./CloudWatchTreeDataProvider");
 const ui = require("../common/UI");
 const api = require("../common/API");
+const CloudWatchLogView_1 = require("./CloudWatchLogView");
 class CloudWatchTreeView {
     constructor(context) {
         this.FilterString = '';
@@ -202,6 +203,16 @@ class CloudWatchTreeView {
         }
         this.treeDataProvider.RemoveAllLogStreams(node.Region, node.LogGroup);
         this.SaveState();
+    }
+    async ShowCloudWatchLogView(node) {
+        ui.logToOutput('CloudWatchTreeView.ShowCloudWatchLogView Started');
+        if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogStream) {
+            return;
+        }
+        if (!node.Region || !node.LogGroup || !node.LogStream) {
+            return;
+        }
+        CloudWatchLogView_1.CloudWatchLogView.Render(this.context.extensionUri, node.Region, node.LogGroup, node.LogStream);
     }
 }
 exports.CloudWatchTreeView = CloudWatchTreeView;

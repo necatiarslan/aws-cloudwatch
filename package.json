@@ -76,6 +76,11 @@
       {
         "command": "CloudWatchTreeView.RemoveAllLogStreams",
         "title": "Remove All Log Streams"
+      },
+      {
+        "command": "CloudWatchTreeView.ShowCloudWatchLogView",
+        "title": "Show Logs",
+        "icon": "$(open-preview)"
       }
     ],
     "menus": {
@@ -136,6 +141,11 @@
           "command": "CloudWatchTreeView.RemoveAllLogStreams",
           "when": "view == CloudWatchTreeView",
           "group": "LogGroup"
+        },
+        {
+          "command": "CloudWatchTreeView.ShowCloudWatchLogView",
+          "when": "view == CloudWatchTreeView",
+          "group": "inline"
         }
       ]
     },
@@ -187,6 +197,7 @@
   },
   "dependencies": {
     "@aws-sdk/credential-provider-node": "^3.181.0",
+    "@vscode/webview-ui-toolkit": "^1.2.0",
     "aws-sdk": "^2.1271.0"
   }
 }

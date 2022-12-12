@@ -56,6 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.RemoveAllLogStreams(node);
 	});
 
+	vscode.commands.registerCommand('CloudWatchTreeView.ShowCloudWatchLogView', (node: CloudWatchTreeItem) => {
+		treeView.ShowCloudWatchLogView(node);
+	});
+
 	ui.logToOutput('Aws CloudWatch Extension activation completed');
 }
 
