@@ -31,12 +31,17 @@ class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView.LoadLogs Started');
         var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
         if (result.isSuccessful) {
-            this.LogEvents = this.LogEvents.concat(result.result);
-            this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
-            if (this.LogEvents.length > 0 && this.LogEvents[0].timestamp) {
-                this.StartTime = this.LogEvents[0].timestamp + 1;
+            if (result.result.length > 0) {
+                this.LogEvents = this.LogEvents.concat(result.result);
+                this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
+                if (this.LogEvents.length > 0 && this.LogEvents[0].timestamp) {
+                    this.StartTime = this.LogEvents[0].timestamp + 1;
+                }
+                this.RenderHmtl();
             }
-            this.RenderHmtl();
+            else {
+                ui.logToOutput('CloudWatchLogView.LoadLogs No New Log');
+            }
         }
     }
     ResetCurrentState() {

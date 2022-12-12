@@ -87,26 +87,39 @@ export async function GetLogEvents(Region:string, LogGroupName:string, LogStream
   
   let result:MethodResult<AWS.CloudWatchLogs.OutputLogEvents> = new MethodResult<AWS.CloudWatchLogs.OutputLogEvents>();
 
-  // Initialize the CloudWatchLogs client
-  const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region});
-
-  // Set the parameters for the describeLogGroups API
-  const params = {
-    logGroupName: LogGroupName,
-    logStreamName: LogStreamName,
-    limit: 100,
-    startFromHead: false,
-    startTime:StartTime
-  };
-  //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
-  let response = await cloudwatchlogs.getLogEvents(params).promise();
-  if(response.events)
+  try 
   {
-    result.isSuccessful = true;
-    result.result = response.events;
+    // Initialize the CloudWatchLogs client
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region});
+
+    // Set the parameters for the describeLogGroups API
+    const params = {
+      logGroupName: LogGroupName,
+      logStreamName: LogStreamName,
+      limit: 100,
+      startFromHead: false,
+      startTime:StartTime
+    };
+    //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
+    let response = await cloudwatchlogs.getLogEvents(params).promise();
+    if(response.events)
+    {
+      result.isSuccessful = true;
+      result.result = response.events;
+    }
+
+    return result;
+  } 
+  catch (error:any) 
+  {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.showErrorMessage('api.GetLogEvents Error !!!', error);
+    ui.logToOutput("api.GetLogEvents Error !!!", error); 
+    return result;
   }
 
-  return result;
+
 }
 
 export async function GetRegionList(): Promise<MethodResult<string[]>> {
