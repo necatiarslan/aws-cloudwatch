@@ -3,7 +3,7 @@
   "displayName": "Aws CloudWatch",
   "description": "Browse Your AWS CloudWatch Logs",
   "version": "1.0.2",
-  "publisher": "NecatiARSLAN",
+  "publisher": "Necati ARSLAN",
   "repository": {
     "type": "git",
     "url": "https://github.com/necatiarslan/aws-cloudwatch"
@@ -54,7 +54,12 @@
       },
       {
         "command": "CloudWatchTreeView.AddLogGroup",
-        "title": "Add Log Group",
+        "title": "Add Log Group (From List)",
+        "icon": "$(add)"
+      },
+      {
+        "command": "CloudWatchTreeView.AddLogGroupByName",
+        "title": "Add Log Group (By Name)",
         "icon": "$(add)"
       },
       {
@@ -91,9 +96,9 @@
     "menus": {
       "view/title": [
         {
-          "command": "CloudWatchTreeView.Refresh",
+          "command": "CloudWatchTreeView.ShowOnlyFavorite",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation@5"
+          "group": "navigation@1"
         },
         {
           "command": "CloudWatchTreeView.Filter",
@@ -101,19 +106,24 @@
           "group": "navigation@2"
         },
         {
-          "command": "CloudWatchTreeView.ShowOnlyFavorite",
-          "when": "view == CloudWatchTreeView",
-          "group": "navigation@1"
-        },
-        {
           "command": "CloudWatchTreeView.AddLogGroup",
           "when": "view == CloudWatchTreeView",
           "group": "navigation@3"
         },
         {
-          "command": "CloudWatchTreeView.SelectAwsProfile",
+          "command": "CloudWatchTreeView.AddLogGroupByName",
           "when": "view == CloudWatchTreeView",
           "group": "navigation@4"
+        },
+        {
+          "command": "CloudWatchTreeView.SelectAwsProfile",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation@5"
+        },
+        {
+          "command": "CloudWatchTreeView.Refresh",
+          "when": "view == CloudWatchTreeView",
+          "group": "navigation@6"
         }
       ],
       "view/item/context": [

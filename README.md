@@ -1,18 +1,22 @@
 # Aws CloudWatch 
+This is a vscode extension to browse Aws CloudWatch Logs.
 
-Log Groups (Add By Name)
-- Log Streams (Filter By Name, Date)
-    -Logs (Show as a document)
-    
+To Access Aws, you need to configure aws credentials.
+For more detail on aws credentials
+https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
+
+The extension uses same credentials and allows you to select the profile (aws aim user).
+
+If you need proxy settings, goto vscode settings and update Http:Proxy setting
+
 ## Bug Report
 To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
-For more detail on aws credentials
-https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
-
 ## TODO:
-- 1
-- 2
-- 3
+- 1 Pause
+- 2 Export
+- 3 Add LogStreams Containing XXX
+- 4 
+- 5 
 

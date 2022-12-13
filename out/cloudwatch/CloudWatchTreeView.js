@@ -146,6 +146,29 @@ class CloudWatchTreeView {
         this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
         this.SaveState();
     }
+    async AddLogGroupByName() {
+        ui.logToOutput('CloudWatchTreeView.AddLogGroupByName Started');
+        //TODO
+        //var resultRegions = await api.GetRegionList();
+        //if(!resultRegions.isSuccessful){ return; }
+        //let selectedRegion = await vscode.window.showQuickPick(resultRegions.result, {canPickMany:false, placeHolder: 'Select Region'});
+        //if(!selectedRegion){ return; }
+        let selectedRegion = "us-east-1";
+        let selectedLogGroupName = await vscode.window.showInputBox({ placeHolder: 'Enter Log Group Search Text' });
+        if (!selectedLogGroupName) {
+            return;
+        }
+        var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion, selectedLogGroupName);
+        if (!resultLogGroup.isSuccessful) {
+            return;
+        }
+        let selectedLogGroup = await vscode.window.showQuickPick(resultLogGroup.result, { canPickMany: false, placeHolder: 'Select Log Group' });
+        if (!selectedLogGroup) {
+            return;
+        }
+        this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+        this.SaveState();
+    }
     async RemoveLogGroup(node) {
         ui.logToOutput('CloudWatchTreeView.RemoveLogGroup Started');
         if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogGroup) {

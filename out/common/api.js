@@ -9,7 +9,7 @@ const os_1 = require("os");
 const path_1 = require("path");
 const path_2 = require("path");
 const parseKnownFiles_1 = require("../aws-sdk/parseKnownFiles");
-async function GetLogGroupList(Profile, Region) {
+async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
     let result = new MethodResult_1.MethodResult();
     result.result = [];
     try {
@@ -19,6 +19,7 @@ async function GetLogGroupList(Profile, Region) {
         // Set the parameters for the describeLogGroups API
         const params = {
             limit: 50,
+            logGroupNamePattern: LogGroupNamePattern
         };
         let response = await cloudwatchlogs.describeLogGroups(params).promise();
         result.isSuccessful = true;
@@ -48,6 +49,9 @@ async function GetLogStreamList(Profile, Region, LogGroupName) {
         const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
         const params = {
             logGroupName: LogGroupName,
+            orderBy: "LastEventTime",
+            descending: true,
+            limit: 50
         };
         let response = await cloudwatchlogs.describeLogStreams(params).promise();
         result.isSuccessful = true;

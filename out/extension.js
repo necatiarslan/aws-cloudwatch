@@ -28,6 +28,9 @@ function activate(context) {
     vscode.commands.registerCommand('CloudWatchTreeView.AddLogGroup', () => {
         treeView.AddLogGroup();
     });
+    vscode.commands.registerCommand('CloudWatchTreeView.AddLogGroupByName', () => {
+        treeView.AddLogGroupByName();
+    });
     vscode.commands.registerCommand('CloudWatchTreeView.RemoveLogGroup', (node) => {
         treeView.RemoveLogGroup(node);
     });

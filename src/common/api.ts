@@ -10,7 +10,7 @@ import { parseKnownFiles, SourceProfileInit } from "../aws-sdk/parseKnownFiles";
 import { ParsedIniData } from "@aws-sdk/types";
 
 
-export async function GetLogGroupList(Profile:string, Region:string): Promise<MethodResult<string[]>> {
+export async function GetLogGroupList(Profile:string, Region:string, LogGroupNamePattern?:string): Promise<MethodResult<string[]>> {
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
@@ -24,6 +24,7 @@ export async function GetLogGroupList(Profile:string, Region:string): Promise<Me
     // Set the parameters for the describeLogGroups API
     const params = {
       limit: 50,
+      logGroupNamePattern: LogGroupNamePattern
     };
 
     let response = await cloudwatchlogs.describeLogGroups(params).promise();
@@ -61,6 +62,9 @@ export async function GetLogStreamList(Profile:string, Region:string, LogGroupNa
 
     const params = {
       logGroupName: LogGroupName,
+      orderBy:"LastEventTime",
+      descending:true,
+      limit:50
     };
   
     let response = await cloudwatchlogs.describeLogStreams(params).promise();

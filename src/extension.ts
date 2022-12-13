@@ -36,6 +36,10 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.AddLogGroup();
 	});
 
+	vscode.commands.registerCommand('CloudWatchTreeView.AddLogGroupByName', () => {
+		treeView.AddLogGroupByName();
+	});
+
 	vscode.commands.registerCommand('CloudWatchTreeView.RemoveLogGroup', (node: CloudWatchTreeItem) => {
 		treeView.RemoveLogGroup(node);
 	});
