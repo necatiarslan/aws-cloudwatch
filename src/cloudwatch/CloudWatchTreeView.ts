@@ -174,10 +174,15 @@ export class CloudWatchTreeView {
 		var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion);
 		if(!resultLogGroup.isSuccessful){ return; }
 
-		let selectedLogGroup = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:false, placeHolder: 'Select Log Group'});
-		if(!selectedLogGroup){ return; }
 
-		this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+		let selectedLogGroupList = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:true, placeHolder: 'Select Log Group'});
+		if(!selectedLogGroupList || selectedLogGroupList.length===0){ return; }
+
+		for(var selectedLogGroup of selectedLogGroupList)
+		{
+			this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+		}
+
 		this.SaveState();
 	}
 
@@ -197,10 +202,13 @@ export class CloudWatchTreeView {
 		var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion, selectedLogGroupName);
 		if(!resultLogGroup.isSuccessful){ return; }
 
-		let selectedLogGroup = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:false, placeHolder: 'Select Log Group'});
-		if(!selectedLogGroup){ return; }
+		let selectedLogGroupList = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:true, placeHolder: 'Select Log Group'});
+		if(!selectedLogGroupList || selectedLogGroupList.length===0){ return; }
 
-		this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+		for(var selectedLogGroup of selectedLogGroupList)
+		{
+			this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
+		}
 		this.SaveState();
 	}
 
@@ -221,10 +229,14 @@ export class CloudWatchTreeView {
 		var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
 
-		let selectedLogStream = await vscode.window.showQuickPick(resultLogStream.result, {canPickMany:false, placeHolder: 'Select Log Stream'});
-		if(!selectedLogStream){ return; }
+		let selectedLogStreamList = await vscode.window.showQuickPick(resultLogStream.result, {canPickMany:true, placeHolder: 'Select Log Stream'});
+		if(!selectedLogStreamList || selectedLogStreamList.length === 0){ return; }
 
-		this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, selectedLogStream);
+		for(var selectedLogStream of selectedLogStreamList)
+		{
+			this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, selectedLogStream);
+		}
+
 		this.SaveState();
 	}
 
