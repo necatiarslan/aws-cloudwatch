@@ -14,9 +14,9 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
-- 1 Pause
+- 1 Pause/UnPause
 - 2 Export
-- 3 Add LogStreams Containing XXX
-- 4 
-- 5 
+- 3 Pause if latest event is older then 1 hour
+- 4 Select Region
+- 5 Show Region in the tree
 
