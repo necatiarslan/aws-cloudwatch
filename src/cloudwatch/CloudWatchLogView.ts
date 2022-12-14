@@ -58,6 +58,12 @@ export class CloudWatchLogView {
                 if(this.LogEvents.length>0 && this.LogEvents[0].timestamp)
                 {
                     this.StartTime = this.LogEvents[0].timestamp + 1;
+                    let now = new Date();
+                    now.setHours(now.getHours() - 1);
+                    if(new Date(this.StartTime) < now)
+                    {
+                        this.StopTimer();
+                    }
                 }
                 this.RenderHmtl();
             }
