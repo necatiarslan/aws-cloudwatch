@@ -14,7 +14,6 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
-- Pause/UnPause
 - Export To Text File
 - Pause if latest event is older then 1 hour
 - Select Region
@@ -25,5 +24,9 @@ https://github.com/necatiarslan/aws-cloudwatch/issues/new
 - Adjust colors
 - Special color codes for logs
 - Keep logs when lod view closed or switch between log streams
-- 
+- Different TreeView Styles
+    - Region > Log Group > Log Stream
+    - Log Group > Log Stream
+    - Log Stream
+- Stop Timer if connection error
 

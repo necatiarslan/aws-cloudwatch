@@ -164,11 +164,13 @@ export class CloudWatchLogView {
         <br>
         <table>
             <tr>
-                <th style="text-align:left" width="50px">
-                <vscode-progress-ring></vscode-progress-ring>
+                <th style="text-align:left" width="20px">
+                    <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
+                    <vscode-progress-ring></vscode-progress-ring>
+                    </div>
                 </th>
                 <th style="text-align:left">
-                <vscode-button appearance="primary" id="pause_timer" disabled>Pause</vscode-button>
+                <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking()?"Pause":"Resume"}</vscode-button>
                 <vscode-button appearance="primary" id="export_logs" disabled>Export Logs</vscode-button>
                 </th>
             </tr>
@@ -190,8 +192,9 @@ export class CloudWatchLogView {
 
                 ui.logToOutput('CloudWatchLogView._setWebviewMessageListener Message Received ' + message.command);
                 switch (command) {
-                    case "run-trigger-dag":
-                        //this.triggerDagWConfig(message.config, message.date);
+                    case "pause_timer":
+                        this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
+                        this.RenderHmtl();
                         return;
                 }
 
@@ -220,6 +223,7 @@ export class CloudWatchLogView {
 
         if (this.Timer) {
             clearInterval(this.Timer);//stop prev checking
+            this.Timer = undefined;
         }
 
         this.Timer = setInterval(this.OnTimerTick, 5 * 1000, this);
@@ -229,7 +233,12 @@ export class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView.StopTimer Started');
         if (this.Timer) {
             clearInterval(this.Timer);//stop prev checking
+            this.Timer = undefined;
         }
+    }
+
+    public IsTimerTicking(){
+        return (this.Timer !== undefined);
     }
 
     async OnTimerTick(CloudWatchLogView: CloudWatchLogView) {

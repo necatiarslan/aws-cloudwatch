@@ -4,20 +4,24 @@ table {
     border-spacing: 0;
     border-collapse: collapse;
   }
+
+  tr:nth-child(even) {
+    background-color: #3c3c3c;
+  }
   
   th {
     background-color: #2a2d2e;
     color: white;
     padding: 5px;
-    font-size: 15px;
+    font-size: 12px;
     font: bold;
   }
   
   td {
-    background-color: #3c3c3c;
     color: white;
     padding: 5px;
-    font-size: 12px;
+    font-size: 10px;
+    vertical-align: top;
   }
   
   vscode-panels {
@@ -41,138 +45,4 @@ table {
     display: flex;
     flex-direction: column;
     width: 100%;
-  }
-  
-  .state-success {
-    width: 10px;
-    height: 10px;
-    background-color: green;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-failed {
-    width: 10px;
-    height: 10px;
-    background-color: red;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-running {
-    width: 10px;
-    height: 10px;
-    background-color: lime;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-    animation: blinkingColorRunning 1s infinite;
-  }
-  
-  @keyframes blinkingColorRunning{
-    0%		{ background-color: green;}
-    15%		{ background-color: green;}
-    50%		{ background-color: lime;}
-    75%		{ background-color: lime;}
-    100%	{ background-color: lime;}
-  }
-  
-  .state-queued {
-    width: 10px;
-    height: 10px;
-    background-color: gray;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-skipped {
-    width: 10px;
-    height: 10px;
-    background-color: hotpink;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-deferred {
-    width: 10px;
-    height: 10px;
-    background-color: mediumpurple;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-scheduled {
-    width: 10px;
-    height: 10px;
-    background-color: tan;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-up_for_reschedule {
-    width: 10px;
-    height: 10px;
-    background-color: turquoise;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-up_for_retry {
-    width: 10px;
-    height: 10px;
-    background-color: gold;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .state-upstream_failed {
-    width: 10px;
-    height: 10px;
-    background-color: orange;
-    border-radius: 2px;
-    border-width: 0px;
-    margin-right: var(--chakra-space-2);
-  }
-  
-  .dag-header-table {
-    width: 100%;
-    height: min-content;
-    border: 0px solid;
-  }
-  
-  .dag-header-th {
-    background-color: transparent;
-  }
-  
-  .dag-header-td {
-    background-color: transparent;
-  }
-  
-  .dag-paused-true {
-    width: 10px;
-    height: 10px;
-    background: gray;
-    border-radius: 50%;
-  }
-  
-  .dag-paused-false {
-    width: 15px;
-    height: 15px;
-    background: green;
-    border-radius: 50%;
-  }
-  
-  .dag-paused-unknown {
-    width: 15px;
-    height: 15px;
-    background: transparent;
-    border-radius: 50%;
   }
