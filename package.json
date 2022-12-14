@@ -2,13 +2,13 @@
   "name": "aws-cloudwatch-vscode-extension",
   "displayName": "Aws CloudWatch",
   "description": "Browse Your AWS CloudWatch Logs",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "Necati ARSLAN",
   "repository": {
     "type": "git",
     "url": "https://github.com/necatiarslan/aws-cloudwatch"
   },
-  "icon": "media/aws-cloudwatch-logo.png",
+  "icon": "media/aws-cloudwatch-logo-extension.png",
   "engines": {
     "vscode": "^1.71.0"
   },
@@ -174,7 +174,7 @@
         {
           "id": "aws-cloudwatch-vscode-extension",
           "title": "Aws Cloud Watch",
-          "icon": "media/aws-cloudwatch-logo.png"
+          "icon": "media/aws-cloudwatch-logo-activitybar.png"
         }
       ]
     },
@@ -183,7 +183,7 @@
         {
           "id": "CloudWatchTreeView",
           "name": "Aws Cloud Watch",
-          "icon": "media/aws-cloudwatch-logo.png"
+          "icon": "media/aws-cloudwatch-logo-activitybar.png"
         }
       ]
     },
