@@ -15,14 +15,13 @@ https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
 - Export To Text File
-- Select Region
 - Show Region in the tree
 - Update Icon Color to Original pink
 - Search in message
 - Show loading message when waiting
 - Adjust colors
 - Special color codes for logs
-- Keep logs when lod view closed or switch between log streams
+- Keep logs when log view closed or switch between log streams
 - Different TreeView Styles
     - Region > Log Group > Log Stream
     - Log Group > Log Stream

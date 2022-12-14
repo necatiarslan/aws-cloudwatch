@@ -218,6 +218,7 @@
   "dependencies": {
     "@aws-sdk/credential-provider-node": "^3.181.0",
     "@vscode/webview-ui-toolkit": "^1.2.0",
-    "aws-sdk": "^2.1271.0"
+    "aws-sdk": "^2.1271.0",
+    "tmp": "^0.2.1"
   }
 }

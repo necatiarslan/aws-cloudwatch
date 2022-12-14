@@ -142,7 +142,7 @@ class CloudWatchLogView {
                 </th>
                 <th style="text-align:left">
                 <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking() ? "Pause" : "Resume"}</vscode-button>
-                <vscode-button appearance="primary" id="export_logs" disabled>Export Logs</vscode-button>
+                <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
                 </th>
             </tr>
         </table>
@@ -163,6 +163,9 @@ class CloudWatchLogView {
                 case "pause_timer":
                     this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
                     this.RenderHmtl();
+                    return;
+                case "export_logs":
+                    this.ExportLogs();
                     return;
             }
         }, undefined, this._disposables);
@@ -199,6 +202,19 @@ class CloudWatchLogView {
     async OnTimerTick(CloudWatchLogView) {
         ui.logToOutput('CloudWatchLogView.OnTimerTick Started');
         CloudWatchLogView.LoadLogs();
+    }
+    async ExportLogs() {
+        ui.logToOutput('CloudWatchLogView.ExportLogs Started');
+        const tmp = require('tmp');
+        var fs = require('fs');
+        const tmpFile = tmp.fileSync({ mode: 0o644, prefix: this.LogStream, postfix: '.log' });
+        fs.appendFileSync(tmpFile.name, this.Region + "/" + this.LogGroup + "/" + this.LogStream);
+        for (var message of this.LogEvents) {
+            fs.appendFileSync(tmpFile.name, "\n" + "----------------------------------------------------------");
+            fs.appendFileSync(tmpFile.name, "\n" + message.message);
+        }
+        fs.appendFileSync(tmpFile.name, "\n" + "---------------------------END OF LOGS--------------------");
+        ui.openFile(tmpFile.name);
     }
 }
 exports.CloudWatchLogView = CloudWatchLogView;
