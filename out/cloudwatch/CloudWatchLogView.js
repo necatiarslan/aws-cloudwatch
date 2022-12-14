@@ -52,6 +52,9 @@ class CloudWatchLogView {
                 ui.logToOutput('CloudWatchLogView.LoadLogs No New Log');
             }
         }
+        else {
+            this.StopTimer();
+        }
     }
     ResetCurrentState() {
         this.LogEvents = [];

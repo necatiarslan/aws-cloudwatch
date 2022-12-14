@@ -14,7 +14,6 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
-- Export To Text File
 - Show Region in the tree
 - Update Icon Color to Original pink
 - Search in message
@@ -25,6 +24,6 @@ https://github.com/necatiarslan/aws-cloudwatch/issues/new
 - Different TreeView Styles
     - Region > Log Group > Log Stream
     - Log Group > Log Stream
+    - Log Group (Region) > Log Stream
     - Log Stream
-- Stop Timer if connection error
 
