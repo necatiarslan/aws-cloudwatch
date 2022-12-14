@@ -15,7 +15,6 @@ https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
 - Export To Text File
-- Pause if latest event is older then 1 hour
 - Select Region
 - Show Region in the tree
 - Update Icon Color to Original pink

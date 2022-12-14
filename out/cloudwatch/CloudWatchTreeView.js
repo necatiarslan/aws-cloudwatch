@@ -13,6 +13,7 @@ class CloudWatchTreeView {
         this.FilterString = "";
         this.isShowOnlyFavorite = false;
         this.AwsProfile = "default";
+        this.LastUsedRegion = "us-east-1";
         ui.logToOutput('TreeView.constructor Started');
         this.context = context;
         this.treeDataProvider = new CloudWatchTreeDataProvider_1.CloudWatchTreeDataProvider();
@@ -129,12 +130,10 @@ class CloudWatchTreeView {
     }
     async AddLogGroup() {
         ui.logToOutput('CloudWatchTreeView.AddLogGroup Started');
-        //TODO
-        //var resultRegions = await api.GetRegionList();
-        //if(!resultRegions.isSuccessful){ return; }
-        //let selectedRegion = await vscode.window.showQuickPick(resultRegions.result, {canPickMany:false, placeHolder: 'Select Region'});
-        //if(!selectedRegion){ return; }
-        let selectedRegion = "us-east-1";
+        let selectedRegion = await vscode.window.showInputBox({ value: this.LastUsedRegion, placeHolder: 'Type Region Name' });
+        if (!selectedRegion) {
+            return;
+        }
         var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion);
         if (!resultLogGroup.isSuccessful) {
             return;
@@ -150,12 +149,10 @@ class CloudWatchTreeView {
     }
     async AddLogGroupByName() {
         ui.logToOutput('CloudWatchTreeView.AddLogGroupByName Started');
-        //TODO
-        //var resultRegions = await api.GetRegionList();
-        //if(!resultRegions.isSuccessful){ return; }
-        //let selectedRegion = await vscode.window.showQuickPick(resultRegions.result, {canPickMany:false, placeHolder: 'Select Region'});
-        //if(!selectedRegion){ return; }
-        let selectedRegion = "us-east-1";
+        let selectedRegion = await vscode.window.showInputBox({ value: this.LastUsedRegion, placeHolder: 'Type Region Name' });
+        if (!selectedRegion) {
+            return;
+        }
         let selectedLogGroupName = await vscode.window.showInputBox({ placeHolder: 'Enter Log Group Search Text' });
         if (!selectedLogGroupName) {
             return;
