@@ -16,6 +16,9 @@ function activate(context) {
     vscode.commands.registerCommand('CloudWatchTreeView.Filter', () => {
         treeView.Filter();
     });
+    vscode.commands.registerCommand('CloudWatchTreeView.ChangeView', () => {
+        treeView.ChangeView();
+    });
     vscode.commands.registerCommand('CloudWatchTreeView.ShowOnlyFavorite', () => {
         treeView.ShowOnlyFavorite();
     });

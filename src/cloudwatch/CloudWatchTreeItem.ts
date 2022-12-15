@@ -22,7 +22,7 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 
 		if(this.TreeItemType === TreeItemType.Region)
 		{
-			this.iconPath = new vscode.ThemeIcon('archive');
+			this.iconPath = new vscode.ThemeIcon('globe');
 		}
 		else if(this.TreeItemType === TreeItemType.LogGroup)
 		{
@@ -49,6 +49,10 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 			{
 				return true;
 			}
+			else if (n.Children.length > 0)
+			{
+				return this.IsAnyChidrenFavInternal(n);
+			}
 		}
 
 		return false;
@@ -74,6 +78,10 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 			if(n.Text.includes(FilterString))
 			{
 				return true;
+			}
+			else if (n.Children.length > 0)
+			{
+				return this.IsFilterStringMatchAnyChildren(n, FilterString);
 			}
 		}
 

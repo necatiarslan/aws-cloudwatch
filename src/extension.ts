@@ -20,6 +20,10 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.Filter();
 	});
 
+	vscode.commands.registerCommand('CloudWatchTreeView.ChangeView', () => {
+		treeView.ChangeView();
+	});
+
 	vscode.commands.registerCommand('CloudWatchTreeView.ShowOnlyFavorite', () => {
 		treeView.ShowOnlyFavorite();
 	});

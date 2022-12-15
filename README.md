@@ -1,3 +1,5 @@
+![screenshoot](media/main-screen.png)
+
 # Aws CloudWatch 
 This is a vscode extension to browse Aws CloudWatch Logs.
 
@@ -14,16 +16,13 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
-- Show Region in the tree
-- Update Icon Color to Original pink
 - Search in message
 - Show loading message when waiting
-- Adjust colors
 - Special color codes for logs
-- Keep logs when log view closed or switch between log streams
-- Different TreeView Styles
-    - Region > Log Group > Log Stream
-    - Log Group > Log Stream
-    - Log Group (Region) > Log Stream
-    - Log Stream
 
+Follow me on linkedin to get latest news \
+https://www.linkedin.com/in/necati-arslan/
+
+Thanks, \
+Necati ARSLAN \
+necatia@gmail.com

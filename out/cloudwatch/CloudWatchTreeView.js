@@ -37,6 +37,7 @@ class CloudWatchTreeView {
     }
     LoadTreeItems() {
         ui.logToOutput('CloudWatchTreeView.loadTreeItems Started');
+        this.treeDataProvider.LoadRegionNodeList();
         this.treeDataProvider.LoadLogGroupNodeList();
         this.treeDataProvider.LoadLogStreamNodeList();
         this.treeDataProvider.Refresh();
@@ -62,7 +63,7 @@ class CloudWatchTreeView {
     }
     async Filter() {
         ui.logToOutput('CloudWatchTreeView.Filter Started');
-        let filterStringTemp = await vscode.window.showInputBox({ value: this.FilterString, placeHolder: 'Enter your filters seperated by comma' });
+        let filterStringTemp = await vscode.window.showInputBox({ value: this.FilterString, placeHolder: 'Enter Your Filter Text' });
         if (filterStringTemp === undefined) {
             return;
         }
@@ -70,6 +71,12 @@ class CloudWatchTreeView {
         this.treeDataProvider.Refresh();
         this.SetFilterMessage();
         this.SaveState();
+    }
+    async ChangeView() {
+        ui.logToOutput('CloudWatchTreeView.ChangeView Started');
+        this.treeDataProvider.ChangeView();
+        this.SaveState();
+        ui.logToOutput('CloudWatchTreeView.ChangeView New View=' + this.treeDataProvider.ViewType);
     }
     async ShowOnlyFavorite() {
         ui.logToOutput('CloudWatchTreeView.ShowOnlyFavorite Started');
@@ -89,6 +96,8 @@ class CloudWatchTreeView {
             this.context.globalState.update('ShowOnlyFavorite', this.ShowOnlyFavorite);
             this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
             this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
+            this.context.globalState.update('ViewType', this.treeDataProvider.ViewType);
+            ui.logToOutput("CloudWatchTreeView.saveState Successfull");
         }
         catch (error) {
             ui.logToOutput("CloudWatchTreeView.saveState Error !!!");
@@ -117,6 +126,11 @@ class CloudWatchTreeView {
             if (LogStreamListTemp) {
                 this.treeDataProvider.LogStreamList = LogStreamListTemp;
             }
+            let ViewTypeTemp = this.context.globalState.get('ViewType');
+            if (ViewTypeTemp) {
+                this.treeDataProvider.ViewType = ViewTypeTemp;
+            }
+            ui.logToOutput("CloudWatchTreeView.loadState Successfull");
         }
         catch (error) {
             ui.logToOutput("CloudWatchTreeView.loadState Error !!!");

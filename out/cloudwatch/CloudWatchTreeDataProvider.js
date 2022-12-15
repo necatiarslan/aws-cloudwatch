@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CloudWatchTreeDataProvider = void 0;
+exports.ViewType = exports.CloudWatchTreeDataProvider = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const vscode = require("vscode");
 const CloudWatchTreeItem_1 = require("./CloudWatchTreeItem");
@@ -9,10 +9,12 @@ class CloudWatchTreeDataProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+        this.RegionNodeList = [];
         this.LogGroupNodeList = [];
         this.LogStreamNodeList = [];
         this.LogGroupList = [["???", "???"]];
         this.LogStreamList = [["???", "???", "???"]];
+        this.ViewType = ViewType.Region_LogGroup_LogStream;
         this.LogGroupList.splice(0, 1);
         this.LogStreamList.splice(0, 1);
     }
@@ -27,6 +29,7 @@ class CloudWatchTreeDataProvider {
         }
         this.LogGroupList.push([Region, LogGroup]);
         this.LoadLogGroupNodeList();
+        this.LoadRegionNodeList();
         this.Refresh();
     }
     RemoveLogGroup(Region, LogGroup) {
@@ -44,6 +47,7 @@ class CloudWatchTreeDataProvider {
             }
         }
         this.LoadLogGroupNodeList();
+        this.LoadRegionNodeList();
         this.Refresh();
     }
     RemoveAllLogStreams(Region, LogGroup) {
@@ -89,6 +93,28 @@ class CloudWatchTreeDataProvider {
             this.LogGroupNodeList.push(treeItem);
         }
     }
+    LoadRegionNodeList() {
+        this.LogGroupNodeList = [];
+        for (var lg of this.LogGroupList) {
+            if (lg[0] === "???") {
+                continue;
+            }
+            if (this.GetRegionNode(lg[0]) === undefined) {
+                let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg[0], CloudWatchTreeItem_1.TreeItemType.Region);
+                treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                treeItem.Region = lg[0];
+                this.RegionNodeList.push(treeItem);
+            }
+        }
+    }
+    GetRegionNode(Region) {
+        for (var node of this.RegionNodeList) {
+            if (node.Region === Region) {
+                return node;
+            }
+        }
+        return undefined;
+    }
     LoadLogStreamNodeList() {
         this.LogStreamNodeList = [];
         for (var lg of this.LogStreamList) {
@@ -103,15 +129,58 @@ class CloudWatchTreeDataProvider {
         }
     }
     getChildren(node) {
+        let result = [];
+        if (this.ViewType === ViewType.Region_LogGroup_LogStream) {
+            result = this.GetNodesRegionLogGroupLogStream(node);
+        }
+        else if (this.ViewType === ViewType.LogGroup_LogStream) {
+            result = this.GetNodesLogGroupLogStream(node);
+        }
+        else if (this.ViewType === ViewType.LogStream) {
+            result = this.GetNodesLogStream(node);
+        }
+        return Promise.resolve(result);
+    }
+    GetNodesRegionLogGroupLogStream(node) {
+        let result = [];
         if (!node) {
-            let nodes = this.GetLogGroupNodes();
-            return Promise.resolve(nodes);
+            result = this.GetRegionNodes();
         }
-        if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.LogGroup && node.Region && node.LogGroup) {
-            let nodes = this.GetLogStreamNodes(node);
-            return Promise.resolve(nodes);
+        else if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.Region) {
+            result = this.GetLogGroupNodesParentRegion(node);
         }
-        return Promise.resolve([]);
+        else if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.LogGroup) {
+            result = this.GetLogStreamNodesParentLogGroup(node);
+        }
+        return result;
+    }
+    GetRegionNodes() {
+        var result = [];
+        for (var node of this.RegionNodeList) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
+                continue;
+            }
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) {
+                continue;
+            }
+            result.push(node);
+        }
+        return result;
+    }
+    GetNodesLogStream(node) {
+        let result = [];
+        result = this.GetLogStreamNodes();
+        return result;
+    }
+    GetNodesLogGroupLogStream(node) {
+        let result = [];
+        if (!node) {
+            result = this.GetLogGroupNodes();
+        }
+        else if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.LogGroup) {
+            result = this.GetLogStreamNodesParentLogGroup(node);
+        }
+        return result;
     }
     GetLogGroupNodes() {
         var result = [];
@@ -126,7 +195,27 @@ class CloudWatchTreeDataProvider {
         }
         return result;
     }
-    GetLogStreamNodes(LogGroupNode) {
+    GetLogGroupNodesParentRegion(RegionNode) {
+        var result = [];
+        for (var node of this.LogGroupNodeList) {
+            if (node.Region !== RegionNode.Region) {
+                continue;
+            }
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
+                continue;
+            }
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) {
+                continue;
+            }
+            node.Parent = RegionNode;
+            if (RegionNode.Children.indexOf(node) === -1) {
+                RegionNode.Children.push(node);
+            }
+            result.push(node);
+        }
+        return result;
+    }
+    GetLogStreamNodesParentLogGroup(LogGroupNode) {
         var result = [];
         for (var node of this.LogStreamNodeList) {
             if (!(node.Region === LogGroupNode.Region && node.LogGroup === LogGroupNode.LogGroup)) {
@@ -146,9 +235,40 @@ class CloudWatchTreeDataProvider {
         }
         return result;
     }
+    GetLogStreamNodes() {
+        var result = [];
+        for (var node of this.LogStreamNodeList) {
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
+                continue;
+            }
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) {
+                continue;
+            }
+            result.push(node);
+        }
+        return result;
+    }
     getTreeItem(element) {
         return element;
     }
+    async ChangeView() {
+        if (this.ViewType === ViewType.Region_LogGroup_LogStream) {
+            this.ViewType = ViewType.LogGroup_LogStream;
+        }
+        else if (this.ViewType === ViewType.LogGroup_LogStream) {
+            this.ViewType = ViewType.LogStream;
+        }
+        else if (this.ViewType === ViewType.LogStream) {
+            this.ViewType = ViewType.Region_LogGroup_LogStream;
+        }
+        this.Refresh();
+    }
 }
 exports.CloudWatchTreeDataProvider = CloudWatchTreeDataProvider;
+var ViewType;
+(function (ViewType) {
+    ViewType[ViewType["Region_LogGroup_LogStream"] = 1] = "Region_LogGroup_LogStream";
+    ViewType[ViewType["LogGroup_LogStream"] = 2] = "LogGroup_LogStream";
+    ViewType[ViewType["LogStream"] = 3] = "LogStream";
+})(ViewType = exports.ViewType || (exports.ViewType = {}));
 //# sourceMappingURL=CloudWatchTreeDataProvider.js.map
