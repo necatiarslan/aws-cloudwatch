@@ -18,7 +18,7 @@ async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
         const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
         // Set the parameters for the describeLogGroups API
         const params = {
-            limit: 100,
+            limit: 50,
             logGroupNamePattern: LogGroupNamePattern
         };
         let response = await cloudwatchlogs.describeLogGroups(params).promise();
@@ -51,7 +51,7 @@ async function GetLogStreamList(Profile, Region, LogGroupName) {
             logGroupName: LogGroupName,
             orderBy: "LastEventTime",
             descending: true,
-            limit: 100
+            limit: 50, //max value
         };
         let response = await cloudwatchlogs.describeLogStreams(params).promise();
         result.isSuccessful = true;
