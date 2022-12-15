@@ -16,6 +16,7 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## TODO:
+- Load all logs, not only latest 50
 - Search in message
 - Show loading message when waiting
 - Special color codes for logs

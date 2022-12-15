@@ -86,7 +86,6 @@ async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartT
         const params = {
             logGroupName: LogGroupName,
             logStreamName: LogStreamName,
-            limit: 50,
             startFromHead: false,
             startTime: StartTime
         };
