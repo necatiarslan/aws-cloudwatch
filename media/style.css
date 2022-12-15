@@ -6,11 +6,11 @@ table {
   }
 
   tr:nth-child(even) {
-    background-color: #3c3c3c;
+    background-color: #2a2d2e;
   }
   
   th {
-    background-color: #2a2d2e;
+    background-color: #3c3c3c;
     color: white;
     padding: 5px;
     font-size: 12px;

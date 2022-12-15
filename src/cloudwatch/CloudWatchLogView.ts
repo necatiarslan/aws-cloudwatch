@@ -65,12 +65,12 @@ export class CloudWatchLogView {
                         this.StopTimer();
                     }
                 }
-                this.RenderHmtl();
             }
             else
             {
                 ui.logToOutput('CloudWatchLogView.LoadLogs No New Log');
             }
+            this.RenderHmtl();
         }
         else
         {
@@ -129,7 +129,7 @@ export class CloudWatchLogView {
 
         let logRowHtml:string="";
         let rowNumber:number=1;
-        if(this.LogEvents)
+        if(this.LogEvents && this.LogEvents.length > 0)
         {
             rowNumber = this.LogEvents.length;
             for(var event of this.LogEvents){

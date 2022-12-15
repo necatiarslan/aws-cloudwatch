@@ -23,7 +23,7 @@ export async function GetLogGroupList(Profile:string, Region:string, LogGroupNam
 
     // Set the parameters for the describeLogGroups API
     const params = {
-      limit: 50,
+      limit: 100,
       logGroupNamePattern: LogGroupNamePattern
     };
 
@@ -64,7 +64,7 @@ export async function GetLogStreamList(Profile:string, Region:string, LogGroupNa
       logGroupName: LogGroupName,
       orderBy:"LastEventTime",
       descending:true,
-      limit:50
+      limit:100
     };
   
     let response = await cloudwatchlogs.describeLogStreams(params).promise();
@@ -105,7 +105,7 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
     const params = {
       logGroupName: LogGroupName,
       logStreamName: LogStreamName,
-      limit: 20,
+      limit: 50,
       startFromHead: false,
       startTime:StartTime
     };

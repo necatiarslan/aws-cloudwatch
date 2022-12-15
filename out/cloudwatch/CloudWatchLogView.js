@@ -46,11 +46,11 @@ class CloudWatchLogView {
                         this.StopTimer();
                     }
                 }
-                this.RenderHmtl();
             }
             else {
                 ui.logToOutput('CloudWatchLogView.LoadLogs No New Log');
             }
+            this.RenderHmtl();
         }
         else {
             this.StopTimer();
@@ -97,7 +97,7 @@ class CloudWatchLogView {
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
         let logRowHtml = "";
         let rowNumber = 1;
-        if (this.LogEvents) {
+        if (this.LogEvents && this.LogEvents.length > 0) {
             rowNumber = this.LogEvents.length;
             for (var event of this.LogEvents) {
                 let timeString = "";
