@@ -10,6 +10,8 @@ function main() {
   const ExportLogsButton = document.getElementById("export_logs");
   ExportLogsButton.addEventListener("click", ExportLogsClick);
 
+  const SearchTextBox = document.getElementById("search_text");
+  SearchTextBox.addEventListener("change", SearchTextChanged);
 
 }
 
@@ -25,3 +27,10 @@ function ExportLogsClick() {
     command: "export_logs"
   });
 }
+
+function SearchTextChanged() {
+  const SearchTextBox = document.getElementById("search_text");
+  let searchText = SearchTextBox.value;
+  console.log(searchText);
+}
+

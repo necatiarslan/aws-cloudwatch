@@ -129,11 +129,13 @@ class CloudWatchLogView {
         </div>
 
         <table>
-            <tr><th width="5px">#</th><th>Message</th><th width="75px">Time</th></tr>
-            ${logRowHtml}
             <tr>
-                <th colspan=3></th>
+                <td colspan=3 style="text-align:right"><vscode-text-field id="search_text" placeholder="Search" disabled></vscode-text-field></td>
             </tr>
+            <tr><th width="5px">#</th><th>Message</th><th width="75px">Time</th></tr>
+
+            ${logRowHtml}
+
         </table>
         <br>
         <table>
@@ -151,6 +153,18 @@ class CloudWatchLogView {
         </table>
         <br>
         ${this.Region} / ${this.LogGroup} / ${this.LogStream}
+        
+        <br>
+        <br>
+        <br>
+                    
+        <table>
+            <tr>
+                <td colspan="3">
+                    <vscode-link href="https://github.com/necatiarslan/aws-cloudwatch/issues/new">Bug Report & Feature Request</vscode-link>
+                </td>
+            </tr>
+        </table>
       </body>
     </html>
     `;

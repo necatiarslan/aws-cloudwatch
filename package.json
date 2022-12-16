@@ -55,12 +55,12 @@
       {
         "command": "CloudWatchTreeView.AddLogGroup",
         "title": "Add Log Group (From List)",
-        "icon": "$(add)"
+        "icon": "$(new-folder)"
       },
       {
         "command": "CloudWatchTreeView.AddLogGroupByName",
         "title": "Add Log Group (By Name)",
-        "icon": "$(add)"
+        "icon": "$(root-folder)"
       },
       {
         "command": "CloudWatchTreeView.RemoveLogGroup",
@@ -200,7 +200,7 @@
     "viewsWelcome": [
       {
         "view": "CloudWatchTreeView",
-        "contents": "\n\n\n\n Please wait \n\n If you can not connect after a while check your Aws Credentials, Network and Proxy settings"
+        "contents": "\n\n\n\n Please wait... \n\n If you can not connect after a while check your Aws Credentials, Network and Proxy settings. \n\n\n\n To Access Aws, you need to configure aws credentials. \n For more detail on Aws Credentials [Click Here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) \n For a Youtube Tutorial [Click Here](https://www.youtube.com/watch?v=SON8sY1iOBU)"
       }
     ]
   },
