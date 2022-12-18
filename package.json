@@ -3,7 +3,7 @@
   "displayName": "Aws CloudWatch",
   "description": "Browse Your AWS CloudWatch Logs",
   "version": "1.0.8",
-  "publisher": "Necati ARSLAN",
+  "publisher": "NecatiARSLAN",
   "repository": {
     "type": "git",
     "url": "https://github.com/necatiarslan/aws-cloudwatch"

@@ -37,7 +37,7 @@ export class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView.constructor Completed');
     }
 
-    public async RenderHmtl() {
+    public async RenderHtml() {
         ui.logToOutput('CloudWatchLogView.RenderHmtl Started');
         this._panel.webview.html = this._getWebviewContent(this._panel.webview, this.extensionUri);
         
@@ -70,7 +70,7 @@ export class CloudWatchLogView {
             {
                 ui.logToOutput('CloudWatchLogView.LoadLogs No New Log');
             }
-            this.RenderHmtl();
+            this.RenderHtml();
         }
         else
         {
@@ -91,7 +91,6 @@ export class CloudWatchLogView {
             CloudWatchLogView.Current.LogGroup = LogGroup;
             CloudWatchLogView.Current.LogStream = LogStream;
             CloudWatchLogView.Current.LoadLogs();
-            CloudWatchLogView.Current.RenderHmtl();
         } 
         else 
         {
@@ -218,7 +217,7 @@ export class CloudWatchLogView {
                 switch (command) {
                     case "pause_timer":
                         this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
-                        this.RenderHmtl();
+                        this.RenderHtml();
                         return;
                     
                     case "export_logs":

@@ -23,7 +23,7 @@ class CloudWatchLogView {
         this.StartTimer();
         ui.logToOutput('CloudWatchLogView.constructor Completed');
     }
-    async RenderHmtl() {
+    async RenderHtml() {
         ui.logToOutput('CloudWatchLogView.RenderHmtl Started');
         this._panel.webview.html = this._getWebviewContent(this._panel.webview, this.extensionUri);
         ui.logToOutput('CloudWatchLogView.RenderHmtl Completed');
@@ -50,7 +50,7 @@ class CloudWatchLogView {
             else {
                 ui.logToOutput('CloudWatchLogView.LoadLogs No New Log');
             }
-            this.RenderHmtl();
+            this.RenderHtml();
         }
         else {
             this.StopTimer();
@@ -68,7 +68,6 @@ class CloudWatchLogView {
             CloudWatchLogView.Current.LogGroup = LogGroup;
             CloudWatchLogView.Current.LogStream = LogStream;
             CloudWatchLogView.Current.LoadLogs();
-            CloudWatchLogView.Current.RenderHmtl();
         }
         else {
             const panel = vscode.window.createWebviewPanel("CloudWatchLogView", "CloudWatch Logs", vscode.ViewColumn.One, {
@@ -179,7 +178,7 @@ class CloudWatchLogView {
             switch (command) {
                 case "pause_timer":
                     this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
-                    this.RenderHmtl();
+                    this.RenderHtml();
                     return;
                 case "export_logs":
                     this.ExportLogs();
