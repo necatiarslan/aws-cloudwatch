@@ -4,7 +4,6 @@ import { CloudWatchTreeItem, TreeItemType } from './CloudWatchTreeItem';
 import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
 import * as ui from '../common/UI';
 import * as api from '../common/API';
-import { APIGateway } from 'aws-sdk';
 import { CloudWatchLogView } from './CloudWatchLogView';
 
 export class CloudWatchTreeView {
@@ -236,7 +235,7 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
+		var resultLogStream = await api.GetLogStreamListWithDate(this.AwsProfile, node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
 
 		let selectedLogStreamList = await vscode.window.showQuickPick(resultLogStream.result, {canPickMany:true, placeHolder: 'Select Log Stream'});

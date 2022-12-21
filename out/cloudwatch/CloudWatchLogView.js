@@ -221,16 +221,23 @@ class CloudWatchLogView {
     }
     async ExportLogs() {
         ui.logToOutput('CloudWatchLogView.ExportLogs Started');
-        const tmp = require('tmp');
-        var fs = require('fs');
-        const tmpFile = tmp.fileSync({ mode: 0o644, prefix: this.LogStream, postfix: '.log' });
-        fs.appendFileSync(tmpFile.name, this.Region + "/" + this.LogGroup + "/" + this.LogStream);
-        for (var message of this.LogEvents) {
-            fs.appendFileSync(tmpFile.name, "\n" + "----------------------------------------------------------");
-            fs.appendFileSync(tmpFile.name, "\n" + message.message);
+        try {
+            const tmp = require('tmp');
+            var fs = require('fs');
+            let fileName = this.LogStream.replace(/[^a-zA-Z0-9]/g, "_");
+            const tmpFile = tmp.fileSync({ mode: 0o644, prefix: fileName, postfix: '.log' });
+            fs.appendFileSync(tmpFile.name, this.Region + "/" + this.LogGroup + "/" + this.LogStream);
+            for (var message of this.LogEvents) {
+                fs.appendFileSync(tmpFile.name, "\n" + "----------------------------------------------------------");
+                fs.appendFileSync(tmpFile.name, "\n" + message.message);
+            }
+            fs.appendFileSync(tmpFile.name, "\n" + "---------------------------END OF LOGS--------------------");
+            ui.openFile(tmpFile.name);
         }
-        fs.appendFileSync(tmpFile.name, "\n" + "---------------------------END OF LOGS--------------------");
-        ui.openFile(tmpFile.name);
+        catch (error) {
+            ui.showErrorMessage('ExportLogs Error !!!', error);
+            ui.logToOutput("ExportLogs Error !!!", error);
+        }
     }
 }
 exports.CloudWatchLogView = CloudWatchLogView;

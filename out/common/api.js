@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir = exports.ENV_CREDENTIALS_PATH = exports.getIniProfileData = exports.GetAwsProfileList = exports.GetRegionList = exports.GetLogEvents = exports.GetLogStreamList = exports.GetLogGroupList = void 0;
+exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir = exports.ENV_CREDENTIALS_PATH = exports.getIniProfileData = exports.GetAwsProfileList = exports.GetRegionList = exports.GetLogEvents = exports.GetLogStreamListWithDate = exports.GetLogStreamList = exports.GetLogStreams = exports.GetLogGroupList = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const AWS = require("aws-sdk");
 const ui = require("./UI");
@@ -41,9 +41,8 @@ async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
     }
 }
 exports.GetLogGroupList = GetLogGroupList;
-async function GetLogStreamList(Profile, Region, LogGroupName) {
+async function GetLogStreams(Profile, Region, LogGroupName) {
     let result = new MethodResult_1.MethodResult();
-    result.result = [];
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
         const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
@@ -55,14 +54,39 @@ async function GetLogStreamList(Profile, Region, LogGroupName) {
         };
         let response = await cloudwatchlogs.describeLogStreams(params).promise();
         result.isSuccessful = true;
-        if (response.logStreams) {
-            for (var logStream of response.logStreams) {
-                if (logStream.logStreamName) {
-                    result.result.push(logStream.logStreamName);
+        result.result = response.logStreams;
+        return result;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.showErrorMessage('api.GetLogStreams Error !!!', error);
+        ui.logToOutput("api.GetLogStreams Error !!!", error);
+        return result;
+    }
+}
+exports.GetLogStreams = GetLogStreams;
+async function GetLogStreamList(Profile, Region, LogGroupName) {
+    let result = new MethodResult_1.MethodResult();
+    result.result = [];
+    try {
+        let logStreams = await GetLogStreams(Profile, Region, LogGroupName);
+        if (logStreams.isSuccessful) {
+            if (logStreams.result) {
+                for (var logStream of logStreams.result) {
+                    if (logStream.logStreamName) {
+                        result.result.push(logStream.logStreamName);
+                    }
                 }
             }
+            result.isSuccessful = true;
+            return result;
         }
-        return result;
+        else {
+            result.error = logStreams.error;
+            result.isSuccessful = false;
+            return result;
+        }
     }
     catch (error) {
         result.isSuccessful = false;
@@ -73,6 +97,38 @@ async function GetLogStreamList(Profile, Region, LogGroupName) {
     }
 }
 exports.GetLogStreamList = GetLogStreamList;
+async function GetLogStreamListWithDate(Profile, Region, LogGroupName) {
+    let result = new MethodResult_1.MethodResult();
+    result.result = [];
+    try {
+        let logStreams = await GetLogStreams(Profile, Region, LogGroupName);
+        if (logStreams.isSuccessful) {
+            if (logStreams.result) {
+                for (var logStream of logStreams.result) {
+                    if (logStream.logStreamName) {
+                        let date = new Date(logStream.creationTime ? logStream.creationTime : 946684800000);
+                        result.result.push(logStream.logStreamName + "   (" + date.toLocaleDateString() + ")");
+                    }
+                }
+            }
+            result.isSuccessful = true;
+            return result;
+        }
+        else {
+            result.error = logStreams.error;
+            result.isSuccessful = false;
+            return result;
+        }
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.showErrorMessage('api.GetLogStreamsList Error !!!', error);
+        ui.logToOutput("api.GetLogStreamsList Error !!!", error);
+        return result;
+    }
+}
+exports.GetLogStreamListWithDate = GetLogStreamListWithDate;
 async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartTime) {
     if (!StartTime) {
         StartTime = 0;

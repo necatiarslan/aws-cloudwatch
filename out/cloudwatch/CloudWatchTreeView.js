@@ -200,7 +200,7 @@ class CloudWatchTreeView {
         if (!node.Region || !node.LogGroup) {
             return;
         }
-        var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
+        var resultLogStream = await api.GetLogStreamListWithDate(this.AwsProfile, node.Region, node.LogGroup);
         if (!resultLogStream.isSuccessful) {
             return;
         }

@@ -51,9 +51,8 @@ export async function GetLogGroupList(Profile:string, Region:string, LogGroupNam
   }
 }
 
-export async function GetLogStreamList(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
-  let result:MethodResult<string[]> = new MethodResult<string[]>();
-  result.result = [];
+export async function GetLogStreams(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>> {
+  let result = new MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>();
 
   try 
   {
@@ -69,18 +68,89 @@ export async function GetLogStreamList(Profile:string, Region:string, LogGroupNa
   
     let response = await cloudwatchlogs.describeLogStreams(params).promise();
     result.isSuccessful = true;
-    if(response.logStreams)
-    {
-      for(var logStream of response.logStreams)
-      {
-        if(logStream.logStreamName) {
-          result.result.push(logStream.logStreamName);
-        }
-      }
-    }
+    result.result = response.logStreams;
 
     return result;
-  } catch (error:any) 
+  } 
+  catch (error:any) 
+  {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.showErrorMessage('api.GetLogStreams Error !!!', error);
+    ui.logToOutput("api.GetLogStreams Error !!!", error); 
+    return result;
+  }
+}
+
+export async function GetLogStreamList(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
+  let result:MethodResult<string[]> = new MethodResult<string[]>();
+  result.result = [];
+
+  try 
+  {
+    let logStreams = await GetLogStreams(Profile, Region, LogGroupName);
+    if(logStreams.isSuccessful)
+    {
+      if(logStreams.result)
+      {
+        for(var logStream of logStreams.result)
+        {
+          if(logStream.logStreamName) {
+            result.result.push(logStream.logStreamName);
+          }
+        }
+      }
+      result.isSuccessful = true;
+      return result; 
+    }
+    else
+    {
+      result.error = logStreams.error;
+      result.isSuccessful = false;
+      return result;
+    }
+  } 
+  catch (error:any) 
+  {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.showErrorMessage('api.GetLogStreamsList Error !!!', error);
+    ui.logToOutput("api.GetLogStreamsList Error !!!", error); 
+    return result;
+  }
+}
+
+export async function GetLogStreamListWithDate(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
+  let result:MethodResult<string[]> = new MethodResult<string[]>();
+  result.result = [];
+
+  try 
+  {
+    let logStreams = await GetLogStreams(Profile, Region, LogGroupName);
+    if(logStreams.isSuccessful)
+    {
+      if(logStreams.result)
+      {
+        for(var logStream of logStreams.result)
+        {
+          if(logStream.logStreamName) 
+          {
+            let date = new Date(logStream.creationTime?logStream.creationTime:946684800000);
+            result.result.push(logStream.logStreamName + "   (" + date.toLocaleDateString() + ")");
+          }
+        }
+      }
+      result.isSuccessful = true;
+      return result; 
+    }
+    else
+    {
+      result.error = logStreams.error;
+      result.isSuccessful = false;
+      return result;
+    }
+  } 
+  catch (error:any) 
   {
     result.isSuccessful = false;
     result.error = error;
