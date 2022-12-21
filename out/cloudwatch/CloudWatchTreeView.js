@@ -200,16 +200,27 @@ class CloudWatchTreeView {
         if (!node.Region || !node.LogGroup) {
             return;
         }
-        var resultLogStream = await api.GetLogStreamListWithDate(this.AwsProfile, node.Region, node.LogGroup);
-        if (!resultLogStream.isSuccessful) {
+        var resultLogStream = await api.GetLogStreams(this.AwsProfile, node.Region, node.LogGroup);
+        if (!resultLogStream.isSuccessful || !resultLogStream.result) {
             return;
         }
-        let selectedLogStreamList = await vscode.window.showQuickPick(resultLogStream.result, { canPickMany: true, placeHolder: 'Select Log Stream' });
+        let logStreamList = [];
+        for (var ls of resultLogStream.result) {
+            let date = new Date(ls.creationTime ? ls.creationTime : 1);
+            logStreamList.push(ls.logStreamName + " (" + date.toDateString() + ")");
+        }
+        let selectedLogStreamList = await vscode.window.showQuickPick(logStreamList, { canPickMany: true, placeHolder: 'Select Log Stream' });
         if (!selectedLogStreamList || selectedLogStreamList.length === 0) {
             return;
         }
-        for (var selectedLogStream of selectedLogStreamList) {
-            this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, selectedLogStream);
+        for (var ls of resultLogStream.result) {
+            if (!ls.logStreamName) {
+                continue;
+            }
+            let lsName = ls.logStreamName;
+            if (selectedLogStreamList.find(e => e.includes(lsName))) {
+                this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, ls.logStreamName);
+            }
         }
         this.SaveState();
     }
