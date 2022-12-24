@@ -1,6 +1,7 @@
+# Aws CloudWatch 
+
 ![screenshoot](media/main-screen.png)
 
-# Aws CloudWatch 
 This extension is designed to make it easier and more convenient for developers to access and review their Aws CloudWatch logs without leaving vscode. \
 It allows you to add multiple log groups and log streams from different regions, giving you a centralized view of all your log data in one place. \
 You can use the search function to quickly find specific logs, or add them to your favorites list for easy access later on.
@@ -22,6 +23,9 @@ https://www.youtube.com/watch?v=SON8sY1iOBU
 To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
+## Todo
+- Log Group View
+- Log Stream Filter Groups
 
 Follow me on linkedin to get latest news \
 https://www.linkedin.com/in/necati-arslan/

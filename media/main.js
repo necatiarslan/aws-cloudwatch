@@ -11,10 +11,20 @@ function main() {
   ExportLogsButton.addEventListener("click", ExportLogsClick);
 
   const SearchTextBox = document.getElementById("search_text");
-  SearchTextBox.addEventListener("change", SearchTextChanged);
+  SearchTextBox.addEventListener("keydown", SearchTextBoxKeyDown);
+
+  const RefreshButton = document.getElementById("refresh");
+  RefreshButton.addEventListener("click", RefreshButtonClick);
 
 }
 
+function RefreshButtonClick() {
+  const SearchTextBox = document.getElementById("search_text");
+  vscode.postMessage({
+    command: "refresh",
+    search_text: SearchTextBox._value
+  });
+}
 
 function PauseTimerClick() {
   vscode.postMessage({
@@ -28,9 +38,9 @@ function ExportLogsClick() {
   });
 }
 
-function SearchTextChanged() {
-  const SearchTextBox = document.getElementById("search_text");
-  let searchText = SearchTextBox.value;
-  console.log(searchText);
+function SearchTextBoxKeyDown(e) {
+  if (e.key === "Enter") {
+    RefreshButtonClick();
+  }
 }
 

@@ -9,8 +9,6 @@ table {
     background-color: #2a2d2e;
   }
   
-  tr:hover {background-color: #505050;}
-
   th {
     background-color: #3c3c3c;
     color: white;
@@ -20,9 +18,11 @@ table {
   }
   
   td {
-    color: white;
+    color: #d4d4d4;
     padding: 5px;
-    font-size: 10px;
+    font-family: Menlo, Monaco, "Courier New", monospace;
+    font-weight: normal;
+    font-size: 12px;
     vertical-align: top;
   }
   
@@ -47,4 +47,26 @@ table {
     display: flex;
     flex-direction: column;
     width: 100%;
+  }
+
+  .color_code_red {
+    color: red
+  }
+
+  .color_code_yellow {
+    color: yellow
+  }
+
+  .color_code_blue {
+    color:  #569cd6;
+
+  }
+
+  .color_code_green {
+    color: #6a9955
+  }
+
+  .color_code_search_result {
+    background-color: yellow;
+    color: darkred;
   }

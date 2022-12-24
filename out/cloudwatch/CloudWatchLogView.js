@@ -11,6 +11,7 @@ class CloudWatchLogView {
         this._disposables = [];
         this.StartTime = 0;
         this.LogEvents = [];
+        this.SearchText = "";
         ui.logToOutput('CloudWatchLogView.constructor Started');
         this.Region = Region;
         this.LogGroup = LogGroup;
@@ -82,6 +83,32 @@ class CloudWatchLogView {
         }
         return 1;
     }
+    SetCustomColorCoding(message) {
+        if (!message) {
+            return message;
+        }
+        let result = message;
+        //result=result.replace(/"([^"]*)"/g, (match, capture1) => `<span class="color_code_blue">"${capture1}"</span>`);//any string between ""
+        //result=result.replace(/'([^']*)'/g, (match, capture1) => `<span class="color_code_blue">'${capture1}'</span>`);//any string between ''
+        result = result.replace(/(error)/i, (match, capture1) => `<span class="color_code_red">${capture1}</span>`);
+        // result=result.replace(/([error])/g, (match, capture1) => `<span class="color_code_red">${capture1}</span>`);
+        result = result.replace(/(exception)/i, (match, capture1) => `<span class="color_code_red">${capture1}</span>`);
+        // result=result.replace(/([exception])/g, (match, capture1) => `<span class="color_code_red">${capture1}</span>`);
+        // result=result.replace(/(failure)/g, (match, capture1) => `<span class="color_code_red">${capture1}</span>`);
+        // result=result.replace(/([failure])/g, (match, capture1) => `<span class="color_code_red">${capture1}</span>`);
+        result = result.replace(/(\[info\])/i, (match, capture1) => `<span class="color_code_yellow">${capture1}</span>`);
+        // result=result.replace(/([info])/g, (match, capture1) => `<span class="color_code_yellow">${capture1}</span>`);
+        // result=result.replace(/(warning)/g, (match, capture1) => `<span class="color_code_yellow">${capture1}</span>`);
+        // result=result.replace(/([warning])/g, (match, capture1) => `<span class="color_code_yellow">${capture1}</span>`);
+        result = result.replace(/(\d{4}-\d{2}-\d{2})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
+        result = result.replace(/(\d{2}\/\d{2}\/\d{4})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
+        result = result.replace(/(\d{2}:\d{2}:\d{2})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
+        if (this.SearchText) {
+            const regex = new RegExp("(" + this.SearchText + ")", "i");
+            result = result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+        }
+        return result;
+    }
     _getWebviewContent(webview, extensionUri) {
         ui.logToOutput('CloudWatchLogView._getWebviewContent Started');
         //file URIs
@@ -94,16 +121,21 @@ class CloudWatchLogView {
         ]);
         const mainUri = ui.getUri(webview, extensionUri, ["media", "main.js"]);
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
+        const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
         let logRowHtml = "";
         let rowNumber = 1;
         if (this.LogEvents && this.LogEvents.length > 0) {
             rowNumber = this.LogEvents.length;
             for (var event of this.LogEvents) {
+                const regex = new RegExp(this.SearchText, "i");
+                if (this.SearchText && event.message?.search(regex) === -1) {
+                    continue;
+                }
                 let timeString = "";
                 if (event.timestamp) {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
-                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + event.message + '</td><td>' + timeString + '</td></tr>';
+                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td>' + timeString + '</td></tr>';
                 rowNumber--;
             }
         }
@@ -119,6 +151,7 @@ class CloudWatchLogView {
         <script type="module" src="${toolkitUri}"></script>
         <script type="module" src="${mainUri}"></script>
         <link rel="stylesheet" href="${styleUri}">
+        <link href="${codiconsUri}" rel="stylesheet" />
         <title>Logs</title>
       </head>
       <body>  
@@ -129,27 +162,35 @@ class CloudWatchLogView {
 
         <table>
             <tr>
-                <td colspan=3 style="text-align:right"><vscode-text-field id="search_text" placeholder="Search" disabled></vscode-text-field></td>
+                <td style="text-align:left" width="20px">
+                    <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
+                    <vscode-progress-ring></vscode-progress-ring>
+                    </div>
+                </td>
+                <td style="text-align:left">
+                    <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking() ? "Pause" : "Resume"}</vscode-button>
+                    <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
+                    <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
+                </td>
+                <td style="text-align:right">
+                    <vscode-text-field id="search_text" placeholder="Search" value="${this.SearchText}">
+                    <span slot="start" class="codicon codicon-search"></span>
+                    </vscode-text-field>
+                </vscode-text-field></td>
             </tr>
-            <tr><th width="5px">#</th><th>Message</th><th width="75px">Time</th></tr>
+        </table>
+
+        <table>
+            <tr>
+                <th width="5px">#</th>
+                <th>Message</th>
+                <th width="75px">Time</th>
+            </tr>
 
             ${logRowHtml}
 
         </table>
-        <br>
-        <table>
-            <tr>
-                <th style="text-align:left" width="20px">
-                    <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
-                    <vscode-progress-ring></vscode-progress-ring>
-                    </div>
-                </th>
-                <th style="text-align:left">
-                <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking() ? "Pause" : "Resume"}</vscode-button>
-                <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
-                </th>
-            </tr>
-        </table>
+
         <br>
         ${this.Region} / ${this.LogGroup} / ${this.LogStream}
         
@@ -176,6 +217,12 @@ class CloudWatchLogView {
             const command = message.command;
             ui.logToOutput('CloudWatchLogView._setWebviewMessageListener Message Received ' + message.command);
             switch (command) {
+                case "refresh":
+                    this.SearchText = message.search_text;
+                    this.LoadLogs();
+                    ;
+                    this.RenderHtml();
+                    return;
                 case "pause_timer":
                     this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
                     this.RenderHtml();
