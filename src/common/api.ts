@@ -124,6 +124,8 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
   if(!StartTime) {StartTime=0;}
   
   let result:MethodResult<AWS.CloudWatchLogs.OutputLogEvents> = new MethodResult<AWS.CloudWatchLogs.OutputLogEvents>();
+  result.result = [];
+  let nextToken:string | undefined;
 
   try 
   {
@@ -131,21 +133,26 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
     // Initialize the CloudWatchLogs client
     const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
 
-    // Set the parameters for the describeLogGroups API
-    const params = {
-      logGroupName: LogGroupName,
-      logStreamName: LogStreamName,
-      startFromHead: false,
-      startTime:StartTime
-    };
-    //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
-    let response = await cloudwatchlogs.getLogEvents(params).promise();
-    if(response.events)
+    while(1===1)
     {
-      result.isSuccessful = true;
-      result.result = response.events;
+      let response = await getLogEventsInternal(cloudwatchlogs);
+      if(response.events)
+      {
+        for(var e of response.events)
+        {
+          result.result.push(e);
+        }
+      }
+      let newToken = response.nextForwardToken;
+
+      if(newToken === nextToken)
+      {
+        break;
+      }
+      nextToken = newToken;
     }
 
+    result.isSuccessful = true;
     return result;
   } 
   catch (error:any) 
@@ -157,7 +164,17 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
     return result;
   }
 
-
+  async function getLogEventsInternal(cloudwatchlogs: AWS.CloudWatchLogs) {
+    const params = {
+      logGroupName: LogGroupName,
+      logStreamName: LogStreamName,
+      startTime: StartTime,
+      nextToken: nextToken
+    };
+    //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
+    let response = await cloudwatchlogs.getLogEvents(params).promise();
+    return response;
+  }
 }
 
 export async function GetRegionList(Profile:string): Promise<MethodResult<string[]>> {

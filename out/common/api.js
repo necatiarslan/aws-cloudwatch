@@ -102,23 +102,26 @@ async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartT
         StartTime = 0;
     }
     let result = new MethodResult_1.MethodResult();
+    result.result = [];
+    let nextToken;
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
         // Initialize the CloudWatchLogs client
         const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
-        // Set the parameters for the describeLogGroups API
-        const params = {
-            logGroupName: LogGroupName,
-            logStreamName: LogStreamName,
-            startFromHead: false,
-            startTime: StartTime
-        };
-        //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
-        let response = await cloudwatchlogs.getLogEvents(params).promise();
-        if (response.events) {
-            result.isSuccessful = true;
-            result.result = response.events;
+        while (1 === 1) {
+            let response = await getLogEventsInternal(cloudwatchlogs);
+            if (response.events) {
+                for (var e of response.events) {
+                    result.result.push(e);
+                }
+            }
+            let newToken = response.nextForwardToken;
+            if (newToken === nextToken) {
+                break;
+            }
+            nextToken = newToken;
         }
+        result.isSuccessful = true;
         return result;
     }
     catch (error) {
@@ -127,6 +130,17 @@ async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartT
         ui.showErrorMessage('api.GetLogEvents Error !!!', error);
         ui.logToOutput("api.GetLogEvents Error !!!", error);
         return result;
+    }
+    async function getLogEventsInternal(cloudwatchlogs) {
+        const params = {
+            logGroupName: LogGroupName,
+            logStreamName: LogStreamName,
+            startTime: StartTime,
+            nextToken: nextToken
+        };
+        //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
+        let response = await cloudwatchlogs.getLogEvents(params).promise();
+        return response;
     }
 }
 exports.GetLogEvents = GetLogEvents;
