@@ -26,6 +26,7 @@ https://github.com/necatiarslan/aws-cloudwatch/issues/new
 ## Todo
 - Log Group View
 - Log Stream Filter Groups
+- Add Log Stream Name Filter before the list
 
 Follow me on linkedin to get latest news \
 https://www.linkedin.com/in/necati-arslan/

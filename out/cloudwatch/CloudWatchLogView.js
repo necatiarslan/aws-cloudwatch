@@ -135,7 +135,7 @@ class CloudWatchLogView {
                 if (event.timestamp) {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
-                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td>' + timeString + '</td></tr>';
+                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
                 rowNumber--;
             }
         }
@@ -184,7 +184,7 @@ class CloudWatchLogView {
             <tr>
                 <th width="5px">#</th>
                 <th>Message</th>
-                <th width="75px">Time</th>
+                <th>Time</th>
             </tr>
 
             ${logRowHtml}

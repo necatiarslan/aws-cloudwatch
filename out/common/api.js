@@ -41,7 +41,7 @@ async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
     }
 }
 exports.GetLogGroupList = GetLogGroupList;
-async function GetLogStreams(Profile, Region, LogGroupName) {
+async function GetLogStreams(Profile, Region, LogGroupName, LogStreamFilter) {
     let result = new MethodResult_1.MethodResult();
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });

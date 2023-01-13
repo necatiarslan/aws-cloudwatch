@@ -235,7 +235,10 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		var resultLogStream = await api.GetLogStreams(this.AwsProfile, node.Region, node.LogGroup);
+		let filterStringTemp = await vscode.window.showInputBox({ placeHolder: 'Log Stream Filter ?' });
+		if (filterStringTemp === undefined) { return; }
+
+		var resultLogStream = await api.GetLogStreams(this.AwsProfile, node.Region, node.LogGroup, filterStringTemp);
 		if(!resultLogStream.isSuccessful || !resultLogStream.result){ return; }
 
 		let logStreamList:string[]=[];

@@ -51,7 +51,7 @@ export async function GetLogGroupList(Profile:string, Region:string, LogGroupNam
   }
 }
 
-export async function GetLogStreams(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>> {
+export async function GetLogStreams(Profile:string, Region:string, LogGroupName:string, LogStreamFilter?:string): Promise<MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>> {
   let result = new MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>();
 
   try 
