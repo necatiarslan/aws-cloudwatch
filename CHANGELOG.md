@@ -1,3 +1,6 @@
+# v1.2.0
+    - Hide
+    - Read longer logs
 # v1.1.0
     - Search
     - Color Code
