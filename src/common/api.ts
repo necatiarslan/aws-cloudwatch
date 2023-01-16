@@ -2,7 +2,6 @@
 import * as AWS from "aws-sdk";
 import * as ui from "./UI";
 import { MethodResult } from './MethodResult';
-import { Credentials } from 'aws-sdk';
 import { homedir } from "os";
 import { sep } from "path";
 import { join } from "path";
@@ -11,6 +10,7 @@ import { ParsedIniData } from "@aws-sdk/types";
 
 
 export async function GetLogGroupList(Profile:string, Region:string, LogGroupNamePattern?:string): Promise<MethodResult<string[]>> {
+  ui.logToOutput('api.GetLogGroupList Started');
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
@@ -52,6 +52,7 @@ export async function GetLogGroupList(Profile:string, Region:string, LogGroupNam
 }
 
 export async function GetLogStreams(Profile:string, Region:string, LogGroupName:string, LogStreamFilter?:string): Promise<MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>> {
+  ui.logToOutput('api.GetLogStreams Started');
   let result = new MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>();
 
   try 
@@ -83,6 +84,7 @@ export async function GetLogStreams(Profile:string, Region:string, LogGroupName:
 }
 
 export async function GetLogStreamList(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
+  ui.logToOutput('api.GetLogStreamList Started');
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
@@ -121,6 +123,7 @@ export async function GetLogStreamList(Profile:string, Region:string, LogGroupNa
 }
 
 export async function GetLogEvents(Profile:string, Region:string, LogGroupName:string, LogStreamName:string, StartTime?:number): Promise<MethodResult<AWS.CloudWatchLogs.OutputLogEvents>> {
+  ui.logToOutput('api.GetLogEvents Started');
   if(!StartTime) {StartTime=0;}
   
   let result:MethodResult<AWS.CloudWatchLogs.OutputLogEvents> = new MethodResult<AWS.CloudWatchLogs.OutputLogEvents>();
@@ -144,7 +147,7 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
         }
       }
       let newToken = response.nextForwardToken;
-
+      ui.logToOutput("newToken=" + newToken);
       if(newToken === nextToken)
       {
         break;
@@ -165,19 +168,23 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
   }
 
   async function getLogEventsInternal(cloudwatchlogs: AWS.CloudWatchLogs) {
+    ui.logToOutput("cloudwatchlogs.getLogEvents");
     const params = {
       logGroupName: LogGroupName,
       logStreamName: LogStreamName,
       startTime: StartTime,
       nextToken: nextToken
     };
+    ui.logToOutput(params);
     //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
     let response = await cloudwatchlogs.getLogEvents(params).promise();
+    ui.logToOutput("log count = " + response.events?.length);
     return response;
   }
 }
 
 export async function GetRegionList(Profile:string): Promise<MethodResult<string[]>> {
+  ui.logToOutput('api.GetRegionList Started');
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
@@ -234,8 +241,9 @@ export async function GetAwsProfileList(): Promise<MethodResult<string[]>> {
 
 export async function getIniProfileData(init: SourceProfileInit = {}):Promise<ParsedIniData>
 {
-    const profiles = await parseKnownFiles(init);
-    return profiles;
+  ui.logToOutput('api.getIniProfileData Started');
+  const profiles = await parseKnownFiles(init);
+  return profiles;
 }
 
 export const ENV_CREDENTIALS_PATH = "AWS_SHARED_CREDENTIALS_FILE";

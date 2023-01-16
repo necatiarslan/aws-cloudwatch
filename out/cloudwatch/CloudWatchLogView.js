@@ -12,6 +12,7 @@ class CloudWatchLogView {
         this.StartTime = 0;
         this.LogEvents = [];
         this.SearchText = "";
+        this.HideText = "";
         ui.logToOutput('CloudWatchLogView.constructor Started');
         this.Region = Region;
         this.LogGroup = LogGroup;
@@ -125,10 +126,10 @@ class CloudWatchLogView {
         let logRowHtml = "";
         let rowNumber = 1;
         if (this.LogEvents && this.LogEvents.length > 0) {
-            rowNumber = this.LogEvents.length;
+            rowNumber = this.LogEvents.length + 1;
             for (var event of this.LogEvents) {
-                const regex = new RegExp(this.SearchText, "i");
-                if (this.SearchText && event.message?.search(regex) === -1) {
+                rowNumber--;
+                if (this.IsHideEvent(event)) {
                     continue;
                 }
                 let timeString = "";
@@ -136,7 +137,6 @@ class CloudWatchLogView {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
                 logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
-                rowNumber--;
             }
         }
         else {
@@ -173,8 +173,11 @@ class CloudWatchLogView {
                     <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
                 </td>
                 <td style="text-align:right">
+                    <vscode-text-field id="hide_text" placeholder="Hide" value="${this.HideText}">
+                        <span slot="start" class="codicon codicon-eye-closed"></span>
+                    </vscode-text-field>
                     <vscode-text-field id="search_text" placeholder="Search" value="${this.SearchText}">
-                    <span slot="start" class="codicon codicon-search"></span>
+                        <span slot="start" class="codicon codicon-search"></span>
                     </vscode-text-field>
                 </vscode-text-field></td>
             </tr>
@@ -184,7 +187,7 @@ class CloudWatchLogView {
             <tr>
                 <th width="5px">#</th>
                 <th>Message</th>
-                <th>Time</th>
+                <th  width="50px">Time</th>
             </tr>
 
             ${logRowHtml}
@@ -211,6 +214,29 @@ class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView._getWebviewContent Completed');
         return result;
     }
+    IsHideEvent(event) {
+        if (this.SearchText.length > 0) {
+            let searchTerms = this.SearchText.split(",");
+            for (var term of searchTerms) {
+                const regex = new RegExp(term.trim(), "i");
+                if (event.message?.search(regex) !== -1) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (this.HideText.length > 0) {
+            let hideTerms = this.HideText.split(",");
+            for (var term of hideTerms) {
+                const regex = new RegExp(term.trim(), "i");
+                if (event.message?.search(regex) !== -1) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
     _setWebviewMessageListener(webview) {
         ui.logToOutput('CloudWatchLogView._setWebviewMessageListener Started');
         webview.onDidReceiveMessage((message) => {
@@ -219,6 +245,7 @@ class CloudWatchLogView {
             switch (command) {
                 case "refresh":
                     this.SearchText = message.search_text;
+                    this.HideText = message.hide_text;
                     this.LoadLogs();
                     ;
                     this.RenderHtml();

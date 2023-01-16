@@ -4,6 +4,7 @@ import * as ui from '../common/UI';
 import * as api from '../common/API';
 import * as AWS from "aws-sdk";
 import { CloudWatchTreeView } from "./CloudWatchTreeView";
+import { bool } from "aws-sdk/clients/signer";
 
 export class CloudWatchLogView {
     public static Current: CloudWatchLogView | undefined;
@@ -18,6 +19,7 @@ export class CloudWatchLogView {
     public StartTime:number = 0;
     public LogEvents:AWS.CloudWatchLogs.OutputLogEvents = [];
     public SearchText:string = "";
+    public HideText:string = "";
 
     private Timer: NodeJS.Timer | undefined;
 
@@ -163,10 +165,11 @@ export class CloudWatchLogView {
         let rowNumber:number=1;
         if(this.LogEvents && this.LogEvents.length > 0)
         {
-            rowNumber = this.LogEvents.length;
+            rowNumber = this.LogEvents.length+1;
             for(var event of this.LogEvents){
-                const regex = new RegExp(this.SearchText, "i");
-                if(this.SearchText && event.message?.search(regex) === -1){continue;}
+                rowNumber--;
+
+                if (this.IsHideEvent(event)) { continue; }
 
                 let timeString:string = "";
                 if(event.timestamp)
@@ -174,7 +177,6 @@ export class CloudWatchLogView {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
                 logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
-                rowNumber--;
             }
         }
         else
@@ -213,8 +215,11 @@ export class CloudWatchLogView {
                     <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
                 </td>
                 <td style="text-align:right">
+                    <vscode-text-field id="hide_text" placeholder="Hide" value="${this.HideText}">
+                        <span slot="start" class="codicon codicon-eye-closed"></span>
+                    </vscode-text-field>
                     <vscode-text-field id="search_text" placeholder="Search" value="${this.SearchText}">
-                    <span slot="start" class="codicon codicon-search"></span>
+                        <span slot="start" class="codicon codicon-search"></span>
                     </vscode-text-field>
                 </vscode-text-field></td>
             </tr>
@@ -224,7 +229,7 @@ export class CloudWatchLogView {
             <tr>
                 <th width="5px">#</th>
                 <th>Message</th>
-                <th>Time</th>
+                <th  width="50px">Time</th>
             </tr>
 
             ${logRowHtml}
@@ -252,6 +257,31 @@ export class CloudWatchLogView {
         return result;
     }
 
+    private IsHideEvent(event: AWS.CloudWatchLogs.OutputLogEvent) : boolean
+    {
+        if(this.SearchText.length > 0)
+        {
+            let searchTerms = this.SearchText.split(",");
+            for (var term of searchTerms) {
+                const regex = new RegExp(term.trim(), "i");
+                if (event.message?.search(regex) !== -1) { return false; }
+            }
+            return true;
+        }
+
+        if(this.HideText.length > 0)
+        {
+            let hideTerms = this.HideText.split(",");
+            for (var term of hideTerms) {
+                const regex = new RegExp(term.trim(), "i");
+                if (event.message?.search(regex) !== -1) { return true; }
+            }
+            return false;
+        }
+
+        return false;
+    }
+
     private _setWebviewMessageListener(webview: vscode.Webview) {
         ui.logToOutput('CloudWatchLogView._setWebviewMessageListener Started');
         webview.onDidReceiveMessage(
@@ -262,6 +292,7 @@ export class CloudWatchLogView {
                 switch (command) {
                     case "refresh":
                         this.SearchText = message.search_text;
+                        this.HideText = message.hide_text;
                         this.LoadLogs();;
                         this.RenderHtml();
                         return;

@@ -10,6 +10,7 @@ const path_1 = require("path");
 const path_2 = require("path");
 const parseKnownFiles_1 = require("../aws-sdk/parseKnownFiles");
 async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
+    ui.logToOutput('api.GetLogGroupList Started');
     let result = new MethodResult_1.MethodResult();
     result.result = [];
     try {
@@ -42,6 +43,7 @@ async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
 }
 exports.GetLogGroupList = GetLogGroupList;
 async function GetLogStreams(Profile, Region, LogGroupName, LogStreamFilter) {
+    ui.logToOutput('api.GetLogStreams Started');
     let result = new MethodResult_1.MethodResult();
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
@@ -67,6 +69,7 @@ async function GetLogStreams(Profile, Region, LogGroupName, LogStreamFilter) {
 }
 exports.GetLogStreams = GetLogStreams;
 async function GetLogStreamList(Profile, Region, LogGroupName) {
+    ui.logToOutput('api.GetLogStreamList Started');
     let result = new MethodResult_1.MethodResult();
     result.result = [];
     try {
@@ -98,6 +101,7 @@ async function GetLogStreamList(Profile, Region, LogGroupName) {
 }
 exports.GetLogStreamList = GetLogStreamList;
 async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartTime) {
+    ui.logToOutput('api.GetLogEvents Started');
     if (!StartTime) {
         StartTime = 0;
     }
@@ -116,6 +120,7 @@ async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartT
                 }
             }
             let newToken = response.nextForwardToken;
+            ui.logToOutput("newToken=" + newToken);
             if (newToken === nextToken) {
                 break;
             }
@@ -132,19 +137,23 @@ async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartT
         return result;
     }
     async function getLogEventsInternal(cloudwatchlogs) {
+        ui.logToOutput("cloudwatchlogs.getLogEvents");
         const params = {
             logGroupName: LogGroupName,
             logStreamName: LogStreamName,
             startTime: StartTime,
             nextToken: nextToken
         };
+        ui.logToOutput(params);
         //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
         let response = await cloudwatchlogs.getLogEvents(params).promise();
+        ui.logToOutput("log count = " + response.events?.length);
         return response;
     }
 }
 exports.GetLogEvents = GetLogEvents;
 async function GetRegionList(Profile) {
+    ui.logToOutput('api.GetRegionList Started');
     let result = new MethodResult_1.MethodResult();
     result.result = [];
     try {
@@ -189,6 +198,7 @@ async function GetAwsProfileList() {
 }
 exports.GetAwsProfileList = GetAwsProfileList;
 async function getIniProfileData(init = {}) {
+    ui.logToOutput('api.getIniProfileData Started');
     const profiles = await (0, parseKnownFiles_1.parseKnownFiles)(init);
     return profiles;
 }
