@@ -2,7 +2,7 @@
   "name": "aws-cloudwatch-vscode-extension",
   "displayName": "Aws CloudWatch",
   "description": "Browse Your AWS CloudWatch Logs",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "publisher": "NecatiARSLAN",
   "repository": {
     "type": "git",

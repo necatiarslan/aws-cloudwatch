@@ -39,9 +39,13 @@ class CloudWatchLogView {
         if (result.isSuccessful) {
             if (result.result.length > 0) {
                 this.LogEvents = this.LogEvents.concat(result.result);
-                this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
-                if (this.LogEvents.length > 0 && this.LogEvents[0].timestamp) {
-                    this.StartTime = this.LogEvents[0].timestamp + 1;
+                //this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
+                if (this.LogEvents.length > 0) {
+                    let latestTimeStamp = this.LogEvents[this.LogEvents.length - 1].timestamp;
+                    if (!latestTimeStamp) {
+                        latestTimeStamp = 0;
+                    }
+                    this.StartTime = latestTimeStamp + 1;
                     let now = new Date();
                     now.setHours(now.getHours() - 1);
                     if (new Date(this.StartTime) < now) {
@@ -124,11 +128,10 @@ class CloudWatchLogView {
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
         const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
         let logRowHtml = "";
-        let rowNumber = 1;
         if (this.LogEvents && this.LogEvents.length > 0) {
-            rowNumber = this.LogEvents.length + 1;
+            let rowNumber = 0;
             for (var event of this.LogEvents) {
-                rowNumber--;
+                rowNumber++;
                 if (this.IsHideEvent(event)) {
                     continue;
                 }

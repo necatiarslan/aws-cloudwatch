@@ -57,10 +57,13 @@ export class CloudWatchLogView {
             if(result.result.length > 0)
             {
                 this.LogEvents = this.LogEvents.concat(result.result);
-                this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
-                if(this.LogEvents.length>0 && this.LogEvents[0].timestamp)
+                //this.LogEvents = this.LogEvents.sort(this.CompareEventsFunction);
+                if(this.LogEvents.length>0)
                 {
-                    this.StartTime = this.LogEvents[0].timestamp + 1;
+                    let latestTimeStamp = this.LogEvents[this.LogEvents.length-1].timestamp;
+                    if(!latestTimeStamp) { latestTimeStamp=0; }
+
+                    this.StartTime = latestTimeStamp + 1;
                     let now = new Date();
                     now.setHours(now.getHours() - 1);
                     if(new Date(this.StartTime) < now)
@@ -162,12 +165,12 @@ export class CloudWatchLogView {
 
 
         let logRowHtml:string="";
-        let rowNumber:number=1;
+        
         if(this.LogEvents && this.LogEvents.length > 0)
         {
-            rowNumber = this.LogEvents.length+1;
+            let rowNumber:number=0;
             for(var event of this.LogEvents){
-                rowNumber--;
+                rowNumber++;
 
                 if (this.IsHideEvent(event)) { continue; }
 
