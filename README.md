@@ -24,9 +24,13 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## Todo
+- Show First 100 characters for long lines
+- Show Long Logs in a expendable view
+- Identify JSON strings and show in a seperate window with a clickable link
 - Log Group View
 - Log Stream Filter Groups
 - Add Log Stream Name Filter before the list
+- Log font size adj
 
 Follow me on linkedin to get latest news \
 https://www.linkedin.com/in/necati-arslan/

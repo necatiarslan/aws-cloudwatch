@@ -108,15 +108,6 @@ export class CloudWatchLogView {
         }
     }
 
-    private CompareEventsFunction(a:AWS.CloudWatchLogs.OutputLogEvent, b:AWS.CloudWatchLogs.OutputLogEvent):number
-    {
-        if(a.timestamp && b.timestamp)
-        {
-            return a.timestamp > b.timestamp ? -1 : 1;
-        }
-        return 1;
-    }
-
     private SetCustomColorCoding(message:string | undefined) : string | undefined
     {
         if(!message) { return message; }

@@ -82,12 +82,6 @@ class CloudWatchLogView {
             CloudWatchLogView.Current = new CloudWatchLogView(panel, extensionUri, Region, LogGroup, LogStream);
         }
     }
-    CompareEventsFunction(a, b) {
-        if (a.timestamp && b.timestamp) {
-            return a.timestamp > b.timestamp ? -1 : 1;
-        }
-        return 1;
-    }
     SetCustomColorCoding(message) {
         if (!message) {
             return message;
