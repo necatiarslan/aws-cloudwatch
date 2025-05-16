@@ -19,9 +19,7 @@
     "AWS",
     "CloudWatch"
   ],
-  "activationEvents": [
-    "onView:CloudWatchTreeView"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [

@@ -21,7 +21,8 @@ export class CloudWatchLogView {
     public SearchText:string = "";
     public HideText:string = "";
 
-    private Timer: NodeJS.Timer | undefined;
+    private Timer: ReturnType<typeof setInterval> | undefined;
+
 
     private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, Region: string, LogGroup:string, LogStream:string) {
         ui.logToOutput('CloudWatchLogView.constructor Started');
