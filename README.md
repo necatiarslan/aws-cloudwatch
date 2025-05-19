@@ -24,9 +24,6 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## Todo
-- Localstack Support
-- AWS JS SDK V3 Migration
-- Vscode-elements Migration
 - Log Stream Filter Groups
 - Add Log Stream Name Filter before the list
 

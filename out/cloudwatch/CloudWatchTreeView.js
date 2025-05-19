@@ -151,7 +151,7 @@ class CloudWatchTreeView {
         if (!selectedRegion) {
             return;
         }
-        var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion);
+        var resultLogGroup = await api.GetLogGroupList(selectedRegion);
         if (!resultLogGroup.isSuccessful) {
             return;
         }
