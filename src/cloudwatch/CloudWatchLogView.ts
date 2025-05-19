@@ -19,6 +19,7 @@ export class CloudWatchLogView {
     public LogEvents:OutputLogEvent[] = [];
     public SearchText:string = "";
     public HideText:string = "";
+    public FilterText:string = "";
 
     private Timer: ReturnType<typeof setInterval> | undefined;
 
@@ -129,6 +130,16 @@ export class CloudWatchLogView {
         //result=result.replace(/(\d{2}\/\d{2}\/\d{4})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
         //result=result.replace(/(\d{2}:\d{2}:\d{2})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
 
+        if(this.FilterText)
+        {
+            const filterTextArray = this.FilterText.split(",");
+            for(var i = 0; i < filterTextArray.length; i++)
+            {
+                const regex = new RegExp("(" + filterTextArray[i].trim() + ")", "i");
+                result=result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+            }
+        }
+
         if(this.SearchText)
         {
             const regex = new RegExp("(" + this.SearchText + ")", "i");
@@ -143,8 +154,6 @@ export class CloudWatchLogView {
 
         //file URIs
         const vscodeElementsUri = ui.getUri(webview, extensionUri, ["node_modules", "@vscode-elements", "elements", "dist", "bundled.js"]);
-
-
         const mainUri = ui.getUri(webview, extensionUri, ["media", "main.js"]);
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
         const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
@@ -182,7 +191,7 @@ export class CloudWatchLogView {
         <script type="module" src="${vscodeElementsUri}"></script>
         <script type="module" src="${mainUri}"></script>
         <link rel="stylesheet" href="${styleUri}">
-        <link href="${codiconsUri}" rel="stylesheet" />
+        <link href="${codiconsUri}" rel="stylesheet" id="vscode-codicon-stylesheet"/>
         <title>Logs</title>
       </head>
       <body>  
@@ -193,24 +202,27 @@ export class CloudWatchLogView {
 
         <table>
             <tr>
+                <td style="text-align:left"  width="300px">
+                    <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking()?"Pause":"Resume"}</vscode-button>
+                    <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
+                    <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
+                </td>
                 <td style="text-align:left" width="20px">
                     <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
                     <vscode-progress-ring></vscode-progress-ring>
                     </div>
                 </td>
-                <td style="text-align:left">
-                    <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking()?"Pause":"Resume"}</vscode-button>
-                    <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
-                    <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
-                </td>
                 <td style="text-align:right">
-                    <vscode-textfield id="hide_text" placeholder="Hide" value="${this.HideText}">
-                        <span slot="start" class="codicon codicon-eye-closed"></span>
-                    </vscode-text-field>
-                    <vscode-textfield id="search_text" placeholder="Search" value="${this.SearchText}">
-                        <span slot="start" class="codicon codicon-search"></span>
-                    </vscode-text-field>
-                </vscode-text-field></td>
+                    <vscode-textfield id="search_text" placeholder="Search" value="${this.SearchText}" style="width: 20ch; margin: 0;" >
+                        <vscode-icon slot="content-before" name="search" title="search"></vscode-icon>
+                    </vscode-textfield>
+                    <vscode-textfield id="filter_text" placeholder="Filter" value="${this.FilterText}" style="width: 20ch; margin: 0;" >
+                        <vscode-icon slot="content-before" name="filter" title="filter"></vscode-icon>
+                    </vscode-textfield>
+                    <vscode-textfield id="hide_text" placeholder="Hide" value="${this.HideText}" style="width: 20ch; margin: 0;" >
+                        <vscode-icon slot="content-before" name="eye-closed" title="eye-closed"></vscode-icon>
+                    </vscode-textfield>
+                </td>
             </tr>
         </table>
 

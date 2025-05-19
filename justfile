@@ -69,4 +69,4 @@ add_logs:
     aws --endpoint-url=http://localhost:4566 logs put-log-events \
     --log-group-name my-log-group \
     --log-stream-name my-log-stream \
-    --log-events "[{\"timestamp\": $timestamp, \"message\": \"Your log message here\"}]"
+    --log-events '[{"timestamp": $timestamp, "message": "Your log message here"}]'
