@@ -234,8 +234,8 @@
   },
   "dependencies": {
     "@aws-sdk/credential-provider-node": "^3.181.0",
+    "@vscode-elements/elements": "^1.16.0",
     "@vscode/codicons": "^0.0.32",
-    "@vscode/webview-ui-toolkit": "^1.2.0",
     "aws-sdk": "^2.1271.0",
     "tmp": "^0.2.1"
   }

@@ -143,13 +143,8 @@ export class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView._getWebviewContent Started');
 
         //file URIs
-        const toolkitUri = ui.getUri(webview, extensionUri, [
-            "node_modules",
-            "@vscode",
-            "webview-ui-toolkit",
-            "dist",
-            "toolkit.js", // A toolkit.min.js file is also available
-        ]);
+        const vscodeElementsUri = ui.getUri(webview, extensionUri, ["node_modules", "@vscode-elements", "elements", "dist", "bundled.js"]);
+
 
         const mainUri = ui.getUri(webview, extensionUri, ["media", "main.js"]);
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
@@ -185,7 +180,7 @@ export class CloudWatchLogView {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
-        <script type="module" src="${toolkitUri}"></script>
+        <script type="module" src="${vscodeElementsUri}"></script>
         <script type="module" src="${mainUri}"></script>
         <link rel="stylesheet" href="${styleUri}">
         <link href="${codiconsUri}" rel="stylesheet" />
@@ -210,10 +205,10 @@ export class CloudWatchLogView {
                     <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
                 </td>
                 <td style="text-align:right">
-                    <vscode-text-field id="hide_text" placeholder="Hide" value="${this.HideText}">
+                    <vscode-textfield id="hide_text" placeholder="Hide" value="${this.HideText}">
                         <span slot="start" class="codicon codicon-eye-closed"></span>
                     </vscode-text-field>
-                    <vscode-text-field id="search_text" placeholder="Search" value="${this.SearchText}">
+                    <vscode-textfield id="search_text" placeholder="Search" value="${this.SearchText}">
                         <span slot="start" class="codicon codicon-search"></span>
                     </vscode-text-field>
                 </vscode-text-field></td>
@@ -240,8 +235,15 @@ export class CloudWatchLogView {
                     
         <table>
             <tr>
-                <td colspan="3">
-                    <vscode-link href="https://github.com/necatiarslan/aws-cloudwatch/issues/new">Bug Report & Feature Request</vscode-link>
+                <td>
+                    <a href="https://github.com/necatiarslan/aws-cloudwatch/issues/new" style="cursor: pointer; text-decoration: none;">Bug Report & Feature Request</a>
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td>
+                    <a href="https://github.com/sponsors/necatiarslan" style="cursor: pointer; text-decoration: none;">Donate to support this extension</a>
                 </td>
             </tr>
         </table>
