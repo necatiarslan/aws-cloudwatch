@@ -2,8 +2,8 @@
 import * as vscode from 'vscode';
 import { CloudWatchTreeItem, TreeItemType } from './CloudWatchTreeItem';
 import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
-import * as ui from '../common/UI';
-import * as api from '../common/API';
+import * as ui from '../common/ui';
+import * as api from '../common/api';
 import { CloudWatchLogView } from './CloudWatchLogView';
 
 export class CloudWatchTreeView {
@@ -15,6 +15,7 @@ export class CloudWatchTreeView {
 	public FilterString: string = "";
 	public isShowOnlyFavorite: boolean = false;
 	public AwsProfile: string = "default";
+	public AwsEndPoint: string | undefined;
 	public LastUsedRegion: string = "us-east-1";
 	
 
@@ -119,6 +120,7 @@ export class CloudWatchTreeView {
 			this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
 			this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
 			this.context.globalState.update('ViewType', this.treeDataProvider.ViewType);
+			this.context.globalState.update('AwsEndPoint', this.AwsEndPoint);
 
 			ui.logToOutput("CloudWatchTreeView.saveState Successfull");
 		} catch (error) {
@@ -160,6 +162,9 @@ export class CloudWatchTreeView {
 			{
 				this.treeDataProvider.ViewType = ViewTypeTemp;
 			}
+
+			let AwsEndPointTemp: string | undefined = this.context.globalState.get('AwsEndPoint');
+			this.AwsEndPoint = AwsEndPointTemp;
 
 			ui.logToOutput("CloudWatchTreeView.loadState Successfull");
 
@@ -319,6 +324,20 @@ export class CloudWatchTreeView {
 		this.AwsProfile = selectedAwsProfile;
 		this.SaveState();
 		this.SetFilterMessage();
+	}
+
+	async UpdateAwsEndPoint() {
+		ui.logToOutput('CloudWatchTreeView.UpdateAwsEndPoint Started');
+
+		let awsEndPointUrl = await vscode.window.showInputBox({ placeHolder: 'Enter Aws End Point URL (Leave Empty To Return To Default)', value: this.AwsEndPoint });
+		if(awsEndPointUrl===undefined){ return; }
+		if(awsEndPointUrl.length===0) { this.AwsEndPoint = undefined; }
+		else
+		{
+			this.AwsEndPoint = awsEndPointUrl;
+		}
+		this.SaveState();
+		ui.showInfoMessage('Aws End Point Updated');
 	}
 
 }

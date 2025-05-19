@@ -5,8 +5,8 @@ exports.CloudWatchTreeView = void 0;
 const vscode = require("vscode");
 const CloudWatchTreeItem_1 = require("./CloudWatchTreeItem");
 const CloudWatchTreeDataProvider_1 = require("./CloudWatchTreeDataProvider");
-const ui = require("../common/UI");
-const api = require("../common/API");
+const ui = require("../common/ui");
+const api = require("../common/api");
 const CloudWatchLogView_1 = require("./CloudWatchLogView");
 class CloudWatchTreeView {
     constructor(context) {
@@ -97,6 +97,7 @@ class CloudWatchTreeView {
             this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
             this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
             this.context.globalState.update('ViewType', this.treeDataProvider.ViewType);
+            this.context.globalState.update('AwsEndPoint', this.AwsEndPoint);
             ui.logToOutput("CloudWatchTreeView.saveState Successfull");
         }
         catch (error) {
@@ -130,6 +131,8 @@ class CloudWatchTreeView {
             if (ViewTypeTemp) {
                 this.treeDataProvider.ViewType = ViewTypeTemp;
             }
+            let AwsEndPointTemp = this.context.globalState.get('AwsEndPoint');
+            this.AwsEndPoint = AwsEndPointTemp;
             ui.logToOutput("CloudWatchTreeView.loadState Successfull");
         }
         catch (error) {
@@ -287,6 +290,21 @@ class CloudWatchTreeView {
         this.AwsProfile = selectedAwsProfile;
         this.SaveState();
         this.SetFilterMessage();
+    }
+    async UpdateAwsEndPoint() {
+        ui.logToOutput('CloudWatchTreeView.UpdateAwsEndPoint Started');
+        let awsEndPointUrl = await vscode.window.showInputBox({ placeHolder: 'Enter Aws End Point URL (Leave Empty To Return To Default)', value: this.AwsEndPoint });
+        if (awsEndPointUrl === undefined) {
+            return;
+        }
+        if (awsEndPointUrl.length === 0) {
+            this.AwsEndPoint = undefined;
+        }
+        else {
+            this.AwsEndPoint = awsEndPointUrl;
+        }
+        this.SaveState();
+        ui.showInfoMessage('Aws End Point Updated');
     }
 }
 exports.CloudWatchTreeView = CloudWatchTreeView;

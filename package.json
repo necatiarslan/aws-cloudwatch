@@ -2,7 +2,7 @@
   "name": "aws-cloudwatch-vscode-extension",
   "displayName": "Aws CloudWatch",
   "description": "Browse Your AWS CloudWatch Logs",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "publisher": "NecatiARSLAN",
   "repository": {
     "type": "git",
@@ -94,6 +94,10 @@
         "command": "CloudWatchTreeView.ChangeView",
         "title": "Change View",
         "icon": "$(symbol-class)"
+      },
+      {
+        "command": "CloudWatchTreeView.UpdateAwsEndPoint",
+        "title": "Update Aws EndPoint"
       }
     ],
     "menus": {
@@ -132,6 +136,11 @@
           "command": "CloudWatchTreeView.Refresh",
           "when": "view == CloudWatchTreeView",
           "group": "navigation@7"
+        },
+        {
+          "command": "CloudWatchTreeView.UpdateAwsEndPoint",
+          "when": "view == CloudWatchTreeView",
+          "group": "other"
         }
       ],
       "view/item/context": [

@@ -3,12 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir = exports.ENV_CREDENTIALS_PATH = exports.getIniProfileData = exports.GetAwsProfileList = exports.GetRegionList = exports.GetLogEvents = exports.GetLogStreamList = exports.GetLogStreams = exports.GetLogGroupList = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const AWS = require("aws-sdk");
-const ui = require("./UI");
+const ui = require("./ui");
 const MethodResult_1 = require("./MethodResult");
 const os_1 = require("os");
 const path_1 = require("path");
 const path_2 = require("path");
 const parseKnownFiles_1 = require("../aws-sdk/parseKnownFiles");
+const CloudWatchTreeView_1 = require("../cloudwatch/CloudWatchTreeView");
 async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
     ui.logToOutput('api.GetLogGroupList Started');
     let result = new MethodResult_1.MethodResult();
@@ -16,7 +17,7 @@ async function GetLogGroupList(Profile, Region, LogGroupNamePattern) {
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
         // Initialize the CloudWatchLogs client
-        const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
+        const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials, endpoint: CloudWatchTreeView_1.CloudWatchTreeView.Current?.AwsEndPoint, });
         // Set the parameters for the describeLogGroups API
         const params = {
             limit: 50,
@@ -47,7 +48,7 @@ async function GetLogStreams(Profile, Region, LogGroupName, LogStreamFilter) {
     let result = new MethodResult_1.MethodResult();
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
-        const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
+        const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials, endpoint: CloudWatchTreeView_1.CloudWatchTreeView.Current?.AwsEndPoint, });
         const params = {
             logGroupName: LogGroupName,
             orderBy: "LastEventTime",
@@ -111,7 +112,7 @@ async function GetLogEvents(Profile, Region, LogGroupName, LogStreamName, StartT
     try {
         const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
         // Initialize the CloudWatchLogs client
-        const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials });
+        const cloudwatchlogs = new AWS.CloudWatchLogs({ region: Region, credentials: credentials, endpoint: CloudWatchTreeView_1.CloudWatchTreeView.Current?.AwsEndPoint, });
         while (1 === 1) {
             let response = await getLogEventsInternal(cloudwatchlogs);
             if (response.events) {
@@ -222,4 +223,4 @@ const getCredentialsFilepath = () => process.env[exports.ENV_CREDENTIALS_PATH] |
 exports.getCredentialsFilepath = getCredentialsFilepath;
 const getConfigFilepath = () => process.env[exports.ENV_CREDENTIALS_PATH] || (0, path_2.join)((0, exports.getHomeDir)(), ".aws", "config");
 exports.getConfigFilepath = getConfigFilepath;
-//# sourceMappingURL=API.js.map
+//# sourceMappingURL=api.js.map

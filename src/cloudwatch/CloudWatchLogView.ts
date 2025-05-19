@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import * as ui from '../common/UI';
-import * as api from '../common/API';
+import * as ui from '../common/ui';
+import * as api from '../common/api';
 import * as AWS from "aws-sdk";
 import { CloudWatchTreeView } from "./CloudWatchTreeView";
 import { bool } from "aws-sdk/clients/signer";

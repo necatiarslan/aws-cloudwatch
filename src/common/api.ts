@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as AWS from "aws-sdk";
-import * as ui from "./UI";
+import * as ui from "./ui";
 import { MethodResult } from './MethodResult';
 import { homedir } from "os";
 import { sep } from "path";
 import { join } from "path";
 import { parseKnownFiles, SourceProfileInit } from "../aws-sdk/parseKnownFiles";
 import { ParsedIniData } from "@aws-sdk/types";
-
+import { CloudWatchTreeView } from "../cloudwatch/CloudWatchTreeView";
 
 export async function GetLogGroupList(Profile:string, Region:string, LogGroupNamePattern?:string): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogGroupList Started');
@@ -19,7 +19,7 @@ export async function GetLogGroupList(Profile:string, Region:string, LogGroupNam
     const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
 
     // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials, endpoint: CloudWatchTreeView.Current?.AwsEndPoint,});
 
     // Set the parameters for the describeLogGroups API
     const params = {
@@ -58,7 +58,8 @@ export async function GetLogStreams(Profile:string, Region:string, LogGroupName:
   try 
   {
     const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials, endpoint: CloudWatchTreeView.Current?.AwsEndPoint,});
+
 
     const params = {
       logGroupName: LogGroupName,
@@ -134,7 +135,8 @@ export async function GetLogEvents(Profile:string, Region:string, LogGroupName:s
   {
     const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
     // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials});
+    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials, endpoint: CloudWatchTreeView.Current?.AwsEndPoint,});
+
 
     while(1===1)
     {
