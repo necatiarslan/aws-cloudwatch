@@ -174,7 +174,7 @@ class CloudWatchTreeView {
         if (!selectedLogGroupName) {
             return;
         }
-        var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion, selectedLogGroupName);
+        var resultLogGroup = await api.GetLogGroupList(selectedRegion, selectedLogGroupName);
         if (!resultLogGroup.isSuccessful) {
             return;
         }
@@ -207,7 +207,7 @@ class CloudWatchTreeView {
         if (filterStringTemp === undefined) {
             return;
         }
-        var resultLogStream = await api.GetLogStreams(this.AwsProfile, node.Region, node.LogGroup, filterStringTemp);
+        var resultLogStream = await api.GetLogStreams(node.Region, node.LogGroup, filterStringTemp);
         if (!resultLogStream.isSuccessful || !resultLogStream.result) {
             return;
         }
@@ -236,7 +236,7 @@ class CloudWatchTreeView {
         if (!node.Region || !node.LogGroup) {
             return;
         }
-        var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
+        var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
         if (!resultLogStream.isSuccessful) {
             return;
         }

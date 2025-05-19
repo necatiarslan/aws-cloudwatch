@@ -213,7 +213,7 @@ export class CloudWatchTreeView {
 		let selectedLogGroupName = await vscode.window.showInputBox({ placeHolder: 'Enter Log Group Search Text' });
 		if(!selectedLogGroupName){ return; }
 
-		var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion, selectedLogGroupName);
+		var resultLogGroup = await api.GetLogGroupList(selectedRegion, selectedLogGroupName);
 		if(!resultLogGroup.isSuccessful){ return; }
 
 		let selectedLogGroupList = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:true, placeHolder: 'Select Log Group'});
@@ -243,7 +243,7 @@ export class CloudWatchTreeView {
 		let filterStringTemp = await vscode.window.showInputBox({ placeHolder: 'Log Stream Filter ?' });
 		if (filterStringTemp === undefined) { return; }
 
-		var resultLogStream = await api.GetLogStreams(this.AwsProfile, node.Region, node.LogGroup, filterStringTemp);
+		var resultLogStream = await api.GetLogStreams(node.Region, node.LogGroup, filterStringTemp);
 		if(!resultLogStream.isSuccessful || !resultLogStream.result){ return; }
 
 		let logStreamList:string[]=[];
@@ -273,7 +273,7 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
+		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
 
 		for(var logStream of resultLogStream.result)

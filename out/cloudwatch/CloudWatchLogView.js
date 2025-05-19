@@ -35,7 +35,7 @@ class CloudWatchLogView {
         if (!CloudWatchTreeView_1.CloudWatchTreeView.Current) {
             return;
         }
-        var result = await api.GetLogEvents(CloudWatchTreeView_1.CloudWatchTreeView.Current.AwsProfile, this.Region, this.LogGroup, this.LogStream, this.StartTime);
+        var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
         if (result.isSuccessful) {
             if (result.result.length > 0) {
                 this.LogEvents = this.LogEvents.concat(result.result);

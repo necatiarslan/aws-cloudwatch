@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import * as AWS from "aws-sdk";
 import * as ui from "./ui";
 import { MethodResult } from './MethodResult';
 import { homedir } from "os";
@@ -9,89 +8,109 @@ import { parseKnownFiles, SourceProfileInit } from "../aws-sdk/parseKnownFiles";
 import { ParsedIniData } from "@aws-sdk/types";
 import { CloudWatchTreeView } from "../cloudwatch/CloudWatchTreeView";
 
-export async function GetLogGroupList(Profile:string, Region:string, LogGroupNamePattern?:string): Promise<MethodResult<string[]>> {
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
+export async function GetCredentials() {
+  let credentials;
+
+  try {
+    if (CloudWatchTreeView.Current) {
+      process.env.AWS_PROFILE = CloudWatchTreeView.Current.AwsProfile ;
+    }
+    // Get credentials using the default provider chain.
+    const provider = fromNodeProviderChain({ignoreCache: true});
+    credentials = await provider();
+
+    if (!credentials) {
+      throw new Error("Aws credentials not found !!!");
+    }
+
+    ui.logToOutput("Aws credentials AccessKeyId=" + credentials.accessKeyId);
+    return credentials;
+  } catch (error: any) {
+    ui.showErrorMessage("Aws Credentials Not Found !!!", error);
+    ui.logToOutput("GetCredentials Error !!!", error);
+    return credentials;
+  }
+}
+
+import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
+
+export async function GetCloudWatchLogsClient(Region:string | undefined = CloudWatchTreeView.Current?.LastUsedRegion): Promise<CloudWatchLogsClient> {
+  let credentials = await GetCredentials();
+  return new CloudWatchLogsClient({
+    credentials: credentials,
+    endpoint: CloudWatchTreeView.Current?.AwsEndPoint,
+    region: Region
+  });
+}
+
+import { DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
+export async function GetLogGroupList(Region: string, LogGroupNamePattern?: string): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogGroupList Started');
-  let result:MethodResult<string[]> = new MethodResult<string[]>();
+  let result = new MethodResult<string[]>();
   result.result = [];
 
-  try 
-  {
-    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
+  try {
+    const client = await GetCloudWatchLogsClient(Region);
+    const command = new DescribeLogGroupsCommand({
+      limit: 500,
+      logGroupNamePrefix: LogGroupNamePattern
+    });
 
-    // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials, endpoint: CloudWatchTreeView.Current?.AwsEndPoint,});
-
-    // Set the parameters for the describeLogGroups API
-    const params = {
-      limit: 50,//max value
-      logGroupNamePattern: LogGroupNamePattern
-    };
-
-    let response = await cloudwatchlogs.describeLogGroups(params).promise();
+    const response = await client.send(command);
     result.isSuccessful = true;
-    if(response.logGroups)
-    {
-      for(var logGroup of response.logGroups)
-      {
-        if(logGroup.logGroupName)
-        {
+    if (response.logGroups) {
+      for (const logGroup of response.logGroups) {
+        if (logGroup.logGroupName) {
           result.result.push(logGroup.logGroupName);
         }
       }
     }
-    return result;
-  } 
-  catch (error:any) 
-  {
+  } catch (error: any) {
     result.isSuccessful = false;
     result.error = error;
     ui.showErrorMessage('api.GetLogGroupList Error !!!', error);
     ui.logToOutput("api.GetLogGroupList Error !!!", error); 
-    return result;
   }
+  return result;
 }
 
-export async function GetLogStreams(Profile:string, Region:string, LogGroupName:string, LogStreamFilter?:string): Promise<MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>> {
+
+import { DescribeLogStreamsCommand, LogStream } from "@aws-sdk/client-cloudwatch-logs";
+export async function GetLogStreams(Region: string, LogGroupName: string, LogStreamFilter?: string): Promise<MethodResult<LogStream[] | undefined>> {
   ui.logToOutput('api.GetLogStreams Started');
-  let result = new MethodResult<AWS.CloudWatchLogs.LogStreams | undefined>();
+  const result = new MethodResult<LogStream[] | undefined>();
 
-  try 
-  {
-    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials, endpoint: CloudWatchTreeView.Current?.AwsEndPoint,});
-
-
-    const params = {
+  try {
+    const client = await GetCloudWatchLogsClient(Region);
+    const command = new DescribeLogStreamsCommand({
       logGroupName: LogGroupName,
-      orderBy:"LastEventTime",
-      descending:true,
-      limit:50,//max value
-    };
-  
-    let response = await cloudwatchlogs.describeLogStreams(params).promise();
+      orderBy: "LastEventTime",
+      descending: true,
+      limit: 50,
+    });
+
+    const response = await client.send(command);
     result.isSuccessful = true;
     result.result = response.logStreams;
-
-    return result;
-  } 
-  catch (error:any) 
-  {
+  } catch (error: any) {
     result.isSuccessful = false;
     result.error = error;
     ui.showErrorMessage('api.GetLogStreams Error !!!', error);
     ui.logToOutput("api.GetLogStreams Error !!!", error); 
-    return result;
   }
+  return result;
 }
 
-export async function GetLogStreamList(Profile:string, Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
+
+export async function GetLogStreamList(Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogStreamList Started');
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
 
   try 
   {
-    let logStreams = await GetLogStreams(Profile, Region, LogGroupName);
+    let logStreams = await GetLogStreams(Region, LogGroupName);
     if(logStreams.isSuccessful)
     {
       if(logStreams.result)
@@ -123,99 +142,44 @@ export async function GetLogStreamList(Profile:string, Region:string, LogGroupNa
   }
 }
 
-export async function GetLogEvents(Profile:string, Region:string, LogGroupName:string, LogStreamName:string, StartTime?:number): Promise<MethodResult<AWS.CloudWatchLogs.OutputLogEvents>> {
+import { GetLogEventsCommand, OutputLogEvent } from "@aws-sdk/client-cloudwatch-logs";
+export async function GetLogEvents(Region: string, LogGroupName: string, LogStreamName: string, StartTime: number = 0): Promise<MethodResult<OutputLogEvent[]>> {
   ui.logToOutput('api.GetLogEvents Started');
-  if(!StartTime) {StartTime=0;}
-  
-  let result:MethodResult<AWS.CloudWatchLogs.OutputLogEvents> = new MethodResult<AWS.CloudWatchLogs.OutputLogEvents>();
+
+  const result = new MethodResult<OutputLogEvent[]>();
   result.result = [];
-  let nextToken:string | undefined;
 
-  try 
-  {
-    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
-    // Initialize the CloudWatchLogs client
-    const cloudwatchlogs = new AWS.CloudWatchLogs({region:Region, credentials:credentials, endpoint: CloudWatchTreeView.Current?.AwsEndPoint,});
+  try {
+    const client = await GetCloudWatchLogsClient(Region);
+    let nextToken: string | undefined;
 
+    while (true) {
+      const command = new GetLogEventsCommand({
+        logGroupName: LogGroupName,
+        logStreamName: LogStreamName,
+        startTime: StartTime,
+        nextToken
+      });
+      const response = await client.send(command);
 
-    while(1===1)
-    {
-      let response = await getLogEventsInternal(cloudwatchlogs);
-      if(response.events)
-      {
-        for(var e of response.events)
-        {
-          result.result.push(e);
-        }
+      if (response.events) {
+        result.result.push(...response.events);
       }
-      let newToken = response.nextForwardToken;
-      ui.logToOutput("newToken=" + newToken);
-      if(newToken === nextToken)
-      {
-        break;
-      }
+
+      const newToken = response.nextForwardToken;
+      if (newToken === nextToken) { break; }
       nextToken = newToken;
     }
 
     result.isSuccessful = true;
-    return result;
-  } 
-  catch (error:any) 
-  {
+  } catch (error: any) {
     result.isSuccessful = false;
     result.error = error;
     ui.showErrorMessage('api.GetLogEvents Error !!!', error);
     ui.logToOutput("api.GetLogEvents Error !!!", error); 
-    return result;
   }
 
-  async function getLogEventsInternal(cloudwatchlogs: AWS.CloudWatchLogs) {
-    ui.logToOutput("cloudwatchlogs.getLogEvents");
-    const params = {
-      logGroupName: LogGroupName,
-      logStreamName: LogStreamName,
-      startTime: StartTime,
-      nextToken: nextToken
-    };
-    ui.logToOutput(params);
-    //https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_GetLogEvents.html
-    let response = await cloudwatchlogs.getLogEvents(params).promise();
-    ui.logToOutput("log count = " + response.events?.length);
-    return response;
-  }
-}
-
-export async function GetRegionList(Profile:string): Promise<MethodResult<string[]>> {
-  ui.logToOutput('api.GetRegionList Started');
-  let result:MethodResult<string[]> = new MethodResult<string[]>();
-  result.result = [];
-
-  try 
-  {
-    const credentials = new AWS.SharedIniFileCredentials({ profile: Profile });
-    const ec2 = new AWS.EC2({region: 'us-east-1', credentials:credentials});
-    let response = await ec2.describeRegions().promise();
-
-    result.isSuccessful = true;
-    if(response.Regions)
-    {
-      for(var r of response.Regions)
-      {
-        if(r.RegionName)
-        {
-          result.result.push(r.RegionName);
-        }
-      }
-    }
-    return result;
-  } catch (error:any) 
-  {
-    result.isSuccessful = false;
-    result.error = error;
-    ui.showErrorMessage('api.GetRegionList Error !!!', error);
-    ui.logToOutput("api.GetRegionList Error !!!", error); 
-    return result;
-  }
+  return result;
 }
 
 export async function GetAwsProfileList(): Promise<MethodResult<string[]>> {

@@ -2,9 +2,8 @@
 import * as vscode from "vscode";
 import * as ui from '../common/ui';
 import * as api from '../common/api';
-import * as AWS from "aws-sdk";
+import { OutputLogEvent } from "@aws-sdk/client-cloudwatch-logs";
 import { CloudWatchTreeView } from "./CloudWatchTreeView";
-import { bool } from "aws-sdk/clients/signer";
 
 export class CloudWatchLogView {
     public static Current: CloudWatchLogView | undefined;
@@ -17,7 +16,7 @@ export class CloudWatchLogView {
     public LogStream:string;
 
     public StartTime:number = 0;
-    public LogEvents:AWS.CloudWatchLogs.OutputLogEvents = [];
+    public LogEvents:OutputLogEvent[] = [];
     public SearchText:string = "";
     public HideText:string = "";
 
@@ -52,7 +51,7 @@ export class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView.LoadLogs Started');
         if(!CloudWatchTreeView.Current){return;}
 
-        var result = await api.GetLogEvents(CloudWatchTreeView.Current.AwsProfile, this.Region, this.LogGroup, this.LogStream, this.StartTime);
+        var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
         if(result.isSuccessful)
         {
             if(result.result.length > 0)
@@ -254,7 +253,7 @@ export class CloudWatchLogView {
         return result;
     }
 
-    private IsHideEvent(event: AWS.CloudWatchLogs.OutputLogEvent) : boolean
+    private IsHideEvent(event: OutputLogEvent) : boolean
     {
         if(this.SearchText.length > 0)
         {
