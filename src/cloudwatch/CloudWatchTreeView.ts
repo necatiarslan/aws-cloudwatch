@@ -188,6 +188,7 @@ export class CloudWatchTreeView {
 
 		let selectedRegion = await vscode.window.showInputBox({value: this.LastUsedRegion, placeHolder: 'Type Region Name'});
 		if(!selectedRegion){ return; }
+		this.LastUsedRegion = selectedRegion;
 
 		var resultLogGroup = await api.GetLogGroupList(selectedRegion);
 		if(!resultLogGroup.isSuccessful){ return; }
@@ -200,7 +201,7 @@ export class CloudWatchTreeView {
 		{
 			this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
 		}
-
+		this.Refresh();
 		this.SaveState();
 	}
 
@@ -209,6 +210,7 @@ export class CloudWatchTreeView {
 
 		let selectedRegion = await vscode.window.showInputBox({value: this.LastUsedRegion, placeHolder: 'Type Region Name'});
 		if(!selectedRegion){ return; }
+		this.LastUsedRegion = selectedRegion;
 
 		let selectedLogGroupName = await vscode.window.showInputBox({ placeHolder: 'Enter Log Group Search Text' });
 		if(!selectedLogGroupName){ return; }
@@ -223,6 +225,7 @@ export class CloudWatchTreeView {
 		{
 			this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
 		}
+		this.Refresh();
 		this.SaveState();
 	}
 
