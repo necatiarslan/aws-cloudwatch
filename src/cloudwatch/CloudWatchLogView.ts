@@ -178,7 +178,7 @@ export class CloudWatchLogView {
                 {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
-                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
+                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: top;" >' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
             }
         }
         else
@@ -230,11 +230,11 @@ export class CloudWatchLogView {
             </tr>
         </table>
 
-        <table>
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
             <tr>
-                <th width="5px">#</th>
+                <th style="width: 10px;">#</th>
                 <th>Message</th>
-                <th  width="50px">Time</th>
+                <th style="width: 100px;">Time</th>
             </tr>
 
             ${logRowHtml}
@@ -242,7 +242,11 @@ export class CloudWatchLogView {
         </table>
 
         <br>
-        ${this.Region} / ${this.LogGroup} / ${this.LogStream}
+        Region : ${this.Region} 
+        <br>
+        LogGroup : ${this.LogGroup} 
+        <br>
+        LogStream : ${this.LogStream}
         
         <br>
         <br>
