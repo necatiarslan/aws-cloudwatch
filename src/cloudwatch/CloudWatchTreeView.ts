@@ -2,8 +2,8 @@
 import * as vscode from 'vscode';
 import { CloudWatchTreeItem, TreeItemType } from './CloudWatchTreeItem';
 import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
-import * as ui from '../common/UI';
-import * as api from '../common/API';
+import * as ui from '../common/ui';
+import * as api from '../common/api';
 import { CloudWatchLogView } from './CloudWatchLogView';
 
 export class CloudWatchTreeView {
@@ -15,6 +15,7 @@ export class CloudWatchTreeView {
 	public FilterString: string = "";
 	public isShowOnlyFavorite: boolean = false;
 	public AwsProfile: string = "default";
+	public AwsEndPoint: string | undefined;
 	public LastUsedRegion: string = "us-east-1";
 	
 
@@ -90,13 +91,6 @@ export class CloudWatchTreeView {
 		this.SaveState();
 	}
 
-	async ChangeView() {
-		ui.logToOutput('CloudWatchTreeView.ChangeView Started');
-		this.treeDataProvider.ChangeView();
-		this.SaveState();
-		ui.logToOutput('CloudWatchTreeView.ChangeView New View=' + this.treeDataProvider.ViewType);
-	}
-
 	async ShowOnlyFavorite() {
 		ui.logToOutput('CloudWatchTreeView.ShowOnlyFavorite Started');
 		this.isShowOnlyFavorite = !this.isShowOnlyFavorite;
@@ -118,7 +112,7 @@ export class CloudWatchTreeView {
 			this.context.globalState.update('ShowOnlyFavorite', this.ShowOnlyFavorite);
 			this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
 			this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
-			this.context.globalState.update('ViewType', this.treeDataProvider.ViewType);
+			this.context.globalState.update('AwsEndPoint', this.AwsEndPoint);
 
 			ui.logToOutput("CloudWatchTreeView.saveState Successfull");
 		} catch (error) {
@@ -143,23 +137,34 @@ export class CloudWatchTreeView {
 			let ShowOnlyFavoriteTemp: boolean | undefined = this.context.globalState.get('ShowOnlyFavorite');
 			if (ShowOnlyFavoriteTemp) { this.isShowOnlyFavorite = ShowOnlyFavoriteTemp; }
 
-			let LogGroupListTemp:[[string,string]] | undefined  = this.context.globalState.get('LogGroupList');
+			let LogGroupListTemp:{ Region:string, LogGroup:string }[] | undefined = this.context.globalState.get('LogGroupList');
+			
+			// remove prev format, you can remove this after some time
+			if(LogGroupListTemp && Array.isArray(LogGroupListTemp) && LogGroupListTemp[0] && Array.isArray(LogGroupListTemp[0]))
+			{
+				LogGroupListTemp = undefined
+			}
+			
 			if(LogGroupListTemp)
 			{
 				this.treeDataProvider.LogGroupList = LogGroupListTemp;
 			}
 
-			let LogStreamListTemp:[[string,string,string]] | undefined  = this.context.globalState.get('LogStreamList');
+			let LogStreamListTemp:{ Region:string, LogGroup:string, LogStream:string }[] | undefined  = this.context.globalState.get('LogStreamList');
+			
+			// remove prev format, you can remove this after some time
+			if(LogStreamListTemp && Array.isArray(LogStreamListTemp) && LogStreamListTemp[0] && Array.isArray(LogStreamListTemp[0]))
+			{
+				LogStreamListTemp = undefined
+			}
+
 			if(LogStreamListTemp)
 			{
 				this.treeDataProvider.LogStreamList = LogStreamListTemp;
 			}
 
-			let ViewTypeTemp:number | undefined = this.context.globalState.get('ViewType');
-			if(ViewTypeTemp)
-			{
-				this.treeDataProvider.ViewType = ViewTypeTemp;
-			}
+			let AwsEndPointTemp: string | undefined = this.context.globalState.get('AwsEndPoint');
+			this.AwsEndPoint = AwsEndPointTemp;
 
 			ui.logToOutput("CloudWatchTreeView.loadState Successfull");
 
@@ -183,8 +188,9 @@ export class CloudWatchTreeView {
 
 		let selectedRegion = await vscode.window.showInputBox({value: this.LastUsedRegion, placeHolder: 'Type Region Name'});
 		if(!selectedRegion){ return; }
+		this.LastUsedRegion = selectedRegion;
 
-		var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion);
+		var resultLogGroup = await api.GetLogGroupList(selectedRegion);
 		if(!resultLogGroup.isSuccessful){ return; }
 
 
@@ -195,7 +201,7 @@ export class CloudWatchTreeView {
 		{
 			this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
 		}
-
+		this.Refresh();
 		this.SaveState();
 	}
 
@@ -204,11 +210,12 @@ export class CloudWatchTreeView {
 
 		let selectedRegion = await vscode.window.showInputBox({value: this.LastUsedRegion, placeHolder: 'Type Region Name'});
 		if(!selectedRegion){ return; }
+		this.LastUsedRegion = selectedRegion;
 
 		let selectedLogGroupName = await vscode.window.showInputBox({ placeHolder: 'Enter Log Group Search Text' });
 		if(!selectedLogGroupName){ return; }
 
-		var resultLogGroup = await api.GetLogGroupList(this.AwsProfile, selectedRegion, selectedLogGroupName);
+		var resultLogGroup = await api.GetLogGroupList(selectedRegion, selectedLogGroupName);
 		if(!resultLogGroup.isSuccessful){ return; }
 
 		let selectedLogGroupList = await vscode.window.showQuickPick(resultLogGroup.result, {canPickMany:true, placeHolder: 'Select Log Group'});
@@ -218,6 +225,7 @@ export class CloudWatchTreeView {
 		{
 			this.treeDataProvider.AddLogGroup(selectedRegion, selectedLogGroup);
 		}
+		this.Refresh();
 		this.SaveState();
 	}
 
@@ -235,11 +243,14 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		let filterStringTemp = await vscode.window.showInputBox({ placeHolder: 'Log Stream Filter ?' });
+		let filterStringTemp = await vscode.window.showInputBox({ placeHolder: 'Log Stream Name Search Text' });
 		if (filterStringTemp === undefined) { return; }
 
-		var resultLogStream = await api.GetLogStreams(this.AwsProfile, node.Region, node.LogGroup, filterStringTemp);
-		if(!resultLogStream.isSuccessful || !resultLogStream.result){ return; }
+		var resultLogStream = await api.GetLogStreams(node.Region, node.LogGroup, filterStringTemp);
+		if (!resultLogStream.isSuccessful){ return; }
+		if (!resultLogStream.result){ return; }
+		if (resultLogStream.result && resultLogStream.result.length === 0){ ui.showInfoMessage('No Log Streams Found'); return; }
+
 
 		let logStreamList:string[]=[];
 		for(var ls of resultLogStream.result)
@@ -268,8 +279,34 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		var resultLogStream = await api.GetLogStreamList(this.AwsProfile, node.Region, node.LogGroup);
+		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
+		if (resultLogStream.result && resultLogStream.result.length === 0){ ui.showInfoMessage('No Log Streams Found'); return; }
+
+		for(var logStream of resultLogStream.result)
+		{
+			this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, logStream);
+		}
+		this.SaveState();
+	}
+
+	async AddLogStreamsByDate(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.AddLogStreamsByDate Started');
+		if(!node.Region || !node.LogGroup) { return; }
+
+		let today:string = new Date().toISOString().split('T')[0];
+
+		let dateTemp = await vscode.window.showInputBox({value: today, placeHolder: 'Date YYYY-MM-DD' });
+		if (dateTemp === undefined) { return; }
+		if (!dateTemp.includes('-')) { return; }
+		if (dateTemp.length !== 10) { return; }
+
+		let dateParts = dateTemp.split('-');
+		let dateFilter = new Date(Date.UTC(parseInt(dateParts[0]), parseInt(dateParts[1])-1, parseInt(dateParts[2])));
+
+		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup, false, dateFilter);
+		if(!resultLogStream.isSuccessful){ return; }
+		if (resultLogStream.result && resultLogStream.result.length === 0){ ui.showInfoMessage('No Log Streams Found'); return; }
 
 		for(var logStream of resultLogStream.result)
 		{
@@ -319,6 +356,20 @@ export class CloudWatchTreeView {
 		this.AwsProfile = selectedAwsProfile;
 		this.SaveState();
 		this.SetFilterMessage();
+	}
+
+	async UpdateAwsEndPoint() {
+		ui.logToOutput('CloudWatchTreeView.UpdateAwsEndPoint Started');
+
+		let awsEndPointUrl = await vscode.window.showInputBox({ placeHolder: 'Enter Aws End Point URL (Leave Empty To Return To Default)', value: this.AwsEndPoint });
+		if(awsEndPointUrl===undefined){ return; }
+		if(awsEndPointUrl.length===0) { this.AwsEndPoint = undefined; }
+		else
+		{
+			this.AwsEndPoint = awsEndPointUrl;
+		}
+		this.SaveState();
+		ui.showInfoMessage('Aws End Point Updated');
 	}
 
 }

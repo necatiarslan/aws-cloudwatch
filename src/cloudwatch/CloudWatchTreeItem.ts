@@ -2,7 +2,6 @@
 import * as vscode from 'vscode';
 
 export class CloudWatchTreeItem extends vscode.TreeItem {
-	public IsFav: boolean = false;
 	public TreeItemType:TreeItemType;
 	public Text:string;
 	public Region:string | undefined;
@@ -10,12 +9,60 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 	public LogStream:string | undefined;
 	public Parent:CloudWatchTreeItem | undefined;
 	public Children:CloudWatchTreeItem[] = [];
+	private _profileToShow: string = "";
+	private _isHidden: boolean = false;
+	private _isFav: boolean = false;
+
+	public get IsFav(): boolean {
+		return this._isFav;
+	}
+	public set IsFav(value: boolean) {
+		this._isFav = value;
+		this.setContextValue();
+	}
+
+	public get IsHidden(): boolean {
+		return this._isHidden;
+	}
+	public set IsHidden(value: boolean) {
+		this._isHidden = value;
+		this.setContextValue();
+	}
+	
+	public get ProfileToShow(): string {
+		return this._profileToShow;
+	}
+	public set ProfileToShow(value: string) {
+		this._profileToShow = value;
+		this.setContextValue();
+	}
 
 	constructor(text:string, treeItemType:TreeItemType) {
 		super(text);
 		this.Text = text;
 		this.TreeItemType = treeItemType;
 		this.refreshUI();
+	}
+
+	public setContextValue(){
+		let contextValue = "#";
+		contextValue += this.IsFav ? "Fav#" : "!Fav#";
+		contextValue += this.IsHidden ? "Hidden#" : "!Hidden#";
+		contextValue += this.ProfileToShow ? "Profile#" : "NoProfile#";
+		switch(this.TreeItemType)
+		{
+			case TreeItemType.Region:
+				contextValue += "Region#";
+				break;
+			case TreeItemType.LogGroup:
+				contextValue += "LogGroup#";
+				break;
+			case TreeItemType.LogStream:
+				contextValue += "LogStream#";
+				break;
+		}
+
+		this.contextValue = contextValue;
 	}
 
 	public refreshUI() {
@@ -36,6 +83,8 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 		{
 			this.iconPath = new vscode.ThemeIcon('circle-outline');
 		}
+
+		this.setContextValue();
 	}
 
 	public IsAnyChidrenFav(){

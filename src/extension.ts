@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as ui from './common/UI';
+import * as ui from './common/ui';
 import { CloudWatchTreeView } from './cloudwatch/CloudWatchTreeView';
 import { CloudWatchTreeItem } from './cloudwatch/CloudWatchTreeItem';
 
@@ -18,10 +18,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('CloudWatchTreeView.Filter', () => {
 		treeView.Filter();
-	});
-
-	vscode.commands.registerCommand('CloudWatchTreeView.ChangeView', () => {
-		treeView.ChangeView();
 	});
 
 	vscode.commands.registerCommand('CloudWatchTreeView.ShowOnlyFavorite', () => {
@@ -60,6 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.AddAllLogStreams(node);
 	});
 
+	vscode.commands.registerCommand('CloudWatchTreeView.AddLogStreamsByDate', (node: CloudWatchTreeItem) => {
+		treeView.AddLogStreamsByDate(node);
+	});
+
 	vscode.commands.registerCommand('CloudWatchTreeView.RemoveAllLogStreams', (node: CloudWatchTreeItem) => {
 		treeView.RemoveAllLogStreams(node);
 	});
@@ -70,6 +70,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('CloudWatchTreeView.SelectAwsProfile', (node: CloudWatchTreeItem) => {
 		treeView.SelectAwsProfile(node);
+	});
+
+	vscode.commands.registerCommand('CloudWatchTreeView.UpdateAwsEndPoint', () => {
+		treeView.UpdateAwsEndPoint();
 	});
 
 	ui.logToOutput('Aws CloudWatch Extension activation completed');

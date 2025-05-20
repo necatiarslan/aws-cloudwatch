@@ -4,13 +4,54 @@ exports.TreeItemType = exports.CloudWatchTreeItem = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
 const vscode = require("vscode");
 class CloudWatchTreeItem extends vscode.TreeItem {
+    get IsFav() {
+        return this._isFav;
+    }
+    set IsFav(value) {
+        this._isFav = value;
+        this.setContextValue();
+    }
+    get IsHidden() {
+        return this._isHidden;
+    }
+    set IsHidden(value) {
+        this._isHidden = value;
+        this.setContextValue();
+    }
+    get ProfileToShow() {
+        return this._profileToShow;
+    }
+    set ProfileToShow(value) {
+        this._profileToShow = value;
+        this.setContextValue();
+    }
     constructor(text, treeItemType) {
         super(text);
-        this.IsFav = false;
         this.Children = [];
+        this._profileToShow = "";
+        this._isHidden = false;
+        this._isFav = false;
         this.Text = text;
         this.TreeItemType = treeItemType;
         this.refreshUI();
+    }
+    setContextValue() {
+        let contextValue = "#";
+        contextValue += this.IsFav ? "Fav#" : "!Fav#";
+        contextValue += this.IsHidden ? "Hidden#" : "!Hidden#";
+        contextValue += this.ProfileToShow ? "Profile#" : "NoProfile#";
+        switch (this.TreeItemType) {
+            case TreeItemType.Region:
+                contextValue += "Region#";
+                break;
+            case TreeItemType.LogGroup:
+                contextValue += "LogGroup#";
+                break;
+            case TreeItemType.LogStream:
+                contextValue += "LogStream#";
+                break;
+        }
+        this.contextValue = contextValue;
     }
     refreshUI() {
         if (this.TreeItemType === TreeItemType.Region) {
@@ -25,6 +66,7 @@ class CloudWatchTreeItem extends vscode.TreeItem {
         else {
             this.iconPath = new vscode.ThemeIcon('circle-outline');
         }
+        this.setContextValue();
     }
     IsAnyChidrenFav() {
         return this.IsAnyChidrenFavInternal(this);

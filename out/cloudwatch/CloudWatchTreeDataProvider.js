@@ -12,36 +12,33 @@ class CloudWatchTreeDataProvider {
         this.RegionNodeList = [];
         this.LogGroupNodeList = [];
         this.LogStreamNodeList = [];
-        this.LogGroupList = [["???", "???"]];
-        this.LogStreamList = [["???", "???", "???"]];
-        this.ViewType = ViewType.Region_LogGroup_LogStream;
-        this.LogGroupList.splice(0, 1);
-        this.LogStreamList.splice(0, 1);
+        this.LogGroupList = [];
+        this.LogStreamList = [];
     }
     Refresh() {
         this._onDidChangeTreeData.fire();
     }
     AddLogGroup(Region, LogGroup) {
         for (var lg of this.LogGroupList) {
-            if (lg[0] === Region && lg[1] === LogGroup) {
+            if (lg.Region === Region && lg.LogGroup === LogGroup) {
                 return;
             }
         }
-        this.LogGroupList.push([Region, LogGroup]);
+        this.LogGroupList.push({ Region: Region, LogGroup: LogGroup });
         this.LoadLogGroupNodeList();
         this.LoadRegionNodeList();
         this.Refresh();
     }
     RemoveLogGroup(Region, LogGroup) {
         for (let i = 0; i < this.LogStreamList.length; i++) {
-            if (this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup) {
+            if (this.LogStreamList[i].Region === Region && this.LogStreamList[i].LogGroup === LogGroup) {
                 this.LogStreamList.splice(i, 1);
                 i--;
             }
         }
         this.LoadLogStreamNodeList();
         for (let i = 0; i < this.LogGroupList.length; i++) {
-            if (this.LogGroupList[i][0] === Region && this.LogGroupList[i][1] === LogGroup) {
+            if (this.LogGroupList[i].Region === Region && this.LogGroupList[i].LogGroup === LogGroup) {
                 this.LogGroupList.splice(i, 1);
                 i--;
             }
@@ -52,7 +49,7 @@ class CloudWatchTreeDataProvider {
     }
     RemoveAllLogStreams(Region, LogGroup) {
         for (let i = 0; i < this.LogStreamList.length; i++) {
-            if (this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup) {
+            if (this.LogStreamList[i].Region === Region && this.LogStreamList[i].LogGroup === LogGroup) {
                 this.LogStreamList.splice(i, 1);
                 i--;
             }
@@ -62,17 +59,17 @@ class CloudWatchTreeDataProvider {
     }
     AddLogStream(Region, LogGroup, LogStream) {
         for (var ls of this.LogStreamList) {
-            if (ls[0] === Region && ls[1] === LogGroup && ls[2] === LogStream) {
+            if (ls.Region === Region && ls.LogGroup === LogGroup && ls.LogStream === LogStream) {
                 return;
             }
         }
-        this.LogStreamList.push([Region, LogGroup, LogStream]);
+        this.LogStreamList.push({ Region: Region, LogGroup: LogGroup, LogStream: LogStream });
         this.LoadLogStreamNodeList();
         this.Refresh();
     }
     RemoveLogStream(Region, LogGroup, LogStream) {
         for (let i = 0; i < this.LogStreamList.length; i++) {
-            if (this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup && this.LogStreamList[i][2] === LogStream) {
+            if (this.LogStreamList[i].Region === Region && this.LogStreamList[i].LogGroup === LogGroup && this.LogStreamList[i].LogStream === LogStream) {
                 this.LogStreamList.splice(i, 1);
                 i--;
             }
@@ -83,26 +80,20 @@ class CloudWatchTreeDataProvider {
     LoadLogGroupNodeList() {
         this.LogGroupNodeList = [];
         for (var lg of this.LogGroupList) {
-            if (lg[0] === "???") {
-                continue;
-            }
-            let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg[1], CloudWatchTreeItem_1.TreeItemType.LogGroup);
+            let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg.LogGroup, CloudWatchTreeItem_1.TreeItemType.LogGroup);
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-            treeItem.Region = lg[0];
-            treeItem.LogGroup = lg[1];
+            treeItem.Region = lg.Region;
+            treeItem.LogGroup = lg.LogGroup;
             this.LogGroupNodeList.push(treeItem);
         }
     }
     LoadRegionNodeList() {
         this.LogGroupNodeList = [];
         for (var lg of this.LogGroupList) {
-            if (lg[0] === "???") {
-                continue;
-            }
-            if (this.GetRegionNode(lg[0]) === undefined) {
-                let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg[0], CloudWatchTreeItem_1.TreeItemType.Region);
+            if (this.GetRegionNode(lg.Region) === undefined) {
+                let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg.Region, CloudWatchTreeItem_1.TreeItemType.Region);
                 treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-                treeItem.Region = lg[0];
+                treeItem.Region = lg.Region;
                 this.RegionNodeList.push(treeItem);
             }
         }
@@ -118,27 +109,16 @@ class CloudWatchTreeDataProvider {
     LoadLogStreamNodeList() {
         this.LogStreamNodeList = [];
         for (var lg of this.LogStreamList) {
-            if (lg[0] === "???") {
-                continue;
-            }
-            let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg[2], CloudWatchTreeItem_1.TreeItemType.LogStream);
-            treeItem.Region = lg[0];
-            treeItem.LogGroup = lg[1];
-            treeItem.LogStream = lg[2];
+            let treeItem = new CloudWatchTreeItem_1.CloudWatchTreeItem(lg.LogStream, CloudWatchTreeItem_1.TreeItemType.LogStream);
+            treeItem.Region = lg.Region;
+            treeItem.LogGroup = lg.LogGroup;
+            treeItem.LogStream = lg.LogStream;
             this.LogStreamNodeList.push(treeItem);
         }
     }
     getChildren(node) {
         let result = [];
-        if (this.ViewType === ViewType.Region_LogGroup_LogStream) {
-            result = this.GetNodesRegionLogGroupLogStream(node);
-        }
-        else if (this.ViewType === ViewType.LogGroup_LogStream) {
-            result = this.GetNodesLogGroupLogStream(node);
-        }
-        else if (this.ViewType === ViewType.LogStream) {
-            result = this.GetNodesLogStream(node);
-        }
+        result = this.GetNodesRegionLogGroupLogStream(node);
         return Promise.resolve(result);
     }
     GetNodesRegionLogGroupLogStream(node) {
@@ -250,18 +230,6 @@ class CloudWatchTreeDataProvider {
     }
     getTreeItem(element) {
         return element;
-    }
-    async ChangeView() {
-        if (this.ViewType === ViewType.Region_LogGroup_LogStream) {
-            this.ViewType = ViewType.LogGroup_LogStream;
-        }
-        else if (this.ViewType === ViewType.LogGroup_LogStream) {
-            this.ViewType = ViewType.LogStream;
-        }
-        else if (this.ViewType === ViewType.LogStream) {
-            this.ViewType = ViewType.Region_LogGroup_LogStream;
-        }
-        this.Refresh();
     }
 }
 exports.CloudWatchTreeDataProvider = CloudWatchTreeDataProvider;

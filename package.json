@@ -66,7 +66,7 @@
       },
       {
         "command": "CloudWatchTreeView.AddLogStream",
-        "title": "Add Log Stream"
+        "title": "Add Log Stream By Name"
       },
       {
         "command": "CloudWatchTreeView.RemoveLogStream",
@@ -75,6 +75,10 @@
       {
         "command": "CloudWatchTreeView.AddAllLogStreams",
         "title": "Add All Log Streams"
+      },
+      {
+        "command": "CloudWatchTreeView.AddLogStreamsByDate",
+        "title": "Add Log Streams By Date"
       },
       {
         "command": "CloudWatchTreeView.RemoveAllLogStreams",
@@ -91,9 +95,8 @@
         "icon": "$(account)"
       },
       {
-        "command": "CloudWatchTreeView.ChangeView",
-        "title": "Change View",
-        "icon": "$(symbol-class)"
+        "command": "CloudWatchTreeView.UpdateAwsEndPoint",
+        "title": "Update Aws EndPoint"
       }
     ],
     "menus": {
@@ -119,60 +122,65 @@
           "group": "navigation@4"
         },
         {
-          "command": "CloudWatchTreeView.ChangeView",
+          "command": "CloudWatchTreeView.SelectAwsProfile",
           "when": "view == CloudWatchTreeView",
           "group": "navigation@5"
         },
         {
-          "command": "CloudWatchTreeView.SelectAwsProfile",
+          "command": "CloudWatchTreeView.Refresh",
           "when": "view == CloudWatchTreeView",
           "group": "navigation@6"
         },
         {
-          "command": "CloudWatchTreeView.Refresh",
+          "command": "CloudWatchTreeView.UpdateAwsEndPoint",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation@7"
+          "group": "other"
         }
       ],
       "view/item/context": [
         {
           "command": "CloudWatchTreeView.AddToFav",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#!Fav#/",
           "group": "Fav"
         },
         {
           "command": "CloudWatchTreeView.DeleteFromFav",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#Fav#/",
           "group": "Fav"
         },
         {
           "command": "CloudWatchTreeView.RemoveLogGroup",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
           "group": "LogGroup"
         },
         {
           "command": "CloudWatchTreeView.AddLogStream",
-          "when": "view == CloudWatchTreeView",
-          "group": "LogGroup"
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.RemoveLogStream",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/",
           "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.AddAllLogStreams",
-          "when": "view == CloudWatchTreeView",
-          "group": "LogGroup"
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
+        },
+        {
+          "command": "CloudWatchTreeView.AddLogStreamsByDate",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.RemoveAllLogStreams",
-          "when": "view == CloudWatchTreeView",
-          "group": "LogGroup"
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.ShowCloudWatchLogView",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/",
           "group": "inline"
         }
       ]
@@ -215,8 +223,6 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.11.3",
     "@types/vscode": "^1.71.0",
-    "@typescript-eslint/eslint-plugin": "^5.30.0",
-    "@typescript-eslint/parser": "^5.30.0",
     "@vscode/test-electron": "^2.1.5",
     "eslint": "^8.18.0",
     "glob": "^8.0.3",
@@ -224,10 +230,10 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@aws-sdk/credential-provider-node": "^3.181.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.812.0",
+    "@aws-sdk/credential-providers": "^3.812.0",
+    "@vscode-elements/elements": "^1.16.0",
     "@vscode/codicons": "^0.0.32",
-    "@vscode/webview-ui-toolkit": "^1.2.0",
-    "aws-sdk": "^2.1271.0",
     "tmp": "^0.2.1"
   }
 }

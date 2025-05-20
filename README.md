@@ -24,10 +24,11 @@ To report your bugs or request new features, use link below\
 https://github.com/necatiarslan/aws-cloudwatch/issues/new
 
 ## Todo
-- Localstack Support
-- AWS JS SDK V3 Migration
-- Vscode-elements Migration
 - Log Stream Filter Groups
+- Wrap / Unwrap
+- List Logs By Date Desc / Asc
+- Add Date / Time / Hour Groups to the View to easly navigate
+- Filter by Date / Time / Hour
 - Add Log Stream Name Filter before the list
 
 ## Nice to have

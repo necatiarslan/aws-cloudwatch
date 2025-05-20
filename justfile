@@ -63,10 +63,11 @@ localstack_update:
 create_loggroup:
     aws --endpoint-url=http://localhost:4566 logs create-log-group --log-group-name "my-log-group"
     aws --endpoint-url=http://localhost:4566 logs create-log-stream --log-group-name "my-log-group" --log-stream-name "my-log-stream"
-
+    aws --endpoint-url=http://localhost:4566 logs create-log-stream --log-group-name "my-log-group" --log-stream-name "empty-log-stream"
+    
 add_logs:
-    timestamp=$(python3 -c 'import time; print(int(time.time() * 1000))')
     aws --endpoint-url=http://localhost:4566 logs put-log-events \
     --log-group-name my-log-group \
     --log-stream-name my-log-stream \
-    --log-events "[{\"timestamp\": $timestamp, \"message\": \"Your log message here\"}]"
+    --log-events '[{"timestamp": 1747746788001, "message": "Your log message here"}]'
+

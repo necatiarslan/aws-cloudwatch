@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
-import * as ui from '../common/UI';
-import * as api from '../common/API';
-import * as AWS from "aws-sdk";
+import * as ui from '../common/ui';
+import * as api from '../common/api';
+import { OutputLogEvent } from "@aws-sdk/client-cloudwatch-logs";
 import { CloudWatchTreeView } from "./CloudWatchTreeView";
-import { bool } from "aws-sdk/clients/signer";
 
 export class CloudWatchLogView {
     public static Current: CloudWatchLogView | undefined;
@@ -17,9 +16,10 @@ export class CloudWatchLogView {
     public LogStream:string;
 
     public StartTime:number = 0;
-    public LogEvents:AWS.CloudWatchLogs.OutputLogEvents = [];
+    public LogEvents:OutputLogEvent[] = [];
     public SearchText:string = "";
     public HideText:string = "";
+    public FilterText:string = "";
 
     private Timer: ReturnType<typeof setInterval> | undefined;
 
@@ -52,7 +52,7 @@ export class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView.LoadLogs Started');
         if(!CloudWatchTreeView.Current){return;}
 
-        var result = await api.GetLogEvents(CloudWatchTreeView.Current.AwsProfile, this.Region, this.LogGroup, this.LogStream, this.StartTime);
+        var result = await api.GetLogEvents(this.Region, this.LogGroup, this.LogStream, this.StartTime);
         if(result.isSuccessful)
         {
             if(result.result.length > 0)
@@ -130,10 +130,24 @@ export class CloudWatchLogView {
         //result=result.replace(/(\d{2}\/\d{2}\/\d{4})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
         //result=result.replace(/(\d{2}:\d{2}:\d{2})/g, (match, capture1) => `<span class="color_code_green">${capture1}</span>`);
 
-        if(this.SearchText)
+        if(this.FilterText)
         {
-            const regex = new RegExp("(" + this.SearchText + ")", "i");
-            result=result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+            const filterTextArray = this.FilterText.split(",");
+            for(var i = 0; i < filterTextArray.length; i++)
+            {
+                const regex = new RegExp("(" + filterTextArray[i].trim() + ")", "i");
+                result=result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+            }
+        }
+
+        if(this.SearchText)
+        {        
+            const searchTextArray = this.SearchText.split(",");
+            for(var i = 0; i < searchTextArray.length; i++)
+            {
+                const regex = new RegExp("(" + searchTextArray[i].trim() + ")", "i");
+                result=result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+            }
         }
 
         return result;
@@ -143,14 +157,7 @@ export class CloudWatchLogView {
         ui.logToOutput('CloudWatchLogView._getWebviewContent Started');
 
         //file URIs
-        const toolkitUri = ui.getUri(webview, extensionUri, [
-            "node_modules",
-            "@vscode",
-            "webview-ui-toolkit",
-            "dist",
-            "toolkit.js", // A toolkit.min.js file is also available
-        ]);
-
+        const vscodeElementsUri = ui.getUri(webview, extensionUri, ["node_modules", "@vscode-elements", "elements", "dist", "bundled.js"]);
         const mainUri = ui.getUri(webview, extensionUri, ["media", "main.js"]);
         const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
         const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
@@ -171,7 +178,7 @@ export class CloudWatchLogView {
                 {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
-                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td>' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
+                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: top;" >' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
             }
         }
         else
@@ -185,10 +192,10 @@ export class CloudWatchLogView {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
-        <script type="module" src="${toolkitUri}"></script>
+        <script type="module" src="${vscodeElementsUri}"></script>
         <script type="module" src="${mainUri}"></script>
         <link rel="stylesheet" href="${styleUri}">
-        <link href="${codiconsUri}" rel="stylesheet" />
+        <link href="${codiconsUri}" rel="stylesheet" id="vscode-codicon-stylesheet"/>
         <title>Logs</title>
       </head>
       <body>  
@@ -199,32 +206,35 @@ export class CloudWatchLogView {
 
         <table>
             <tr>
+                <td style="text-align:left"  width="300px">
+                    <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking()?"Pause":"Resume"}</vscode-button>
+                    <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
+                    <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
+                </td>
                 <td style="text-align:left" width="20px">
                     <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
                     <vscode-progress-ring></vscode-progress-ring>
                     </div>
                 </td>
-                <td style="text-align:left">
-                    <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking()?"Pause":"Resume"}</vscode-button>
-                    <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
-                    <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
-                </td>
                 <td style="text-align:right">
-                    <vscode-text-field id="hide_text" placeholder="Hide" value="${this.HideText}">
-                        <span slot="start" class="codicon codicon-eye-closed"></span>
-                    </vscode-text-field>
-                    <vscode-text-field id="search_text" placeholder="Search" value="${this.SearchText}">
-                        <span slot="start" class="codicon codicon-search"></span>
-                    </vscode-text-field>
-                </vscode-text-field></td>
+                    <vscode-textfield id="search_text" placeholder="Search" value="${this.SearchText}" style="width: 20ch; margin: 0;" >
+                        <vscode-icon slot="content-before" name="search" title="search"></vscode-icon>
+                    </vscode-textfield>
+                    <vscode-textfield id="filter_text" placeholder="Filter" value="${this.FilterText}" style="width: 20ch; margin: 0;" >
+                        <vscode-icon slot="content-before" name="filter" title="filter"></vscode-icon>
+                    </vscode-textfield>
+                    <vscode-textfield id="hide_text" placeholder="Hide" value="${this.HideText}" style="width: 20ch; margin: 0;" >
+                        <vscode-icon slot="content-before" name="eye-closed" title="eye-closed"></vscode-icon>
+                    </vscode-textfield>
+                </td>
             </tr>
         </table>
 
-        <table>
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
             <tr>
-                <th width="5px">#</th>
+                <th style="width: 10px;">#</th>
                 <th>Message</th>
-                <th  width="50px">Time</th>
+                <th style="width: 100px;">Time</th>
             </tr>
 
             ${logRowHtml}
@@ -232,7 +242,11 @@ export class CloudWatchLogView {
         </table>
 
         <br>
-        ${this.Region} / ${this.LogGroup} / ${this.LogStream}
+        Region : ${this.Region} 
+        <br>
+        LogGroup : ${this.LogGroup} 
+        <br>
+        LogStream : ${this.LogStream}
         
         <br>
         <br>
@@ -240,8 +254,15 @@ export class CloudWatchLogView {
                     
         <table>
             <tr>
-                <td colspan="3">
-                    <vscode-link href="https://github.com/necatiarslan/aws-cloudwatch/issues/new">Bug Report & Feature Request</vscode-link>
+                <td>
+                    <a href="https://github.com/necatiarslan/aws-cloudwatch/issues/new" style="cursor: pointer; text-decoration: none;">Bug Report & Feature Request</a>
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td>
+                    <a href="https://github.com/sponsors/necatiarslan" style="cursor: pointer; text-decoration: none;">Donate to support this extension</a>
                 </td>
             </tr>
         </table>
@@ -252,18 +273,8 @@ export class CloudWatchLogView {
         return result;
     }
 
-    private IsHideEvent(event: AWS.CloudWatchLogs.OutputLogEvent) : boolean
+    private IsHideEvent(event: OutputLogEvent) : boolean
     {
-        if(this.SearchText.length > 0)
-        {
-            let searchTerms = this.SearchText.split(",");
-            for (var term of searchTerms) {
-                const regex = new RegExp(term.trim(), "i");
-                if (event.message?.search(regex) !== -1) { return false; }
-            }
-            return true;
-        }
-
         if(this.HideText.length > 0)
         {
             let hideTerms = this.HideText.split(",");
@@ -272,6 +283,16 @@ export class CloudWatchLogView {
                 if (event.message?.search(regex) !== -1) { return true; }
             }
             return false;
+        }
+
+        if(this.FilterText.length > 0)
+        {
+            let searchTerms = this.FilterText.split(",");
+            for (var term of searchTerms) {
+                const regex = new RegExp(term.trim(), "i");
+                if (event.message?.search(regex) !== -1) { return false; }
+            }
+            return true;
         }
 
         return false;
@@ -288,7 +309,15 @@ export class CloudWatchLogView {
                     case "refresh":
                         this.SearchText = message.search_text;
                         this.HideText = message.hide_text;
-                        this.LoadLogs();;
+                        this.FilterText = message.filter_text;
+                        this.LoadLogs();
+                        this.RenderHtml();
+                        return;
+
+                    case "refresh_nologload":
+                        this.SearchText = message.search_text;
+                        this.HideText = message.hide_text;
+                        this.FilterText = message.filter_text;
                         this.RenderHtml();
                         return;
 
