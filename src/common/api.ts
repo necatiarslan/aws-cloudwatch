@@ -141,7 +141,7 @@ export async function GetLogStreams(
 
 
 
-export async function GetLogStreamList(Region:string, LogGroupName:string, IncludeEmptyLogStreams:boolean=false): Promise<MethodResult<string[]>> {
+export async function GetLogStreamList(Region:string, LogGroupName:string, IncludeEmptyLogStreams:boolean=false, DateFilter?:Date): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogStreamList Started');
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
@@ -157,6 +157,12 @@ export async function GetLogStreamList(Region:string, LogGroupName:string, Inclu
         {
           if(!IncludeEmptyLogStreams && !logStream.lastEventTimestamp) {
             continue;
+          }
+          if(DateFilter && logStream.lastEventTimestamp) {
+            let nextDay = new Date(DateFilter.getTime() + 86400000);
+            if(logStream.lastEventTimestamp < DateFilter.getTime() || logStream.lastEventTimestamp > nextDay.getTime()) {
+              continue;
+            }
           }
           if(logStream.logStreamName) {
             result.result.push(logStream.logStreamName);

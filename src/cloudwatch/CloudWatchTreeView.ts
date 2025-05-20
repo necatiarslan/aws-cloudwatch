@@ -243,11 +243,14 @@ export class CloudWatchTreeView {
 		ui.logToOutput('CloudWatchTreeView.AddLogStream Started');
 		if(!node.Region || !node.LogGroup) { return; }
 
-		let filterStringTemp = await vscode.window.showInputBox({ placeHolder: 'Log Stream Filter ?' });
+		let filterStringTemp = await vscode.window.showInputBox({ placeHolder: 'Log Stream Name Search Text' });
 		if (filterStringTemp === undefined) { return; }
 
 		var resultLogStream = await api.GetLogStreams(node.Region, node.LogGroup, filterStringTemp);
-		if(!resultLogStream.isSuccessful || !resultLogStream.result){ return; }
+		if (!resultLogStream.isSuccessful){ return; }
+		if (!resultLogStream.result){ return; }
+		if (resultLogStream.result && resultLogStream.result.length === 0){ ui.showInfoMessage('No Log Streams Found'); return; }
+
 
 		let logStreamList:string[]=[];
 		for(var ls of resultLogStream.result)
@@ -278,6 +281,32 @@ export class CloudWatchTreeView {
 
 		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup);
 		if(!resultLogStream.isSuccessful){ return; }
+		if (resultLogStream.result && resultLogStream.result.length === 0){ ui.showInfoMessage('No Log Streams Found'); return; }
+
+		for(var logStream of resultLogStream.result)
+		{
+			this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, logStream);
+		}
+		this.SaveState();
+	}
+
+	async AddLogStreamsByDate(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.AddLogStreamsByDate Started');
+		if(!node.Region || !node.LogGroup) { return; }
+
+		let today:string = new Date().toISOString().split('T')[0];
+
+		let dateTemp = await vscode.window.showInputBox({value: today, placeHolder: 'Date YYYY-MM-DD' });
+		if (dateTemp === undefined) { return; }
+		if (!dateTemp.includes('-')) { return; }
+		if (dateTemp.length !== 10) { return; }
+
+		let dateParts = dateTemp.split('-');
+		let dateFilter = new Date(Date.UTC(parseInt(dateParts[0]), parseInt(dateParts[1])-1, parseInt(dateParts[2])));
+
+		var resultLogStream = await api.GetLogStreamList(node.Region, node.LogGroup, false, dateFilter);
+		if(!resultLogStream.isSuccessful){ return; }
+		if (resultLogStream.result && resultLogStream.result.length === 0){ ui.showInfoMessage('No Log Streams Found'); return; }
 
 		for(var logStream of resultLogStream.result)
 		{

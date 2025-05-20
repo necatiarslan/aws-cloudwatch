@@ -43,6 +43,9 @@ function activate(context) {
     vscode.commands.registerCommand('CloudWatchTreeView.AddAllLogStreams', (node) => {
         treeView.AddAllLogStreams(node);
     });
+    vscode.commands.registerCommand('CloudWatchTreeView.AddLogStreamsByDate', (node) => {
+        treeView.AddLogStreamsByDate(node);
+    });
     vscode.commands.registerCommand('CloudWatchTreeView.RemoveAllLogStreams', (node) => {
         treeView.RemoveAllLogStreams(node);
     });
