@@ -1,3 +1,9 @@
+# v1.3.0
+    - Aws JS SDK V3 Migration
+    - Vscode-elements/elements migration
+    - Filter functionality
+    - Context menu enhancements
+    - Add Log Streams By Date
 # v1.2.0
     - Hide
     - Read longer logs
