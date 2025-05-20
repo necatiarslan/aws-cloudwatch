@@ -174,7 +174,7 @@ async function GetLogEvents(Region, LogGroupName, LogStreamName, StartTime = 0) 
             if (response.events) {
                 result.result.push(...response.events);
             }
-            const newToken = response.nextForwardToken;
+            const newToken = response.nextBackwardToken;
             if (newToken === nextToken) {
                 break;
             }

@@ -213,7 +213,7 @@ export async function GetLogEvents(Region: string, LogGroupName: string, LogStre
         result.result.push(...response.events);
       }
 
-      const newToken = response.nextForwardToken;
+      const newToken = response.nextBackwardToken;
       if (newToken === nextToken) { break; }
       nextToken = newToken;
     }
