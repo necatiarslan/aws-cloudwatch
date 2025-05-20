@@ -12,7 +12,6 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	LogStreamNodeList: CloudWatchTreeItem[] = [];
 	LogGroupList: [[string,string]] = [["???","???"]];
 	LogStreamList: [[string,string,string]] = [["???","???","???"]];
-	public ViewType:ViewType = ViewType.Region_LogGroup_LogStream;
 
 	constructor() {
 		this.LogGroupList.splice(0,1);
@@ -161,18 +160,7 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	getChildren(node: CloudWatchTreeItem): Thenable<CloudWatchTreeItem[]> {
 		let result:CloudWatchTreeItem[] = [];
 
-		if(this.ViewType === ViewType.Region_LogGroup_LogStream)
-		{
-			result = this.GetNodesRegionLogGroupLogStream(node);
-		}
-		else if(this.ViewType === ViewType.LogGroup_LogStream)
-		{
-			result = this.GetNodesLogGroupLogStream(node);
-		}
-		else if(this.ViewType === ViewType.LogStream)
-		{
-			result = this.GetNodesLogStream(node);
-		}
+		result = this.GetNodesRegionLogGroupLogStream(node);
 
 		return Promise.resolve(result);
 	}
@@ -288,21 +276,6 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 		return element;
 	}
 
-	public async ChangeView(){
-		if(this.ViewType === ViewType.Region_LogGroup_LogStream)
-		{
-			this.ViewType = ViewType.LogGroup_LogStream;
-		}
-		else if(this.ViewType === ViewType.LogGroup_LogStream)
-		{
-			this.ViewType = ViewType.LogStream;
-		}
-		else if(this.ViewType === ViewType.LogStream)
-		{
-			this.ViewType = ViewType.Region_LogGroup_LogStream;
-		}
-		this.Refresh();
-	}
 }
 
 export enum ViewType{

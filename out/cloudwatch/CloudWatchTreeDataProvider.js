@@ -14,7 +14,6 @@ class CloudWatchTreeDataProvider {
         this.LogStreamNodeList = [];
         this.LogGroupList = [["???", "???"]];
         this.LogStreamList = [["???", "???", "???"]];
-        this.ViewType = ViewType.Region_LogGroup_LogStream;
         this.LogGroupList.splice(0, 1);
         this.LogStreamList.splice(0, 1);
     }
@@ -130,15 +129,7 @@ class CloudWatchTreeDataProvider {
     }
     getChildren(node) {
         let result = [];
-        if (this.ViewType === ViewType.Region_LogGroup_LogStream) {
-            result = this.GetNodesRegionLogGroupLogStream(node);
-        }
-        else if (this.ViewType === ViewType.LogGroup_LogStream) {
-            result = this.GetNodesLogGroupLogStream(node);
-        }
-        else if (this.ViewType === ViewType.LogStream) {
-            result = this.GetNodesLogStream(node);
-        }
+        result = this.GetNodesRegionLogGroupLogStream(node);
         return Promise.resolve(result);
     }
     GetNodesRegionLogGroupLogStream(node) {
@@ -250,18 +241,6 @@ class CloudWatchTreeDataProvider {
     }
     getTreeItem(element) {
         return element;
-    }
-    async ChangeView() {
-        if (this.ViewType === ViewType.Region_LogGroup_LogStream) {
-            this.ViewType = ViewType.LogGroup_LogStream;
-        }
-        else if (this.ViewType === ViewType.LogGroup_LogStream) {
-            this.ViewType = ViewType.LogStream;
-        }
-        else if (this.ViewType === ViewType.LogStream) {
-            this.ViewType = ViewType.Region_LogGroup_LogStream;
-        }
-        this.Refresh();
     }
 }
 exports.CloudWatchTreeDataProvider = CloudWatchTreeDataProvider;

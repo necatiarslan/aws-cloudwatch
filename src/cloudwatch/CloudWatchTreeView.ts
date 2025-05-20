@@ -91,13 +91,6 @@ export class CloudWatchTreeView {
 		this.SaveState();
 	}
 
-	async ChangeView() {
-		ui.logToOutput('CloudWatchTreeView.ChangeView Started');
-		this.treeDataProvider.ChangeView();
-		this.SaveState();
-		ui.logToOutput('CloudWatchTreeView.ChangeView New View=' + this.treeDataProvider.ViewType);
-	}
-
 	async ShowOnlyFavorite() {
 		ui.logToOutput('CloudWatchTreeView.ShowOnlyFavorite Started');
 		this.isShowOnlyFavorite = !this.isShowOnlyFavorite;
@@ -119,7 +112,6 @@ export class CloudWatchTreeView {
 			this.context.globalState.update('ShowOnlyFavorite', this.ShowOnlyFavorite);
 			this.context.globalState.update('LogGroupList', this.treeDataProvider.LogGroupList);
 			this.context.globalState.update('LogStreamList', this.treeDataProvider.LogStreamList);
-			this.context.globalState.update('ViewType', this.treeDataProvider.ViewType);
 			this.context.globalState.update('AwsEndPoint', this.AwsEndPoint);
 
 			ui.logToOutput("CloudWatchTreeView.saveState Successfull");
@@ -155,12 +147,6 @@ export class CloudWatchTreeView {
 			if(LogStreamListTemp)
 			{
 				this.treeDataProvider.LogStreamList = LogStreamListTemp;
-			}
-
-			let ViewTypeTemp:number | undefined = this.context.globalState.get('ViewType');
-			if(ViewTypeTemp)
-			{
-				this.treeDataProvider.ViewType = ViewTypeTemp;
 			}
 
 			let AwsEndPointTemp: string | undefined = this.context.globalState.get('AwsEndPoint');

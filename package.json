@@ -91,11 +91,6 @@
         "icon": "$(account)"
       },
       {
-        "command": "CloudWatchTreeView.ChangeView",
-        "title": "Change View",
-        "icon": "$(symbol-class)"
-      },
-      {
         "command": "CloudWatchTreeView.UpdateAwsEndPoint",
         "title": "Update Aws EndPoint"
       }
@@ -123,19 +118,14 @@
           "group": "navigation@4"
         },
         {
-          "command": "CloudWatchTreeView.ChangeView",
+          "command": "CloudWatchTreeView.SelectAwsProfile",
           "when": "view == CloudWatchTreeView",
           "group": "navigation@5"
         },
         {
-          "command": "CloudWatchTreeView.SelectAwsProfile",
-          "when": "view == CloudWatchTreeView",
-          "group": "navigation@6"
-        },
-        {
           "command": "CloudWatchTreeView.Refresh",
           "when": "view == CloudWatchTreeView",
-          "group": "navigation@7"
+          "group": "navigation@6"
         },
         {
           "command": "CloudWatchTreeView.UpdateAwsEndPoint",
@@ -146,12 +136,12 @@
       "view/item/context": [
         {
           "command": "CloudWatchTreeView.AddToFav",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#!Fav#/",
           "group": "Fav"
         },
         {
           "command": "CloudWatchTreeView.DeleteFromFav",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#Fav#/",
           "group": "Fav"
         },
         {
