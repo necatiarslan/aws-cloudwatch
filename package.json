@@ -156,32 +156,32 @@
         },
         {
           "command": "CloudWatchTreeView.RemoveLogGroup",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
           "group": "LogGroup"
         },
         {
           "command": "CloudWatchTreeView.AddLogStream",
-          "when": "view == CloudWatchTreeView",
-          "group": "LogGroup"
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.RemoveLogStream",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/",
           "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.AddAllLogStreams",
-          "when": "view == CloudWatchTreeView",
-          "group": "LogGroup"
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.RemoveAllLogStreams",
-          "when": "view == CloudWatchTreeView",
-          "group": "LogGroup"
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogGroup#/",
+          "group": "LogStream"
         },
         {
           "command": "CloudWatchTreeView.ShowCloudWatchLogView",
-          "when": "view == CloudWatchTreeView",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/",
           "group": "inline"
         }
       ]
