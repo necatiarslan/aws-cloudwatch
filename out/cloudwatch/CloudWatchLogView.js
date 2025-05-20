@@ -224,8 +224,8 @@ class CloudWatchLogView {
         return result;
     }
     IsHideEvent(event) {
-        if (this.SearchText.length > 0) {
-            let searchTerms = this.SearchText.split(",");
+        if (this.FilterText.length > 0) {
+            let searchTerms = this.FilterText.split(",");
             for (var term of searchTerms) {
                 const regex = new RegExp(term.trim(), "i");
                 if (event.message?.search(regex) !== -1) {
@@ -255,6 +255,7 @@ class CloudWatchLogView {
                 case "refresh":
                     this.SearchText = message.search_text;
                     this.HideText = message.hide_text;
+                    this.FilterText = message.filter_text;
                     this.LoadLogs();
                     ;
                     this.RenderHtml();

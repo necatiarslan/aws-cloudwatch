@@ -267,9 +267,9 @@ export class CloudWatchLogView {
 
     private IsHideEvent(event: OutputLogEvent) : boolean
     {
-        if(this.SearchText.length > 0)
+        if(this.FilterText.length > 0)
         {
-            let searchTerms = this.SearchText.split(",");
+            let searchTerms = this.FilterText.split(",");
             for (var term of searchTerms) {
                 const regex = new RegExp(term.trim(), "i");
                 if (event.message?.search(regex) !== -1) { return false; }
@@ -301,6 +301,7 @@ export class CloudWatchLogView {
                     case "refresh":
                         this.SearchText = message.search_text;
                         this.HideText = message.hide_text;
+                        this.FilterText = message.filter_text;
                         this.LoadLogs();;
                         this.RenderHtml();
                         return;
