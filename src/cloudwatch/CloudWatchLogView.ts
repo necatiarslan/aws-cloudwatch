@@ -141,9 +141,13 @@ export class CloudWatchLogView {
         }
 
         if(this.SearchText)
-        {
-            const regex = new RegExp("(" + this.SearchText + ")", "i");
-            result=result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+        {        
+            const searchTextArray = this.SearchText.split(",");
+            for(var i = 0; i < searchTextArray.length; i++)
+            {
+                const regex = new RegExp("(" + searchTextArray[i].trim() + ")", "i");
+                result=result.replace(regex, (match, capture1) => `<span class="color_code_search_result">${capture1}</span>`);
+            }
         }
 
         return result;

@@ -113,10 +113,18 @@ class CloudWatchTreeView {
                 this.isShowOnlyFavorite = ShowOnlyFavoriteTemp;
             }
             let LogGroupListTemp = this.context.globalState.get('LogGroupList');
+            // remove prev format, you can remove this after some time
+            if (LogGroupListTemp && Array.isArray(LogGroupListTemp) && LogGroupListTemp[0] && Array.isArray(LogGroupListTemp[0])) {
+                LogGroupListTemp = undefined;
+            }
             if (LogGroupListTemp) {
                 this.treeDataProvider.LogGroupList = LogGroupListTemp;
             }
             let LogStreamListTemp = this.context.globalState.get('LogStreamList');
+            // remove prev format, you can remove this after some time
+            if (LogStreamListTemp && Array.isArray(LogStreamListTemp) && LogStreamListTemp[0] && Array.isArray(LogStreamListTemp[0])) {
+                LogStreamListTemp = undefined;
+            }
             if (LogStreamListTemp) {
                 this.treeDataProvider.LogStreamList = LogStreamListTemp;
             }

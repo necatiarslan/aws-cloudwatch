@@ -10,12 +10,10 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	RegionNodeList: CloudWatchTreeItem[] = [];
 	LogGroupNodeList: CloudWatchTreeItem[] = [];
 	LogStreamNodeList: CloudWatchTreeItem[] = [];
-	LogGroupList: [[string,string]] = [["???","???"]];
-	LogStreamList: [[string,string,string]] = [["???","???","???"]];
+	LogGroupList: { Region:string, LogGroup:string }[] = [];
+	LogStreamList: { Region:string, LogGroup:string, LogStream:string }[] = [];
 
 	constructor() {
-		this.LogGroupList.splice(0,1);
-		this.LogStreamList.splice(0,1);
 	}
 
 	Refresh(): void {
@@ -25,13 +23,13 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	AddLogGroup(Region:string, LogGroup:string){
 		for(var lg of this.LogGroupList)
 		{
-			if(lg[0] === Region && lg[1] === LogGroup)
+			if(lg.Region === Region && lg.LogGroup=== LogGroup)
 			{
 				return;
 			}
 		}
 
-		this.LogGroupList.push([Region, LogGroup]);
+		this.LogGroupList.push({ Region:Region, LogGroup:LogGroup });
 		this.LoadLogGroupNodeList();
 		this.LoadRegionNodeList();
 		this.Refresh();
@@ -40,7 +38,7 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	RemoveLogGroup(Region:string, LogGroup:string){
 		for(let i = 0; i < this.LogStreamList.length; i++)
 		{
-			if(this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup)
+			if(this.LogStreamList[i].Region === Region && this.LogStreamList[i].LogGroup === LogGroup)
 			{
 				this.LogStreamList.splice(i, 1);
 				i--;
@@ -50,7 +48,7 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 
 		for(let i = 0; i < this.LogGroupList.length; i++)
 		{
-			if(this.LogGroupList[i][0] === Region && this.LogGroupList[i][1] === LogGroup)
+			if(this.LogGroupList[i].Region === Region && this.LogGroupList[i].LogGroup === LogGroup)
 			{
 				this.LogGroupList.splice(i, 1);
 				i--;
@@ -64,7 +62,7 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	RemoveAllLogStreams(Region:string, LogGroup:string){
 		for(let i = 0; i < this.LogStreamList.length; i++)
 		{
-			if(this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup)
+			if(this.LogStreamList[i].Region === Region && this.LogStreamList[i].LogGroup === LogGroup)
 			{
 				this.LogStreamList.splice(i, 1);
 				i--;
@@ -77,14 +75,14 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	AddLogStream(Region:string, LogGroup:string, LogStream:string){
 		for(var ls of this.LogStreamList)
 		{
-			if(ls[0] === Region && ls[1] === LogGroup && ls[2] === LogStream)
+			if(ls.Region === Region && ls.LogGroup === LogGroup && ls.LogStream === LogStream)
 			{
 				return;
 			}
 		}
 
 
-		this.LogStreamList.push([Region, LogGroup, LogStream]);
+		this.LogStreamList.push({ Region:Region, LogGroup:LogGroup, LogStream:LogStream });
 		this.LoadLogStreamNodeList();
 		this.Refresh();
 	}
@@ -92,7 +90,7 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 	RemoveLogStream(Region:string, LogGroup:string, LogStream:string){
 		for(let i = 0; i < this.LogStreamList.length; i++)
 		{
-			if(this.LogStreamList[i][0] === Region && this.LogStreamList[i][1] === LogGroup && this.LogStreamList[i][2] === LogStream)
+			if(this.LogStreamList[i].Region === Region && this.LogStreamList[i].LogGroup === LogGroup && this.LogStreamList[i].LogStream === LogStream)
 			{
 				this.LogStreamList.splice(i, 1);
 				i--;
@@ -107,11 +105,10 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 		
 		for(var lg of this.LogGroupList)
 		{
-			if(lg[0] === "???"){ continue; }
-			let treeItem = new CloudWatchTreeItem(lg[1], TreeItemType.LogGroup);
+			let treeItem = new CloudWatchTreeItem(lg.LogGroup, TreeItemType.LogGroup);
 			treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-			treeItem.Region = lg[0];
-			treeItem.LogGroup = lg[1];
+			treeItem.Region = lg.Region;
+			treeItem.LogGroup = lg.LogGroup;
 			this.LogGroupNodeList.push(treeItem);
 		}
 	}
@@ -121,12 +118,11 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 		
 		for(var lg of this.LogGroupList)
 		{
-			if(lg[0] === "???"){ continue; }
-			if(this.GetRegionNode(lg[0]) === undefined)
+			if(this.GetRegionNode(lg.Region) === undefined)
 			{
-				let treeItem = new CloudWatchTreeItem(lg[0], TreeItemType.Region);
+				let treeItem = new CloudWatchTreeItem(lg.Region, TreeItemType.Region);
 				treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-				treeItem.Region = lg[0];
+				treeItem.Region = lg.Region;
 				this.RegionNodeList.push(treeItem);
 			}
 		}
@@ -148,11 +144,10 @@ export class CloudWatchTreeDataProvider implements vscode.TreeDataProvider<Cloud
 		
 		for(var lg of this.LogStreamList)
 		{
-			if(lg[0] === "???"){ continue; }
-			let treeItem = new CloudWatchTreeItem(lg[2], TreeItemType.LogStream);
-			treeItem.Region = lg[0];
-			treeItem.LogGroup = lg[1];
-			treeItem.LogStream = lg[2];
+			let treeItem = new CloudWatchTreeItem(lg.LogStream, TreeItemType.LogStream);
+			treeItem.Region = lg.Region;
+			treeItem.LogGroup = lg.LogGroup;
+			treeItem.LogStream = lg.LogStream;
 			this.LogStreamNodeList.push(treeItem);
 		}
 	}

@@ -137,13 +137,27 @@ export class CloudWatchTreeView {
 			let ShowOnlyFavoriteTemp: boolean | undefined = this.context.globalState.get('ShowOnlyFavorite');
 			if (ShowOnlyFavoriteTemp) { this.isShowOnlyFavorite = ShowOnlyFavoriteTemp; }
 
-			let LogGroupListTemp:[[string,string]] | undefined  = this.context.globalState.get('LogGroupList');
+			let LogGroupListTemp:{ Region:string, LogGroup:string }[] | undefined = this.context.globalState.get('LogGroupList');
+			
+			// remove prev format, you can remove this after some time
+			if(LogGroupListTemp && Array.isArray(LogGroupListTemp) && LogGroupListTemp[0] && Array.isArray(LogGroupListTemp[0]))
+			{
+				LogGroupListTemp = undefined
+			}
+			
 			if(LogGroupListTemp)
 			{
 				this.treeDataProvider.LogGroupList = LogGroupListTemp;
 			}
 
-			let LogStreamListTemp:[[string,string,string]] | undefined  = this.context.globalState.get('LogStreamList');
+			let LogStreamListTemp:{ Region:string, LogGroup:string, LogStream:string }[] | undefined  = this.context.globalState.get('LogStreamList');
+			
+			// remove prev format, you can remove this after some time
+			if(LogStreamListTemp && Array.isArray(LogStreamListTemp) && LogStreamListTemp[0] && Array.isArray(LogStreamListTemp[0]))
+			{
+				LogStreamListTemp = undefined
+			}
+
 			if(LogStreamListTemp)
 			{
 				this.treeDataProvider.LogStreamList = LogStreamListTemp;
