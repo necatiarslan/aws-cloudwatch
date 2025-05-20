@@ -191,7 +191,7 @@ export async function GetLogStreamList(Region:string, LogGroupName:string, Inclu
 
 import { GetLogEventsCommand, OutputLogEvent } from "@aws-sdk/client-cloudwatch-logs";
 export async function GetLogEvents(Region: string, LogGroupName: string, LogStreamName: string, StartTime: number = 0): Promise<MethodResult<OutputLogEvent[]>> {
-  ui.logToOutput('api.GetLogEvents Started');
+  ui.logToOutput(`api.GetLogEvents Started - Region:${Region}, LogGroupName:${LogGroupName}, LogStreamName:${LogStreamName}, StartTime:${StartTime}`);
 
   const result = new MethodResult<OutputLogEvent[]>();
   result.result = [];

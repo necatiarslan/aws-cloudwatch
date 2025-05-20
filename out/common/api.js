@@ -157,7 +157,7 @@ async function GetLogStreamList(Region, LogGroupName, IncludeEmptyLogStreams = f
 exports.GetLogStreamList = GetLogStreamList;
 const client_cloudwatch_logs_4 = require("@aws-sdk/client-cloudwatch-logs");
 async function GetLogEvents(Region, LogGroupName, LogStreamName, StartTime = 0) {
-    ui.logToOutput('api.GetLogEvents Started');
+    ui.logToOutput(`api.GetLogEvents Started - Region:${Region}, LogGroupName:${LogGroupName}, LogStreamName:${LogStreamName}, StartTime:${StartTime}`);
     const result = new MethodResult_1.MethodResult();
     result.result = [];
     try {
