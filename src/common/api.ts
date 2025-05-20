@@ -45,6 +45,7 @@ export async function GetCloudWatchLogsClient(Region:string | undefined = CloudW
 }
 
 import { DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
+
 export async function GetLogGroupList(Region: string, LogGroupNamePattern?: string): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogGroupList Started');
   let result = new MethodResult<string[]>();
@@ -52,55 +53,92 @@ export async function GetLogGroupList(Region: string, LogGroupNamePattern?: stri
 
   try {
     const client = await GetCloudWatchLogsClient(Region);
-    const command = new DescribeLogGroupsCommand({
-      limit: 500,
-      logGroupNamePrefix: LogGroupNamePattern
-    });
+    let nextToken: string | undefined = undefined;
 
-    const response = await client.send(command);
-    result.isSuccessful = true;
-    if (response.logGroups) {
-      for (const logGroup of response.logGroups) {
-        if (logGroup.logGroupName) {
-          result.result.push(logGroup.logGroupName);
+    do {
+      const command:DescribeLogGroupsCommand = new DescribeLogGroupsCommand({
+        limit: 50,
+        logGroupNamePrefix: LogGroupNamePattern,
+        nextToken,
+      });
+
+      const response = await client.send(command);
+      if (response.logGroups) {
+        for (const logGroup of response.logGroups) {
+          if (logGroup.logGroupName) {
+            result.result.push(logGroup.logGroupName);
+          }
         }
       }
-    }
+
+      nextToken = response.nextToken;
+    } while (nextToken);
+
+    result.isSuccessful = true;
+
   } catch (error: any) {
     result.isSuccessful = false;
     result.error = error;
     ui.showErrorMessage('api.GetLogGroupList Error !!!', error);
     ui.logToOutput("api.GetLogGroupList Error !!!", error); 
   }
+
   return result;
 }
 
 
+
 import { DescribeLogStreamsCommand, LogStream } from "@aws-sdk/client-cloudwatch-logs";
-export async function GetLogStreams(Region: string, LogGroupName: string, LogStreamFilter?: string): Promise<MethodResult<LogStream[] | undefined>> {
+
+export async function GetLogStreams(
+  Region: string,
+  LogGroupName: string,
+  LogStreamFilter?: string
+): Promise<MethodResult<LogStream[] | undefined>> {
   ui.logToOutput('api.GetLogStreams Started');
   const result = new MethodResult<LogStream[] | undefined>();
+  const allLogStreams: LogStream[] = [];
 
   try {
     const client = await GetCloudWatchLogsClient(Region);
-    const command = new DescribeLogStreamsCommand({
-      logGroupName: LogGroupName,
-      orderBy: "LastEventTime",
-      descending: true,
-      limit: 50,
-    });
+    let nextToken: string | undefined = undefined;
 
-    const response = await client.send(command);
+    do {
+      const command:DescribeLogStreamsCommand = new DescribeLogStreamsCommand({
+        logGroupName: LogGroupName,
+        orderBy: "LastEventTime",
+        descending: true,
+        limit: 50,
+        nextToken,
+      });
+
+      const response = await client.send(command);
+
+      if (response.logStreams) {
+        allLogStreams.push(...response.logStreams);
+      }
+
+      nextToken = response.nextToken;
+    } while (nextToken);
+
     result.isSuccessful = true;
-    result.result = response.logStreams;
+
+    if (LogStreamFilter) {
+      result.result = allLogStreams.filter((logStream) => logStream.logStreamName?.includes(LogStreamFilter));
+    }
+
+    result.result = allLogStreams;
+
   } catch (error: any) {
     result.isSuccessful = false;
     result.error = error;
     ui.showErrorMessage('api.GetLogStreams Error !!!', error);
     ui.logToOutput("api.GetLogStreams Error !!!", error); 
   }
+
   return result;
 }
+
 
 
 export async function GetLogStreamList(Region:string, LogGroupName:string): Promise<MethodResult<string[]>> {

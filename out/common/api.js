@@ -49,19 +49,24 @@ async function GetLogGroupList(Region, LogGroupNamePattern) {
     result.result = [];
     try {
         const client = await GetCloudWatchLogsClient(Region);
-        const command = new client_cloudwatch_logs_2.DescribeLogGroupsCommand({
-            limit: 500,
-            logGroupNamePrefix: LogGroupNamePattern
-        });
-        const response = await client.send(command);
-        result.isSuccessful = true;
-        if (response.logGroups) {
-            for (const logGroup of response.logGroups) {
-                if (logGroup.logGroupName) {
-                    result.result.push(logGroup.logGroupName);
+        let nextToken = undefined;
+        do {
+            const command = new client_cloudwatch_logs_2.DescribeLogGroupsCommand({
+                limit: 50,
+                logGroupNamePrefix: LogGroupNamePattern,
+                nextToken,
+            });
+            const response = await client.send(command);
+            if (response.logGroups) {
+                for (const logGroup of response.logGroups) {
+                    if (logGroup.logGroupName) {
+                        result.result.push(logGroup.logGroupName);
+                    }
                 }
             }
-        }
+            nextToken = response.nextToken;
+        } while (nextToken);
+        result.isSuccessful = true;
     }
     catch (error) {
         result.isSuccessful = false;
@@ -76,17 +81,29 @@ const client_cloudwatch_logs_3 = require("@aws-sdk/client-cloudwatch-logs");
 async function GetLogStreams(Region, LogGroupName, LogStreamFilter) {
     ui.logToOutput('api.GetLogStreams Started');
     const result = new MethodResult_1.MethodResult();
+    const allLogStreams = [];
     try {
         const client = await GetCloudWatchLogsClient(Region);
-        const command = new client_cloudwatch_logs_3.DescribeLogStreamsCommand({
-            logGroupName: LogGroupName,
-            orderBy: "LastEventTime",
-            descending: true,
-            limit: 50,
-        });
-        const response = await client.send(command);
+        let nextToken = undefined;
+        do {
+            const command = new client_cloudwatch_logs_3.DescribeLogStreamsCommand({
+                logGroupName: LogGroupName,
+                orderBy: "LastEventTime",
+                descending: true,
+                limit: 50,
+                nextToken,
+            });
+            const response = await client.send(command);
+            if (response.logStreams) {
+                allLogStreams.push(...response.logStreams);
+            }
+            nextToken = response.nextToken;
+        } while (nextToken);
         result.isSuccessful = true;
-        result.result = response.logStreams;
+        if (LogStreamFilter) {
+            result.result = allLogStreams.filter((logStream) => logStream.logStreamName?.includes(LogStreamFilter));
+        }
+        result.result = allLogStreams;
     }
     catch (error) {
         result.isSuccessful = false;
