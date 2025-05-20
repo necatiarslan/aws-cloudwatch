@@ -36,6 +36,18 @@ function RefreshButtonClick() {
   });
 }
 
+function RefreshNoLogLoad() {
+  const SearchTextBox = document.getElementById("search_text");
+  const HideTextBox = document.getElementById("hide_text");
+  const FilterTextBox = document.getElementById("filter_text");
+  vscode.postMessage({
+    command: "refresh_nologload",
+    search_text: SearchTextBox._value,
+    hide_text: HideTextBox._value,
+    filter_text: FilterTextBox._value
+  });
+}
+
 function PauseTimerClick() {
   vscode.postMessage({
     command: "pause_timer"
@@ -50,18 +62,18 @@ function ExportLogsClick() {
 
 function SearchTextBoxKeyDown(e) {
   if (e.key === "Enter") {
-    RefreshButtonClick();
+    RefreshNoLogLoad();
   }
 }
 
 function HideTextBoxKeyDown(e) {
   if (e.key === "Enter") {
-    RefreshButtonClick();
+    RefreshNoLogLoad();
   }
 }
 
 function FilterTextBoxKeyDown(e) {
   if (e.key === "Enter") {
-    RefreshButtonClick();
+    RefreshNoLogLoad();
   }
 }

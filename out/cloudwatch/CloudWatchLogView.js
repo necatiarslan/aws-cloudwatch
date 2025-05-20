@@ -227,16 +227,6 @@ class CloudWatchLogView {
         return result;
     }
     IsHideEvent(event) {
-        if (this.FilterText.length > 0) {
-            let searchTerms = this.FilterText.split(",");
-            for (var term of searchTerms) {
-                const regex = new RegExp(term.trim(), "i");
-                if (event.message?.search(regex) !== -1) {
-                    return false;
-                }
-            }
-            return true;
-        }
         if (this.HideText.length > 0) {
             let hideTerms = this.HideText.split(",");
             for (var term of hideTerms) {
@@ -246,6 +236,16 @@ class CloudWatchLogView {
                 }
             }
             return false;
+        }
+        if (this.FilterText.length > 0) {
+            let searchTerms = this.FilterText.split(",");
+            for (var term of searchTerms) {
+                const regex = new RegExp(term.trim(), "i");
+                if (event.message?.search(regex) !== -1) {
+                    return false;
+                }
+            }
+            return true;
         }
         return false;
     }
@@ -260,7 +260,12 @@ class CloudWatchLogView {
                     this.HideText = message.hide_text;
                     this.FilterText = message.filter_text;
                     this.LoadLogs();
-                    ;
+                    this.RenderHtml();
+                    return;
+                case "refresh_nologload":
+                    this.SearchText = message.search_text;
+                    this.HideText = message.hide_text;
+                    this.FilterText = message.filter_text;
                     this.RenderHtml();
                     return;
                 case "pause_timer":
