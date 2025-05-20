@@ -114,7 +114,7 @@ async function GetLogStreams(Region, LogGroupName, LogStreamFilter) {
     return result;
 }
 exports.GetLogStreams = GetLogStreams;
-async function GetLogStreamList(Region, LogGroupName) {
+async function GetLogStreamList(Region, LogGroupName, IncludeEmptyLogStreams = false) {
     ui.logToOutput('api.GetLogStreamList Started');
     let result = new MethodResult_1.MethodResult();
     result.result = [];
@@ -123,6 +123,9 @@ async function GetLogStreamList(Region, LogGroupName) {
         if (logStreams.isSuccessful) {
             if (logStreams.result) {
                 for (var logStream of logStreams.result) {
+                    if (!IncludeEmptyLogStreams && !logStream.lastEventTimestamp) {
+                        continue;
+                    }
                     if (logStream.logStreamName) {
                         result.result.push(logStream.logStreamName);
                     }
