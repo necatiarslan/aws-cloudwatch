@@ -320,13 +320,13 @@ class CloudWatchTreeView {
         }
         CloudWatchLogView_1.CloudWatchLogView.Render(this.context.extensionUri, node.Region, node.LogGroup, node.LogStream);
     }
-    async SelectAwsProfile(node) {
+    async SelectAwsProfile() {
         ui.logToOutput('CloudWatchTreeView.SelectAwsProfile Started');
-        var result = await api.GetAwsProfileList();
+        const result = await api.GetAwsProfileList();
         if (!result.isSuccessful) {
             return;
         }
-        let selectedAwsProfile = await vscode.window.showQuickPick(result.result, { canPickMany: false, placeHolder: 'Select Aws Profile' });
+        const selectedAwsProfile = await vscode.window.showQuickPick(result.result, { canPickMany: false, placeHolder: 'Select Aws Profile' });
         if (!selectedAwsProfile) {
             return;
         }
