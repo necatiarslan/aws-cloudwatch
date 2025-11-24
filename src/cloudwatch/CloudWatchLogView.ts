@@ -20,6 +20,10 @@ export class CloudWatchLogView {
     public SearchText:string = "";
     public HideText:string = "";
     public FilterText:string = "";
+    public WrapText:boolean = true; // Default to wrapped text
+    public UseDateTimeFilter:boolean = false; // Date/Time filter checkbox
+    public FilterStartDate:string = ""; // YYYY-MM-DD format
+    public FilterStartTime:string = "00"; // HH format (0-23)
 
     private Timer: ReturnType<typeof setInterval> | undefined;
 
@@ -88,6 +92,38 @@ export class CloudWatchLogView {
     public ResetCurrentState(){
         this.LogEvents = [];
         this.StartTime = 0;
+    }
+
+    /**
+     * Get the first log event timestamp for default date/time filter values
+     */
+    private GetFirstLogTimestamp(): Date | null {
+        if (this.LogEvents && this.LogEvents.length > 0 && this.LogEvents[0].timestamp) {
+            return new Date(this.LogEvents[0].timestamp);
+        }
+        return null;
+    }
+
+    /**
+     * Get default filter date in YYYY-MM-DD format from first log
+     */
+    private GetDefaultFilterDate(): string {
+        const firstLog = this.GetFirstLogTimestamp();
+        if (firstLog) {
+            return firstLog.toISOString().split('T')[0];
+        }
+        return new Date().toISOString().split('T')[0];
+    }
+
+    /**
+     * Get default filter time (hour) from first log
+     */
+    private GetDefaultFilterTime(): string {
+        const firstLog = this.GetFirstLogTimestamp();
+        if (firstLog) {
+            return firstLog.getHours().toString().padStart(2, '0');
+        }
+        return '00';
     }
 
     public static Render(extensionUri: vscode.Uri, Region: string, LogGroup:string, LogStream:string) {
@@ -178,7 +214,11 @@ export class CloudWatchLogView {
                 {
                     timeString = new Date(event.timestamp).toLocaleTimeString();
                 }
-                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: top;" >' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
+                // Apply wrapping styles based on WrapText state
+                const messageStyle = this.WrapText 
+                    ? 'word-wrap: break-word; overflow-wrap: break-word; white-space: normal; vertical-align: top;'
+                    : 'white-space: nowrap; vertical-align: top;';
+                logRowHtml += '<tr><td>' + rowNumber.toString() + '</td><td style="' + messageStyle + '" >' + this.SetCustomColorCoding(event.message) + '</td><td style="white-space:nowrap;">' + timeString + '</td></tr>';
             }
         }
         else
@@ -226,6 +266,28 @@ export class CloudWatchLogView {
                     <vscode-textfield id="hide_text" placeholder="Hide" value="${this.HideText}" style="width: 20ch; margin: 0;" >
                         <vscode-icon slot="content-before" name="eye-closed" title="eye-closed"></vscode-icon>
                     </vscode-textfield>
+                    <vscode-checkbox id="wrap_text" ${this.WrapText ? 'checked' : ''} style="margin-left: 10px;">
+                        Wrap
+                    </vscode-checkbox>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align:right; padding-top: 10px;">
+                    <vscode-checkbox id="use_datetime_filter" ${this.UseDateTimeFilter ? 'checked' : ''} style="margin-right: 10px;">
+                        Date/Time Filter
+                    </vscode-checkbox>
+                    <label style="margin-right: 5px;">From:</label>
+                    <input type="date" id="filter_start_date" value="${this.FilterStartDate || this.GetDefaultFilterDate()}" 
+                           style="padding: 4px 8px; margin-right: 10px; background: var(--vscode-input-background); 
+                                  color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border);" 
+                           ${!this.UseDateTimeFilter ? 'disabled' : ''} />
+                    <label style="margin-right: 5px;">Hour:</label>
+                    <select id="filter_start_time" 
+                            style="padding: 4px 8px; background: var(--vscode-input-background); 
+                                   color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border);" 
+                            ${!this.UseDateTimeFilter ? 'disabled' : ''}>
+                        ${this.GenerateHourOptions(this.FilterStartTime || this.GetDefaultFilterTime())}
+                    </select>
                 </td>
             </tr>
         </table>
@@ -273,8 +335,28 @@ export class CloudWatchLogView {
         return result;
     }
 
+    /**
+     * Generate HTML options for hour selection (0-23)
+     */
+    private GenerateHourOptions(selectedHour: string): string {
+        let options = '';
+        for (let i = 0; i < 24; i++) {
+            const hourValue = i.toString().padStart(2, '0');
+            const selected = hourValue === selectedHour ? 'selected' : '';
+            options += `<option value="${hourValue}" ${selected}>${hourValue}:00</option>`;
+        }
+        return options;
+    }
+
     private IsHideEvent(event: OutputLogEvent) : boolean
     {
+        // Check date/time filter first
+        if (this.UseDateTimeFilter && event.timestamp) {
+            if (!this.IsEventInDateTimeRange(event)) {
+                return true; // Hide events outside the date/time range
+            }
+        }
+
         if(this.HideText.length > 0)
         {
             let hideTerms = this.HideText.split(",");
@@ -298,6 +380,21 @@ export class CloudWatchLogView {
         return false;
     }
 
+    /**
+     * Check if log event is within the selected date/time range
+     */
+    private IsEventInDateTimeRange(event: OutputLogEvent): boolean {
+        if (!event.timestamp || !this.FilterStartDate || !this.FilterStartTime) {
+            return true;
+        }
+
+        const eventDate = new Date(event.timestamp);
+        const filterDateTime = new Date(`${this.FilterStartDate}T${this.FilterStartTime}:00:00`);
+        
+        // Show events from the selected date/time onwards
+        return eventDate >= filterDateTime;
+    }
+
     private _setWebviewMessageListener(webview: vscode.Webview) {
         ui.logToOutput('CloudWatchLogView._setWebviewMessageListener Started');
         webview.onDidReceiveMessage(
@@ -310,6 +407,10 @@ export class CloudWatchLogView {
                         this.SearchText = message.search_text;
                         this.HideText = message.hide_text;
                         this.FilterText = message.filter_text;
+                        this.WrapText = message.wrap_text !== undefined ? message.wrap_text : this.WrapText;
+                        this.UseDateTimeFilter = message.use_datetime_filter !== undefined ? message.use_datetime_filter : this.UseDateTimeFilter;
+                        this.FilterStartDate = message.filter_start_date || this.FilterStartDate;
+                        this.FilterStartTime = message.filter_start_time || this.FilterStartTime;
                         this.LoadLogs();
                         this.RenderHtml();
                         return;
@@ -318,6 +419,10 @@ export class CloudWatchLogView {
                         this.SearchText = message.search_text;
                         this.HideText = message.hide_text;
                         this.FilterText = message.filter_text;
+                        this.WrapText = message.wrap_text !== undefined ? message.wrap_text : this.WrapText;
+                        this.UseDateTimeFilter = message.use_datetime_filter !== undefined ? message.use_datetime_filter : this.UseDateTimeFilter;
+                        this.FilterStartDate = message.filter_start_date || this.FilterStartDate;
+                        this.FilterStartTime = message.filter_start_time || this.FilterStartTime;
                         this.RenderHtml();
                         return;
 
@@ -328,6 +433,27 @@ export class CloudWatchLogView {
                     
                     case "export_logs":
                         this.ExportLogs();
+                        return;
+                    
+                    case "toggle_wrap":
+                        this.WrapText = message.wrap_text;
+                        this.RenderHtml();
+                        return;
+                    
+                    case "toggle_datetime_filter":
+                        this.UseDateTimeFilter = message.use_datetime_filter;
+                        if (this.UseDateTimeFilter && !this.FilterStartDate) {
+                            // Set defaults from first log if not already set
+                            this.FilterStartDate = this.GetDefaultFilterDate();
+                            this.FilterStartTime = this.GetDefaultFilterTime();
+                        }
+                        this.RenderHtml();
+                        return;
+                    
+                    case "update_datetime_filter":
+                        this.FilterStartDate = message.filter_start_date;
+                        this.FilterStartTime = message.filter_start_time;
+                        this.RenderHtml();
                         return;
                 }
 

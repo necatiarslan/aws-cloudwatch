@@ -17,22 +17,42 @@ function main() {
   HideTextBox.addEventListener("keydown", HideTextBoxKeyDown);
 
   const FilterTextBox = document.getElementById("filter_text");
-  FilterTextBox.addEventListener("keydown", HideTextBoxKeyDown);
+  FilterTextBox.addEventListener("keydown", FilterTextBoxKeyDown);
 
   const RefreshButton = document.getElementById("refresh");
   RefreshButton.addEventListener("click", RefreshButtonClick);
 
+  const WrapCheckbox = document.getElementById("wrap_text");
+  WrapCheckbox.addEventListener("change", WrapCheckboxChange);
+
+  const UseDateTimeFilterCheckbox = document.getElementById("use_datetime_filter");
+  UseDateTimeFilterCheckbox.addEventListener("change", UseDateTimeFilterCheckboxChange);
+
+  const FilterStartDate = document.getElementById("filter_start_date");
+  FilterStartDate.addEventListener("change", DateTimeFilterChange);
+
+  const FilterStartTime = document.getElementById("filter_start_time");
+  FilterStartTime.addEventListener("change", DateTimeFilterChange);
 }
 
 function RefreshButtonClick() {
   const SearchTextBox = document.getElementById("search_text");
   const HideTextBox = document.getElementById("hide_text");
   const FilterTextBox = document.getElementById("filter_text");
+  const WrapCheckbox = document.getElementById("wrap_text");
+  const UseDateTimeFilterCheckbox = document.getElementById("use_datetime_filter");
+  const FilterStartDate = document.getElementById("filter_start_date");
+  const FilterStartTime = document.getElementById("filter_start_time");
+
   vscode.postMessage({
     command: "refresh",
     search_text: SearchTextBox._value,
     hide_text: HideTextBox._value,
-    filter_text: FilterTextBox._value
+    filter_text: FilterTextBox._value,
+    wrap_text: WrapCheckbox.checked,
+    use_datetime_filter: UseDateTimeFilterCheckbox.checked,
+    filter_start_date: FilterStartDate.value,
+    filter_start_time: FilterStartTime.value
   });
 }
 
@@ -40,11 +60,20 @@ function RefreshNoLogLoad() {
   const SearchTextBox = document.getElementById("search_text");
   const HideTextBox = document.getElementById("hide_text");
   const FilterTextBox = document.getElementById("filter_text");
+  const WrapCheckbox = document.getElementById("wrap_text");
+  const UseDateTimeFilterCheckbox = document.getElementById("use_datetime_filter");
+  const FilterStartDate = document.getElementById("filter_start_date");
+  const FilterStartTime = document.getElementById("filter_start_time");
+
   vscode.postMessage({
     command: "refresh_nologload",
     search_text: SearchTextBox._value,
     hide_text: HideTextBox._value,
-    filter_text: FilterTextBox._value
+    filter_text: FilterTextBox._value,
+    wrap_text: WrapCheckbox.checked,
+    use_datetime_filter: UseDateTimeFilterCheckbox.checked,
+    filter_start_date: FilterStartDate.value,
+    filter_start_time: FilterStartTime.value
   });
 }
 
@@ -57,6 +86,13 @@ function PauseTimerClick() {
 function ExportLogsClick() {
   vscode.postMessage({
     command: "export_logs"
+  });
+}
+
+function WrapCheckboxChange(e) {
+  vscode.postMessage({
+    command: "toggle_wrap",
+    wrap_text: e.target.checked
   });
 }
 
@@ -76,4 +112,29 @@ function FilterTextBoxKeyDown(e) {
   if (e.key === "Enter") {
     RefreshNoLogLoad();
   }
+}
+
+function UseDateTimeFilterCheckboxChange(e) {
+  // Enable/disable the date and time inputs
+  const FilterStartDate = document.getElementById("filter_start_date");
+  const FilterStartTime = document.getElementById("filter_start_time");
+
+  FilterStartDate.disabled = !e.target.checked;
+  FilterStartTime.disabled = !e.target.checked;
+
+  vscode.postMessage({
+    command: "toggle_datetime_filter",
+    use_datetime_filter: e.target.checked
+  });
+}
+
+function DateTimeFilterChange() {
+  const FilterStartDate = document.getElementById("filter_start_date");
+  const FilterStartTime = document.getElementById("filter_start_time");
+
+  vscode.postMessage({
+    command: "update_datetime_filter",
+    filter_start_date: FilterStartDate.value,
+    filter_start_time: FilterStartTime.value
+  });
 }
