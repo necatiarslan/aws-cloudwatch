@@ -4,6 +4,8 @@ import * as ui from '../common/ui';
 import * as api from '../common/api';
 import { OutputLogEvent } from "@aws-sdk/client-cloudwatch-logs";
 import { CloudWatchTreeView } from "./CloudWatchTreeView";
+import * as tmp from 'tmp';
+import * as fs from 'fs';
 
 export class CloudWatchLogView {
     public static Current: CloudWatchLogView | undefined;
@@ -427,7 +429,11 @@ export class CloudWatchLogView {
                         return;
 
                     case "pause_timer":
-                        this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
+                        if (this.IsTimerTicking()) {
+                            this.StopTimer();
+                        } else {
+                            this.StartTimer();
+                        }
                         this.RenderHtml();
                         return;
                     
@@ -511,13 +517,10 @@ export class CloudWatchLogView {
 
         try 
         {
-            const tmp = require('tmp');
-            var fs = require('fs');
-    
-            let fileName = this.LogStream.replace(/[^a-zA-Z0-9]/g, "_");
+            const fileName = this.LogStream.replace(/[^a-zA-Z0-9]/g, "_");
             const tmpFile = tmp.fileSync({ mode: 0o644, prefix: fileName, postfix: '.log' });
             fs.appendFileSync(tmpFile.name, this.Region + "/" + this.LogGroup + "/" + this.LogStream);
-            for(var message of this.LogEvents)
+            for(const message of this.LogEvents)
             {
                 fs.appendFileSync(tmpFile.name, "\n" + "----------------------------------------------------------");
                 fs.appendFileSync(tmpFile.name, "\n" + message.message);
@@ -525,10 +528,10 @@ export class CloudWatchLogView {
             fs.appendFileSync(tmpFile.name, "\n" + "---------------------------END OF LOGS--------------------");
             ui.openFile(tmpFile.name);    
         } 
-        catch (error:any) 
+        catch (error: unknown) 
         {
-            ui.showErrorMessage('ExportLogs Error !!!', error);
-            ui.logToOutput("ExportLogs Error !!!", error); 
+            ui.showErrorMessage('ExportLogs Error !!!', error as Error);
+            ui.logToOutput("ExportLogs Error !!!", error as Error); 
         }
 
     }

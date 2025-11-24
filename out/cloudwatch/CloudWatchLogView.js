@@ -1,11 +1,36 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CloudWatchLogView = void 0;
 /* eslint-disable @typescript-eslint/naming-convention */
-const vscode = require("vscode");
-const ui = require("../common/ui");
-const api = require("../common/api");
+const vscode = __importStar(require("vscode"));
+const ui = __importStar(require("../common/ui"));
+const api = __importStar(require("../common/api"));
 const CloudWatchTreeView_1 = require("./CloudWatchTreeView");
+const tmp = __importStar(require("tmp"));
+const fs = __importStar(require("fs"));
 class CloudWatchLogView {
     constructor(panel, extensionUri, Region, LogGroup, LogStream) {
         this._disposables = [];
@@ -370,7 +395,12 @@ class CloudWatchLogView {
                     this.RenderHtml();
                     return;
                 case "pause_timer":
-                    this.IsTimerTicking() ? this.StopTimer() : this.StartTimer();
+                    if (this.IsTimerTicking()) {
+                        this.StopTimer();
+                    }
+                    else {
+                        this.StartTimer();
+                    }
                     this.RenderHtml();
                     return;
                 case "export_logs":
@@ -433,12 +463,10 @@ class CloudWatchLogView {
     async ExportLogs() {
         ui.logToOutput('CloudWatchLogView.ExportLogs Started');
         try {
-            const tmp = require('tmp');
-            var fs = require('fs');
-            let fileName = this.LogStream.replace(/[^a-zA-Z0-9]/g, "_");
+            const fileName = this.LogStream.replace(/[^a-zA-Z0-9]/g, "_");
             const tmpFile = tmp.fileSync({ mode: 0o644, prefix: fileName, postfix: '.log' });
             fs.appendFileSync(tmpFile.name, this.Region + "/" + this.LogGroup + "/" + this.LogStream);
-            for (var message of this.LogEvents) {
+            for (const message of this.LogEvents) {
                 fs.appendFileSync(tmpFile.name, "\n" + "----------------------------------------------------------");
                 fs.appendFileSync(tmpFile.name, "\n" + message.message);
             }
