@@ -73,6 +73,11 @@
         "title": "Remove Log Stream"
       },
       {
+        "command": "CloudWatchTreeView.PinLogStream",
+        "title": "Pin Log Stream",
+        "icon": "$(pin)"
+      },
+      {
         "command": "CloudWatchTreeView.AddAllLogStreams",
         "title": "Add All Log Streams"
       },
@@ -182,6 +187,11 @@
           "command": "CloudWatchTreeView.ShowCloudWatchLogView",
           "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/",
           "group": "inline"
+        },
+        {
+          "command": "CloudWatchTreeView.PinLogStream",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/ && viewItem =~ /#NotPinned#/",
+          "group": "inline@2"
         }
       ]
     },

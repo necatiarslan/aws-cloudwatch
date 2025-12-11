@@ -44,7 +44,7 @@ export async function GetCloudWatchLogsClient(Region:string | undefined = CloudW
   });
 }
 
-import { DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
+import { DescribeLogGroupsCommand, LogGroup } from "@aws-sdk/client-cloudwatch-logs";
 
 export async function GetLogGroupList(Region: string, LogGroupNamePattern?: string): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogGroupList Started');
@@ -81,6 +81,31 @@ export async function GetLogGroupList(Region: string, LogGroupNamePattern?: stri
     result.error = error;
     ui.showErrorMessage('api.GetLogGroupList Error !!!', error);
     ui.logToOutput("api.GetLogGroupList Error !!!", error); 
+  }
+
+  return result;
+}
+
+export async function GetLogGroupInfo(Region: string, LogGroupName: string): Promise<MethodResult<LogGroup | undefined>> {
+  ui.logToOutput('api.GetLogGroupInfo Started');
+  const result = new MethodResult<LogGroup | undefined>();
+
+  try {
+    const client = await GetCloudWatchLogsClient(Region);
+    const command:DescribeLogGroupsCommand = new DescribeLogGroupsCommand({
+      logGroupNamePattern: LogGroupName,
+      limit: 1,
+    });
+
+    const response = await client.send(command);
+    const match = response.logGroups?.find(lg => lg.logGroupName === LogGroupName);
+    result.result = match;
+    result.isSuccessful = true;
+  } catch (error:any) {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.showErrorMessage('api.GetLogGroupInfo Error !!!', error);
+    ui.logToOutput('api.GetLogGroupInfo Error !!!', error);
   }
 
   return result;

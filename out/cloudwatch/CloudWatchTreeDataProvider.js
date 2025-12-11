@@ -38,6 +38,7 @@ exports.ViewType = exports.CloudWatchTreeDataProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const CloudWatchTreeItem_1 = require("./CloudWatchTreeItem");
 const CloudWatchTreeView_1 = require("./CloudWatchTreeView");
+const api = __importStar(require("../common/API"));
 class CloudWatchTreeDataProvider {
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter();
@@ -146,26 +147,30 @@ class CloudWatchTreeDataProvider {
             treeItem.Region = lg.Region;
             treeItem.LogGroup = lg.LogGroup;
             treeItem.LogStream = lg.LogStream;
+            treeItem.IsPinned = true;
             this.LogStreamNodeList.push(treeItem);
         }
     }
-    getChildren(node) {
-        let result = [];
-        result = this.GetNodesRegionLogGroupLogStream(node);
-        return Promise.resolve(result);
-    }
-    GetNodesRegionLogGroupLogStream(node) {
-        let result = [];
+    async getChildren(node) {
         if (!node) {
-            result = this.GetRegionNodes();
+            return this.GetRegionNodes();
         }
-        else if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.Region) {
-            result = this.GetLogGroupNodesParentRegion(node);
+        switch (node.TreeItemType) {
+            case CloudWatchTreeItem_1.TreeItemType.Region:
+                return this.GetLogGroupNodesParentRegion(node);
+            case CloudWatchTreeItem_1.TreeItemType.LogGroup:
+                return await this.GetLogGroupChildren(node);
+            case CloudWatchTreeItem_1.TreeItemType.Info:
+                return await this.GetLogGroupInfoChildren(node);
+            case CloudWatchTreeItem_1.TreeItemType.Today:
+                return await this.GetDateFilteredLogStreams(node, 0);
+            case CloudWatchTreeItem_1.TreeItemType.Yesterday:
+                return await this.GetDateFilteredLogStreams(node, -1);
+            case CloudWatchTreeItem_1.TreeItemType.History:
+                return this.GetHistoryChildren(node);
+            default:
+                return [];
         }
-        else if (node.TreeItemType === CloudWatchTreeItem_1.TreeItemType.LogGroup) {
-            result = this.GetLogStreamNodesParentLogGroup(node);
-        }
-        return result;
     }
     GetRegionNodes() {
         var result = [];
@@ -227,6 +232,138 @@ class CloudWatchTreeDataProvider {
             result.push(node);
         }
         return result;
+    }
+    async GetLogGroupChildren(logGroupNode) {
+        const result = [];
+        const infoNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Info', CloudWatchTreeItem_1.TreeItemType.Info);
+        infoNode.Region = logGroupNode.Region;
+        infoNode.LogGroup = logGroupNode.LogGroup;
+        infoNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        infoNode.Parent = logGroupNode;
+        result.push(infoNode);
+        const todayNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Today', CloudWatchTreeItem_1.TreeItemType.Today);
+        todayNode.Region = logGroupNode.Region;
+        todayNode.LogGroup = logGroupNode.LogGroup;
+        todayNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        todayNode.Parent = logGroupNode;
+        result.push(todayNode);
+        const yesterdayNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Yesterday', CloudWatchTreeItem_1.TreeItemType.Yesterday);
+        yesterdayNode.Region = logGroupNode.Region;
+        yesterdayNode.LogGroup = logGroupNode.LogGroup;
+        yesterdayNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        yesterdayNode.Parent = logGroupNode;
+        result.push(yesterdayNode);
+        const historyNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('History', CloudWatchTreeItem_1.TreeItemType.History);
+        historyNode.Region = logGroupNode.Region;
+        historyNode.LogGroup = logGroupNode.LogGroup;
+        historyNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        historyNode.Parent = logGroupNode;
+        result.push(historyNode);
+        const detailedStreams = await this.GetLogStreamsDetailed(logGroupNode.Region, logGroupNode.LogGroup);
+        for (var node of this.LogStreamNodeList) {
+            if (!(node.Region === logGroupNode.Region && node.LogGroup === logGroupNode.LogGroup)) {
+                continue;
+            }
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString && !node.IsFilterStringMatch(CloudWatchTreeView_1.CloudWatchTreeView.Current.FilterString)) {
+                continue;
+            }
+            if (CloudWatchTreeView_1.CloudWatchTreeView.Current && CloudWatchTreeView_1.CloudWatchTreeView.Current.isShowOnlyFavorite && !(node.IsFav || node.IsAnyChidrenFav())) {
+                continue;
+            }
+            node.Parent = logGroupNode;
+            const match = detailedStreams.find(ds => ds.logStreamName === node.LogStream);
+            node.description = this.FormatLastEventTime(match?.lastEventTimestamp);
+            if (logGroupNode.Children.indexOf(node) === -1) {
+                logGroupNode.Children.push(node);
+            }
+            result.push(node);
+        }
+        return result;
+    }
+    async GetLogGroupInfoChildren(infoNode) {
+        const result = [];
+        if (!infoNode.Region || !infoNode.LogGroup) {
+            return result;
+        }
+        const info = await api.GetLogGroupInfo(infoNode.Region, infoNode.LogGroup);
+        if (!info.isSuccessful || !info.result) {
+            return result;
+        }
+        const detailMap = [
+            { label: 'Log class', value: info.result.logGroupClass },
+            { label: 'ARN', value: info.result.arn },
+            { label: 'Creation time', value: info.result.creationTime ? new Date(info.result.creationTime).toLocaleString() : undefined },
+            { label: 'Retention (days)', value: info.result.retentionInDays },
+        ];
+        for (const detail of detailMap) {
+            const detailNode = new CloudWatchTreeItem_1.CloudWatchTreeItem(`${detail.label}: ${detail.value ?? 'N/A'}`, CloudWatchTreeItem_1.TreeItemType.InfoDetail);
+            detailNode.Region = infoNode.Region;
+            detailNode.LogGroup = infoNode.LogGroup;
+            detailNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
+            detailNode.Parent = infoNode;
+            result.push(detailNode);
+        }
+        return result;
+    }
+    async GetDateFilteredLogStreams(dateNode, dayOffset) {
+        const result = [];
+        if (!dateNode.Region || !dateNode.LogGroup) {
+            return result;
+        }
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        start.setDate(start.getDate() + dayOffset);
+        const end = new Date(start.getTime() + 86400000);
+        const detailedStreams = await this.GetLogStreamsDetailed(dateNode.Region, dateNode.LogGroup);
+        for (const ds of detailedStreams) {
+            if (!ds.lastEventTimestamp) {
+                continue;
+            }
+            if (ds.lastEventTimestamp < start.getTime() || ds.lastEventTimestamp >= end.getTime()) {
+                continue;
+            }
+            if (!ds.logStreamName) {
+                continue;
+            }
+            const streamNode = new CloudWatchTreeItem_1.CloudWatchTreeItem(ds.logStreamName, CloudWatchTreeItem_1.TreeItemType.LogStream);
+            streamNode.Region = dateNode.Region;
+            streamNode.LogGroup = dateNode.LogGroup;
+            streamNode.LogStream = ds.logStreamName;
+            streamNode.description = this.FormatLastEventTime(ds.lastEventTimestamp);
+            streamNode.IsPinned = false;
+            streamNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
+            streamNode.Parent = dateNode;
+            result.push(streamNode);
+        }
+        const refreshNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Refresh', CloudWatchTreeItem_1.TreeItemType.RefreshAction);
+        refreshNode.command = { command: 'CloudWatchTreeView.Refresh', title: 'Refresh' };
+        refreshNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
+        refreshNode.Parent = dateNode;
+        result.push(refreshNode);
+        return result;
+    }
+    GetHistoryChildren(historyNode) {
+        const refreshNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Refresh by Date', CloudWatchTreeItem_1.TreeItemType.RefreshAction);
+        refreshNode.command = { command: 'CloudWatchTreeView.AddLogStreamsByDate', title: 'Add by Date', arguments: [historyNode.Parent] };
+        refreshNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
+        refreshNode.Parent = historyNode;
+        return [refreshNode];
+    }
+    async GetLogStreamsDetailed(Region, LogGroup) {
+        if (!Region || !LogGroup) {
+            return [];
+        }
+        const result = await api.GetLogStreams(Region, LogGroup);
+        if (result.isSuccessful && result.result) {
+            return result.result;
+        }
+        return [];
+    }
+    FormatLastEventTime(timestamp) {
+        if (!timestamp) {
+            return undefined;
+        }
+        return new Date(timestamp).toLocaleString();
     }
     GetLogStreamNodesParentLogGroup(LogGroupNode) {
         var result = [];

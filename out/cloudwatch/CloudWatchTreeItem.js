@@ -58,12 +58,20 @@ class CloudWatchTreeItem extends vscode.TreeItem {
         this._profileToShow = value;
         this.setContextValue();
     }
+    get IsPinned() {
+        return this._isPinned;
+    }
+    set IsPinned(value) {
+        this._isPinned = value;
+        this.setContextValue();
+    }
     constructor(text, treeItemType) {
         super(text);
         this.Children = [];
         this._profileToShow = "";
         this._isHidden = false;
         this._isFav = false;
+        this._isPinned = false;
         this.Text = text;
         this.TreeItemType = treeItemType;
         this.refreshUI();
@@ -72,6 +80,7 @@ class CloudWatchTreeItem extends vscode.TreeItem {
         let contextValue = "#";
         contextValue += this.IsFav ? "Fav#" : "!Fav#";
         contextValue += this.IsHidden ? "Hidden#" : "!Hidden#";
+        contextValue += this.IsPinned ? "Pinned#" : "NotPinned#";
         contextValue += this.ProfileToShow ? "Profile#" : "NoProfile#";
         switch (this.TreeItemType) {
             case TreeItemType.Region:
@@ -83,6 +92,24 @@ class CloudWatchTreeItem extends vscode.TreeItem {
             case TreeItemType.LogStream:
                 contextValue += "LogStream#";
                 break;
+            case TreeItemType.Info:
+                contextValue += "Info#";
+                break;
+            case TreeItemType.InfoDetail:
+                contextValue += "InfoDetail#";
+                break;
+            case TreeItemType.Today:
+                contextValue += "Today#";
+                break;
+            case TreeItemType.Yesterday:
+                contextValue += "Yesterday#";
+                break;
+            case TreeItemType.History:
+                contextValue += "History#";
+                break;
+            case TreeItemType.RefreshAction:
+                contextValue += "RefreshAction#";
+                break;
         }
         this.contextValue = contextValue;
     }
@@ -92,6 +119,18 @@ class CloudWatchTreeItem extends vscode.TreeItem {
         }
         else if (this.TreeItemType === TreeItemType.LogGroup) {
             this.iconPath = new vscode.ThemeIcon('folder');
+        }
+        else if (this.TreeItemType === TreeItemType.Info) {
+            this.iconPath = new vscode.ThemeIcon('info');
+        }
+        else if (this.TreeItemType === TreeItemType.InfoDetail) {
+            this.iconPath = new vscode.ThemeIcon('circle-filled');
+        }
+        else if (this.TreeItemType === TreeItemType.Today || this.TreeItemType === TreeItemType.Yesterday || this.TreeItemType === TreeItemType.History) {
+            this.iconPath = new vscode.ThemeIcon('calendar');
+        }
+        else if (this.TreeItemType === TreeItemType.RefreshAction) {
+            this.iconPath = new vscode.ThemeIcon('refresh');
         }
         else if (this.TreeItemType === TreeItemType.LogStream) {
             this.iconPath = new vscode.ThemeIcon('output');
@@ -142,5 +181,11 @@ var TreeItemType;
     TreeItemType[TreeItemType["Region"] = 1] = "Region";
     TreeItemType[TreeItemType["LogGroup"] = 2] = "LogGroup";
     TreeItemType[TreeItemType["LogStream"] = 3] = "LogStream";
+    TreeItemType[TreeItemType["Info"] = 4] = "Info";
+    TreeItemType[TreeItemType["InfoDetail"] = 5] = "InfoDetail";
+    TreeItemType[TreeItemType["Today"] = 6] = "Today";
+    TreeItemType[TreeItemType["Yesterday"] = 7] = "Yesterday";
+    TreeItemType[TreeItemType["History"] = 8] = "History";
+    TreeItemType[TreeItemType["RefreshAction"] = 9] = "RefreshAction";
 })(TreeItemType || (exports.TreeItemType = TreeItemType = {}));
 //# sourceMappingURL=CloudWatchTreeItem.js.map

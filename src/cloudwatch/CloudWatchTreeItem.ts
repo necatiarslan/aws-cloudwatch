@@ -7,11 +7,14 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 	public Region:string | undefined;
 	public LogGroup:string | undefined;
 	public LogStream:string | undefined;
+	public DetailValue:string | undefined;
+	public DateFilter:Date | undefined;
 	public Parent:CloudWatchTreeItem | undefined;
 	public Children:CloudWatchTreeItem[] = [];
 	private _profileToShow: string = "";
 	private _isHidden: boolean = false;
 	private _isFav: boolean = false;
+	private _isPinned: boolean = false;
 
 	public get IsFav(): boolean {
 		return this._isFav;
@@ -37,6 +40,14 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 		this.setContextValue();
 	}
 
+	public get IsPinned(): boolean {
+		return this._isPinned;
+	}
+	public set IsPinned(value: boolean) {
+		this._isPinned = value;
+		this.setContextValue();
+	}
+
 	constructor(text:string, treeItemType:TreeItemType) {
 		super(text);
 		this.Text = text;
@@ -48,6 +59,7 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 		let contextValue = "#";
 		contextValue += this.IsFav ? "Fav#" : "!Fav#";
 		contextValue += this.IsHidden ? "Hidden#" : "!Hidden#";
+		contextValue += this.IsPinned ? "Pinned#" : "NotPinned#";
 		contextValue += this.ProfileToShow ? "Profile#" : "NoProfile#";
 		switch(this.TreeItemType)
 		{
@@ -59,6 +71,24 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 				break;
 			case TreeItemType.LogStream:
 				contextValue += "LogStream#";
+				break;
+			case TreeItemType.Info:
+				contextValue += "Info#";
+				break;
+			case TreeItemType.InfoDetail:
+				contextValue += "InfoDetail#";
+				break;
+			case TreeItemType.Today:
+				contextValue += "Today#";
+				break;
+			case TreeItemType.Yesterday:
+				contextValue += "Yesterday#";
+				break;
+			case TreeItemType.History:
+				contextValue += "History#";
+				break;
+			case TreeItemType.RefreshAction:
+				contextValue += "RefreshAction#";
 				break;
 		}
 
@@ -74,6 +104,22 @@ export class CloudWatchTreeItem extends vscode.TreeItem {
 		else if(this.TreeItemType === TreeItemType.LogGroup)
 		{
 			this.iconPath = new vscode.ThemeIcon('folder');
+		}
+		else if(this.TreeItemType === TreeItemType.Info)
+		{
+			this.iconPath = new vscode.ThemeIcon('info');
+		}
+		else if(this.TreeItemType === TreeItemType.InfoDetail)
+		{
+			this.iconPath = new vscode.ThemeIcon('circle-filled');
+		}
+		else if(this.TreeItemType === TreeItemType.Today || this.TreeItemType === TreeItemType.Yesterday || this.TreeItemType === TreeItemType.History)
+		{
+			this.iconPath = new vscode.ThemeIcon('calendar');
+		}
+		else if(this.TreeItemType === TreeItemType.RefreshAction)
+		{
+			this.iconPath = new vscode.ThemeIcon('refresh');
 		}
 		else if(this.TreeItemType === TreeItemType.LogStream)
 		{
@@ -142,4 +188,10 @@ export enum TreeItemType{
 	Region = 1,
 	LogGroup = 2,
 	LogStream = 3,
+	Info = 4,
+	InfoDetail = 5,
+	Today = 6,
+	Yesterday = 7,
+	History = 8,
+	RefreshAction = 9,
 }

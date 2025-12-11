@@ -37,6 +37,7 @@ exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir 
 exports.GetCredentials = GetCredentials;
 exports.GetCloudWatchLogsClient = GetCloudWatchLogsClient;
 exports.GetLogGroupList = GetLogGroupList;
+exports.GetLogGroupInfo = GetLogGroupInfo;
 exports.GetLogStreams = GetLogStreams;
 exports.GetLogStreamList = GetLogStreamList;
 exports.GetLogEvents = GetLogEvents;
@@ -112,6 +113,28 @@ async function GetLogGroupList(Region, LogGroupNamePattern) {
         result.error = error;
         ui.showErrorMessage('api.GetLogGroupList Error !!!', error);
         ui.logToOutput("api.GetLogGroupList Error !!!", error);
+    }
+    return result;
+}
+async function GetLogGroupInfo(Region, LogGroupName) {
+    ui.logToOutput('api.GetLogGroupInfo Started');
+    const result = new MethodResult_1.MethodResult();
+    try {
+        const client = await GetCloudWatchLogsClient(Region);
+        const command = new client_cloudwatch_logs_2.DescribeLogGroupsCommand({
+            logGroupNamePattern: LogGroupName,
+            limit: 1,
+        });
+        const response = await client.send(command);
+        const match = response.logGroups?.find(lg => lg.logGroupName === LogGroupName);
+        result.result = match;
+        result.isSuccessful = true;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.showErrorMessage('api.GetLogGroupInfo Error !!!', error);
+        ui.logToOutput('api.GetLogGroupInfo Error !!!', error);
     }
     return result;
 }

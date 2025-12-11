@@ -150,6 +150,17 @@ export function activate(context: vscode.ExtensionContext): void {
 		);
 
 		context.subscriptions.push(
+			vscode.commands.registerCommand('CloudWatchTreeView.PinLogStream', async (node: CloudWatchTreeItem) => {
+				try {
+					await treeView.PinLogStream(node);
+				} catch (error) {
+					ui.showErrorMessage('Failed to pin log stream', error as Error);
+					ui.logToOutput('CloudWatchTreeView.PinLogStream Error', error as Error);
+				}
+			})
+		);
+
+		context.subscriptions.push(
 			vscode.commands.registerCommand('CloudWatchTreeView.AddAllLogStreams', async (node: CloudWatchTreeItem) => {
 				try {
 					await treeView.AddAllLogStreams(node);

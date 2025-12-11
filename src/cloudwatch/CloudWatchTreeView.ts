@@ -326,6 +326,17 @@ export class CloudWatchTreeView {
 		this.SaveState();
 	}
 
+	async PinLogStream(node: CloudWatchTreeItem) {
+		ui.logToOutput('CloudWatchTreeView.PinLogStream Started');
+
+		if(node.TreeItemType !== TreeItemType.LogStream) { return; }
+		if(!node.Region || !node.LogGroup || !node.LogStream ) { return; }
+
+		this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, node.LogStream);
+		this.SaveState();
+		this.Refresh();
+	}
+
 	async RemoveAllLogStreams(node: CloudWatchTreeItem) {
 		ui.logToOutput('CloudWatchTreeView.RemoveAllLogStreams Started');
 		

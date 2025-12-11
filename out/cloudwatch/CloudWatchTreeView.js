@@ -333,6 +333,18 @@ class CloudWatchTreeView {
         this.treeDataProvider.RemoveLogStream(node.Region, node.LogGroup, node.LogStream);
         this.SaveState();
     }
+    async PinLogStream(node) {
+        ui.logToOutput('CloudWatchTreeView.PinLogStream Started');
+        if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogStream) {
+            return;
+        }
+        if (!node.Region || !node.LogGroup || !node.LogStream) {
+            return;
+        }
+        this.treeDataProvider.AddLogStream(node.Region, node.LogGroup, node.LogStream);
+        this.SaveState();
+        this.Refresh();
+    }
     async RemoveAllLogStreams(node) {
         ui.logToOutput('CloudWatchTreeView.RemoveAllLogStreams Started');
         if (node.TreeItemType !== CloudWatchTreeItem_1.TreeItemType.LogGroup) {

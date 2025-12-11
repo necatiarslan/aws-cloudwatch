@@ -153,6 +153,15 @@ function activate(context) {
                 ui.logToOutput('CloudWatchTreeView.RemoveLogStream Error', error);
             }
         }));
+        context.subscriptions.push(vscode.commands.registerCommand('CloudWatchTreeView.PinLogStream', async (node) => {
+            try {
+                await treeView.PinLogStream(node);
+            }
+            catch (error) {
+                ui.showErrorMessage('Failed to pin log stream', error);
+                ui.logToOutput('CloudWatchTreeView.PinLogStream Error', error);
+            }
+        }));
         context.subscriptions.push(vscode.commands.registerCommand('CloudWatchTreeView.AddAllLogStreams', async (node) => {
             try {
                 await treeView.AddAllLogStreams(node);
