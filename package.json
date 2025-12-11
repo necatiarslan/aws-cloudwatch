@@ -185,6 +185,14 @@
         }
       ]
     },
+    "chatParticipants": [
+      {
+        "id": "awscloudwatch.participant",
+        "name": "AwsCloudWatch",
+        "description": "AWS CloudWatch Logs AI Assistant",
+        "isSticky": true
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {

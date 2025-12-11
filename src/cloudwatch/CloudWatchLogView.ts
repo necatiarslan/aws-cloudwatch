@@ -252,6 +252,7 @@ export class CloudWatchLogView {
                     <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking()?"Pause":"Resume"}</vscode-button>
                     <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
                     <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
+                    <vscode-button appearance="secondary" id="ask_ai" >Ask AI</vscode-button>
                 </td>
                 <td style="text-align:left" width="20px">
                     <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
@@ -441,6 +442,10 @@ export class CloudWatchLogView {
                         this.ExportLogs();
                         return;
                     
+                    case "ask_ai":
+                        this.AskAI();
+                        return;
+                    
                     case "toggle_wrap":
                         this.WrapText = message.wrap_text;
                         this.RenderHtml();
@@ -534,5 +539,30 @@ export class CloudWatchLogView {
             ui.logToOutput("ExportLogs Error !!!", error as Error); 
         }
 
+    }
+
+    async AskAI(){
+        ui.logToOutput('CloudWatchLogView.AskAI Started');
+
+        try 
+        {
+            const { CloudWatchAIHandler } = await import('../language_tools/CloudWatchAIHandler');
+            if (!CloudWatchAIHandler.Current) {
+                ui.showErrorMessage('CloudWatchAIHandler not initialized', new Error('AI handler is not available'));
+                return;
+            }
+
+            await CloudWatchAIHandler.Current.askAIWithLogsContext(
+                this.Region,
+                this.LogGroup,
+                this.LogStream,
+                this.LogEvents
+            );
+        } 
+        catch (error: unknown) 
+        {
+            ui.showErrorMessage('AskAI Error !!!', error as Error);
+            ui.logToOutput("AskAI Error !!!", error as Error); 
+        }
     }
 }

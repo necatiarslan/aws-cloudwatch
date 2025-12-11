@@ -10,6 +10,9 @@ function main() {
   const ExportLogsButton = document.getElementById("export_logs");
   ExportLogsButton.addEventListener("click", ExportLogsClick);
 
+  const AskAIButton = document.getElementById("ask_ai");
+  AskAIButton.addEventListener("click", AskAIClick);
+
   const SearchTextBox = document.getElementById("search_text");
   SearchTextBox.addEventListener("keydown", SearchTextBoxKeyDown);
 
@@ -86,6 +89,12 @@ function PauseTimerClick() {
 function ExportLogsClick() {
   vscode.postMessage({
     command: "export_logs"
+  });
+}
+
+function AskAIClick() {
+  vscode.postMessage({
+    command: "ask_ai"
   });
 }
 

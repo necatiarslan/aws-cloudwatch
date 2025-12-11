@@ -38,6 +38,7 @@ exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const ui = __importStar(require("./common/UI"));
 const CloudWatchTreeView_1 = require("./cloudwatch/CloudWatchTreeView");
+const CloudWatchAIHandler_1 = require("./language_tools/CloudWatchAIHandler");
 /**
  * Activates the AWS CloudWatch extension.
  * Registers all commands and initializes the tree view.
@@ -50,7 +51,12 @@ const CloudWatchTreeView_1 = require("./cloudwatch/CloudWatchTreeView");
 function activate(context) {
     ui.logToOutput('AWS CloudWatch Extension activation started');
     try {
-        // Initialize the tree view
+        // Initialize AI Handler
+        CloudWatchAIHandler_1.CloudWatchAIHandler.Current = new CloudWatchAIHandler_1.CloudWatchAIHandler();
+        // Register Chat Participant
+        const participant = vscode.chat.createChatParticipant('awscloudwatch.participant', CloudWatchAIHandler_1.CloudWatchAIHandler.Current.aIHandler.bind(CloudWatchAIHandler_1.CloudWatchAIHandler.Current));
+        participant.iconPath = vscode.Uri.joinPath(context.extensionUri, 'media', 'aws-cloudwatch-logo-extension.png');
+        context.subscriptions.push(participant);
         const treeView = new CloudWatchTreeView_1.CloudWatchTreeView(context);
         // Register all commands and add them to subscriptions to prevent memory leaks
         // Each command handler includes error handling for robustness

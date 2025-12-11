@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as ui from './common/UI';
 import { CloudWatchTreeView } from './cloudwatch/CloudWatchTreeView';
 import { CloudWatchTreeItem } from './cloudwatch/CloudWatchTreeItem';
+import { CloudWatchAIHandler } from './language_tools/CloudWatchAIHandler';
 
 /**
  * Activates the AWS CloudWatch extension.
@@ -16,7 +17,17 @@ export function activate(context: vscode.ExtensionContext): void {
 	ui.logToOutput('AWS CloudWatch Extension activation started');
 
 	try {
-		// Initialize the tree view
+			// Initialize AI Handler
+			CloudWatchAIHandler.Current = new CloudWatchAIHandler();
+
+			// Register Chat Participant
+			const participant = vscode.chat.createChatParticipant(
+				'awscloudwatch.participant',
+				CloudWatchAIHandler.Current.aIHandler.bind(CloudWatchAIHandler.Current)
+			);
+			participant.iconPath = vscode.Uri.joinPath(context.extensionUri, 'media', 'aws-cloudwatch-logo-extension.png');
+			context.subscriptions.push(participant);
+
 		const treeView = new CloudWatchTreeView(context);
 
 		// Register all commands and add them to subscriptions to prevent memory leaks

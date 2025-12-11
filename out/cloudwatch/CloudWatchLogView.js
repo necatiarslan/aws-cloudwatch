@@ -240,6 +240,7 @@ class CloudWatchLogView {
                     <vscode-button appearance="primary" id="pause_timer" >${this.IsTimerTicking() ? "Pause" : "Resume"}</vscode-button>
                     <vscode-button appearance="primary" id="refresh" >Refresh</vscode-button>
                     <vscode-button appearance="primary" id="export_logs" >Export Logs</vscode-button>
+                    <vscode-button appearance="secondary" id="ask_ai" >Ask AI</vscode-button>
                 </td>
                 <td style="text-align:left" width="20px">
                     <div style="visibility: ${this.IsTimerTicking() ? "visible" : "hidden"}; display: flex; align-items: center;">
@@ -416,6 +417,9 @@ class CloudWatchLogView {
                 case "export_logs":
                     this.ExportLogs();
                     return;
+                case "ask_ai":
+                    this.AskAI();
+                    return;
                 case "toggle_wrap":
                     this.WrapText = message.wrap_text;
                     this.RenderHtml();
@@ -486,6 +490,21 @@ class CloudWatchLogView {
         catch (error) {
             ui.showErrorMessage('ExportLogs Error !!!', error);
             ui.logToOutput("ExportLogs Error !!!", error);
+        }
+    }
+    async AskAI() {
+        ui.logToOutput('CloudWatchLogView.AskAI Started');
+        try {
+            const { CloudWatchAIHandler } = await Promise.resolve().then(() => __importStar(require('../language_tools/CloudWatchAIHandler')));
+            if (!CloudWatchAIHandler.Current) {
+                ui.showErrorMessage('CloudWatchAIHandler not initialized', new Error('AI handler is not available'));
+                return;
+            }
+            await CloudWatchAIHandler.Current.askAIWithLogsContext(this.Region, this.LogGroup, this.LogStream, this.LogEvents);
+        }
+        catch (error) {
+            ui.showErrorMessage('AskAI Error !!!', error);
+            ui.logToOutput("AskAI Error !!!", error);
         }
     }
 }
