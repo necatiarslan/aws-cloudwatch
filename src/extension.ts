@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as ui from './common/ui';
+import * as ui from './common/UI';
 import { CloudWatchTreeView } from './cloudwatch/CloudWatchTreeView';
 import { CloudWatchTreeItem } from './cloudwatch/CloudWatchTreeItem';
 

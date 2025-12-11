@@ -15,17 +15,35 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir = exports.ENV_CREDENTIALS_PATH = exports.getIniProfileData = exports.GetAwsProfileList = exports.GetLogEvents = exports.GetLogStreamList = exports.GetLogStreams = exports.GetLogGroupList = exports.GetCloudWatchLogsClient = exports.GetCredentials = void 0;
+exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir = exports.ENV_CREDENTIALS_PATH = void 0;
+exports.GetCredentials = GetCredentials;
+exports.GetCloudWatchLogsClient = GetCloudWatchLogsClient;
+exports.GetLogGroupList = GetLogGroupList;
+exports.GetLogStreams = GetLogStreams;
+exports.GetLogStreamList = GetLogStreamList;
+exports.GetLogEvents = GetLogEvents;
+exports.GetAwsProfileList = GetAwsProfileList;
+exports.getIniProfileData = getIniProfileData;
 /* eslint-disable @typescript-eslint/naming-convention */
-const ui = __importStar(require("./ui"));
+const ui = __importStar(require("./UI"));
 const MethodResult_1 = require("./MethodResult");
 const os_1 = require("os");
 const path_1 = require("path");
@@ -54,7 +72,6 @@ async function GetCredentials() {
         return credentials;
     }
 }
-exports.GetCredentials = GetCredentials;
 const client_cloudwatch_logs_1 = require("@aws-sdk/client-cloudwatch-logs");
 async function GetCloudWatchLogsClient(Region = CloudWatchTreeView_1.CloudWatchTreeView.Current?.LastUsedRegion) {
     let credentials = await GetCredentials();
@@ -64,7 +81,6 @@ async function GetCloudWatchLogsClient(Region = CloudWatchTreeView_1.CloudWatchT
         region: Region
     });
 }
-exports.GetCloudWatchLogsClient = GetCloudWatchLogsClient;
 const client_cloudwatch_logs_2 = require("@aws-sdk/client-cloudwatch-logs");
 async function GetLogGroupList(Region, LogGroupNamePattern) {
     ui.logToOutput('api.GetLogGroupList Started');
@@ -99,7 +115,6 @@ async function GetLogGroupList(Region, LogGroupNamePattern) {
     }
     return result;
 }
-exports.GetLogGroupList = GetLogGroupList;
 const client_cloudwatch_logs_3 = require("@aws-sdk/client-cloudwatch-logs");
 async function GetLogStreams(Region, LogGroupName, LogStreamFilter) {
     ui.logToOutput('api.GetLogStreams Started');
@@ -126,7 +141,9 @@ async function GetLogStreams(Region, LogGroupName, LogStreamFilter) {
         if (LogStreamFilter) {
             result.result = allLogStreams.filter((logStream) => logStream.logStreamName?.includes(LogStreamFilter));
         }
-        result.result = allLogStreams;
+        else {
+            result.result = allLogStreams;
+        }
     }
     catch (error) {
         result.isSuccessful = false;
@@ -136,8 +153,7 @@ async function GetLogStreams(Region, LogGroupName, LogStreamFilter) {
     }
     return result;
 }
-exports.GetLogStreams = GetLogStreams;
-async function GetLogStreamList(Region, LogGroupName, IncludeEmptyLogStreams = false, DateFilter) {
+async function GetLogStreamList(Region, LogGroupName, IncludeEmptyLogStreams = true, DateFilter) {
     ui.logToOutput('api.GetLogStreamList Started');
     let result = new MethodResult_1.MethodResult();
     result.result = [];
@@ -177,7 +193,6 @@ async function GetLogStreamList(Region, LogGroupName, IncludeEmptyLogStreams = f
         return result;
     }
 }
-exports.GetLogStreamList = GetLogStreamList;
 const client_cloudwatch_logs_4 = require("@aws-sdk/client-cloudwatch-logs");
 async function GetLogEvents(Region, LogGroupName, LogStreamName, StartTime = 0) {
     ui.logToOutput(`api.GetLogEvents Started - Region:${Region}, LogGroupName:${LogGroupName}, LogStreamName:${LogStreamName}, StartTime:${StartTime}`);
@@ -213,7 +228,6 @@ async function GetLogEvents(Region, LogGroupName, LogStreamName, StartTime = 0) 
     }
     return result;
 }
-exports.GetLogEvents = GetLogEvents;
 async function GetAwsProfileList() {
     ui.logToOutput("api.GetAwsProfileList Started");
     let result = new MethodResult_1.MethodResult();
@@ -231,13 +245,11 @@ async function GetAwsProfileList() {
         return result;
     }
 }
-exports.GetAwsProfileList = GetAwsProfileList;
 async function getIniProfileData(init = {}) {
     ui.logToOutput('api.getIniProfileData Started');
     const profiles = await (0, parseKnownFiles_1.parseKnownFiles)(init);
     return profiles;
 }
-exports.getIniProfileData = getIniProfileData;
 exports.ENV_CREDENTIALS_PATH = "AWS_SHARED_CREDENTIALS_FILE";
 const getHomeDir = () => {
     const { HOME, USERPROFILE, HOMEPATH, HOMEDRIVE = `C:${path_1.sep}` } = process.env;
@@ -257,4 +269,4 @@ const getCredentialsFilepath = () => process.env[exports.ENV_CREDENTIALS_PATH] |
 exports.getCredentialsFilepath = getCredentialsFilepath;
 const getConfigFilepath = () => process.env[exports.ENV_CREDENTIALS_PATH] || (0, path_2.join)((0, exports.getHomeDir)(), ".aws", "config");
 exports.getConfigFilepath = getConfigFilepath;
-//# sourceMappingURL=api.js.map
+//# sourceMappingURL=API.js.map

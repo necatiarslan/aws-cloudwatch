@@ -2,8 +2,8 @@
 import * as vscode from 'vscode';
 import { CloudWatchTreeItem, TreeItemType } from './CloudWatchTreeItem';
 import { CloudWatchTreeDataProvider } from './CloudWatchTreeDataProvider';
-import * as ui from '../common/ui';
-import * as api from '../common/api';
+import * as ui from '../common/UI';
+import * as api from '../common/API';
 import { CloudWatchLogView } from './CloudWatchLogView';
 
 export class CloudWatchTreeView {

@@ -219,24 +219,24 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/glob": "^8.0.0",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "^20.17.0",
+    "@types/glob": "^9.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.0.0",
     "@types/tmp": "^0.2.6",
     "@types/vscode": "^1.104.0",
-    "@typescript-eslint/eslint-plugin": "^8.47.0",
-    "@typescript-eslint/parser": "^8.47.0",
-    "@vscode/test-electron": "^2.1.5",
-    "eslint": "^8.57.1",
-    "glob": "^8.1.0",
-    "mocha": "^10.8.2",
-    "typescript": "~5.3.3"
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.1",
+    "glob": "^13.0.0",
+    "mocha": "^11.7.5",
+    "typescript": "~5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.936.0",
-    "@aws-sdk/credential-providers": "^3.936.0",
-    "@vscode-elements/elements": "^1.17.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.948.0",
+    "@aws-sdk/credential-providers": "^3.948.0",
+    "@vscode-elements/elements": "^2.3.1",
     "@vscode/codicons": "^0.0.43",
-    "tmp": "^0.2.3"
+    "tmp": "^0.2.5"
   }
 }

@@ -14,7 +14,8 @@ publish:
 
 npm_outdated:
     npm outdated
-
+    npx npm-check-updates
+    
 npm_upgrade:
     brew upgrade # upgrade homebrew
     brew install node # install the latest node version
@@ -69,5 +70,4 @@ add_logs:
     aws --endpoint-url=http://localhost:4566 logs put-log-events \
     --log-group-name my-log-group \
     --log-stream-name my-log-stream \
-    --log-events '[{"timestamp": 1747746788001, "message": "Your log message here"}]'
-
+    --log-events '[{"timestamp": '$(($(date +%s) * 1000))', "message": "Log from '$(whoami)'@'$(hostname)' - ID: '$(uuidgen)'"}]'

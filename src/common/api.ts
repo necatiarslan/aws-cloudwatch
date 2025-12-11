@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import * as ui from "./ui";
+import * as ui from "./UI";
 import { MethodResult } from './MethodResult';
 import { homedir } from "os";
 import { sep } from "path";
@@ -126,8 +126,9 @@ export async function GetLogStreams(
     if (LogStreamFilter) {
       result.result = allLogStreams.filter((logStream) => logStream.logStreamName?.includes(LogStreamFilter));
     }
-
-    result.result = allLogStreams;
+    else {
+      result.result = allLogStreams;
+    }
 
   } catch (error: any) {
     result.isSuccessful = false;
@@ -141,7 +142,7 @@ export async function GetLogStreams(
 
 
 
-export async function GetLogStreamList(Region:string, LogGroupName:string, IncludeEmptyLogStreams:boolean=false, DateFilter?:Date): Promise<MethodResult<string[]>> {
+export async function GetLogStreamList(Region:string, LogGroupName:string, IncludeEmptyLogStreams:boolean=true, DateFilter?:Date): Promise<MethodResult<string[]>> {
   ui.logToOutput('api.GetLogStreamList Started');
   let result:MethodResult<string[]> = new MethodResult<string[]>();
   result.result = [];
