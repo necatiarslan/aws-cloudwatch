@@ -236,6 +236,7 @@ export class CloudWatchTreeView {
 		if(!node.Region || !node.LogGroup) { return; }
 		
 		this.treeDataProvider.RemoveLogGroup(node.Region, node.LogGroup);
+		this.Refresh();
 		this.SaveState();
 	}
 

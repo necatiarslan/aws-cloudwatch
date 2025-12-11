@@ -58,7 +58,7 @@ export async function GetLogGroupList(Region: string, LogGroupNamePattern?: stri
     do {
       const command:DescribeLogGroupsCommand = new DescribeLogGroupsCommand({
         limit: 50,
-        logGroupNamePrefix: LogGroupNamePattern,
+        logGroupNamePattern: LogGroupNamePattern,
         nextToken,
       });
 

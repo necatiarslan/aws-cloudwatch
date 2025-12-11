@@ -230,6 +230,7 @@ class CloudWatchTreeView {
             return;
         }
         this.treeDataProvider.RemoveLogGroup(node.Region, node.LogGroup);
+        this.Refresh();
         this.SaveState();
     }
     async AddLogStream(node) {

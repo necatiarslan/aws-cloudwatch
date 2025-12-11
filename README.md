@@ -381,6 +381,8 @@ For LocalStack or custom AWS endpoints:
 
 ### Planned Features
 
+- [ ] Ask AI for Log Analysis
+- [ ] Language Tools Integration
 - [ ] Log Stream Filter Groups
 - [ ] Log Stream Name Filter
 - [ ] Enhanced log viewing for long messages

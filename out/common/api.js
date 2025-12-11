@@ -92,7 +92,7 @@ async function GetLogGroupList(Region, LogGroupNamePattern) {
         do {
             const command = new client_cloudwatch_logs_2.DescribeLogGroupsCommand({
                 limit: 50,
-                logGroupNamePrefix: LogGroupNamePattern,
+                logGroupNamePattern: LogGroupNamePattern,
                 nextToken,
             });
             const response = await client.send(command);
