@@ -48,6 +48,7 @@ class CloudWatchTreeDataProvider {
         this.LogStreamNodeList = [];
         this.LogGroupList = [];
         this.LogStreamList = [];
+        this.LogStreamCache = [];
     }
     Refresh() {
         this._onDidChangeTreeData.fire();
@@ -246,20 +247,22 @@ class CloudWatchTreeDataProvider {
         todayNode.LogGroup = logGroupNode.LogGroup;
         todayNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         todayNode.Parent = logGroupNode;
+        todayNode.command = { command: 'CloudWatchTreeView.RefreshDateNode', title: 'Refresh', arguments: [todayNode, 0] };
         result.push(todayNode);
         const yesterdayNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Yesterday', CloudWatchTreeItem_1.TreeItemType.Yesterday);
         yesterdayNode.Region = logGroupNode.Region;
         yesterdayNode.LogGroup = logGroupNode.LogGroup;
         yesterdayNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         yesterdayNode.Parent = logGroupNode;
+        yesterdayNode.command = { command: 'CloudWatchTreeView.RefreshDateNode', title: 'Refresh', arguments: [yesterdayNode, 1] };
         result.push(yesterdayNode);
         const historyNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('History', CloudWatchTreeItem_1.TreeItemType.History);
         historyNode.Region = logGroupNode.Region;
         historyNode.LogGroup = logGroupNode.LogGroup;
         historyNode.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         historyNode.Parent = logGroupNode;
+        historyNode.command = { command: 'CloudWatchTreeView.AddLogStreamsByDate', title: 'Add by Date', arguments: [logGroupNode] };
         result.push(historyNode);
-        const detailedStreams = await this.GetLogStreamsDetailed(logGroupNode.Region, logGroupNode.LogGroup);
         for (var node of this.LogStreamNodeList) {
             if (!(node.Region === logGroupNode.Region && node.LogGroup === logGroupNode.LogGroup)) {
                 continue;
@@ -271,8 +274,6 @@ class CloudWatchTreeDataProvider {
                 continue;
             }
             node.Parent = logGroupNode;
-            const match = detailedStreams.find(ds => ds.logStreamName === node.LogStream);
-            node.description = this.FormatLastEventTime(match?.lastEventTimestamp);
             if (logGroupNode.Children.indexOf(node) === -1) {
                 logGroupNode.Children.push(node);
             }
@@ -310,6 +311,11 @@ class CloudWatchTreeDataProvider {
         if (!dateNode.Region || !dateNode.LogGroup) {
             return result;
         }
+        // Check if children are already loaded
+        if (dateNode.Children && dateNode.Children.length > 0) {
+            return dateNode.Children;
+        }
+        // Load streams on expand
         const start = new Date();
         start.setHours(0, 0, 0, 0);
         start.setDate(start.getDate() + dayOffset);
@@ -335,29 +341,59 @@ class CloudWatchTreeDataProvider {
             streamNode.Parent = dateNode;
             result.push(streamNode);
         }
-        const refreshNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Refresh', CloudWatchTreeItem_1.TreeItemType.RefreshAction);
-        refreshNode.command = { command: 'CloudWatchTreeView.Refresh', title: 'Refresh' };
-        refreshNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
-        refreshNode.Parent = dateNode;
-        result.push(refreshNode);
+        // Cache the loaded children
+        dateNode.Children = result;
         return result;
     }
+    async LoadDateFilteredLogStreams(dateNode, dayOffset) {
+        if (!dateNode.Region || !dateNode.LogGroup) {
+            return;
+        }
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        start.setDate(start.getDate() + dayOffset);
+        const end = new Date(start.getTime() + 86400000);
+        const result = [];
+        const detailedStreams = await this.GetLogStreamsDetailed(dateNode.Region, dateNode.LogGroup);
+        for (const ds of detailedStreams) {
+            if (!ds.lastEventTimestamp) {
+                continue;
+            }
+            if (ds.lastEventTimestamp < start.getTime() || ds.lastEventTimestamp >= end.getTime()) {
+                continue;
+            }
+            if (!ds.logStreamName) {
+                continue;
+            }
+            const streamNode = new CloudWatchTreeItem_1.CloudWatchTreeItem(ds.logStreamName, CloudWatchTreeItem_1.TreeItemType.LogStream);
+            streamNode.Region = dateNode.Region;
+            streamNode.LogGroup = dateNode.LogGroup;
+            streamNode.LogStream = ds.logStreamName;
+            streamNode.description = this.FormatLastEventTime(ds.lastEventTimestamp);
+            streamNode.IsPinned = false;
+            streamNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
+            streamNode.Parent = dateNode;
+            result.push(streamNode);
+        }
+        // Cache the loaded children
+        dateNode.Children = result;
+        this.Refresh();
+    }
     GetHistoryChildren(historyNode) {
-        const refreshNode = new CloudWatchTreeItem_1.CloudWatchTreeItem('Refresh by Date', CloudWatchTreeItem_1.TreeItemType.RefreshAction);
-        refreshNode.command = { command: 'CloudWatchTreeView.AddLogStreamsByDate', title: 'Add by Date', arguments: [historyNode.Parent] };
-        refreshNode.collapsibleState = vscode.TreeItemCollapsibleState.None;
-        refreshNode.Parent = historyNode;
-        return [refreshNode];
+        const result = [];
+        return result;
     }
     async GetLogStreamsDetailed(Region, LogGroup) {
         if (!Region || !LogGroup) {
             return [];
         }
-        const result = await api.GetLogStreams(Region, LogGroup);
-        if (result.isSuccessful && result.result) {
-            return result.result;
+        if (!this.LogStreamCache.find(c => c.Region === Region && c.LogGroup === LogGroup)) {
+            const result = await api.GetLogStreams(Region, LogGroup);
+            if (result.isSuccessful && result.result) {
+                this.LogStreamCache.push({ Region: Region, LogGroup: LogGroup, LogStream: result.result });
+            }
         }
-        return [];
+        return this.LogStreamCache.find(c => c.Region === Region && c.LogGroup === LogGroup)?.LogStream || [];
     }
     FormatLastEventTime(timestamp) {
         if (!timestamp) {

@@ -337,6 +337,14 @@ export class CloudWatchTreeView {
 		this.Refresh();
 	}
 
+	async RefreshDateNode(dateNode: CloudWatchTreeItem, dayOffset: number) {
+		ui.logToOutput('CloudWatchTreeView.RefreshDateNode Started');
+
+		if (!dateNode.Region || !dateNode.LogGroup) { return; }
+
+		await this.treeDataProvider.LoadDateFilteredLogStreams(dateNode, dayOffset);
+	}
+
 	async RemoveAllLogStreams(node: CloudWatchTreeItem) {
 		ui.logToOutput('CloudWatchTreeView.RemoveAllLogStreams Started');
 		

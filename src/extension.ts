@@ -161,6 +161,17 @@ export function activate(context: vscode.ExtensionContext): void {
 		);
 
 		context.subscriptions.push(
+			vscode.commands.registerCommand('CloudWatchTreeView.RefreshDateNode', async (dateNode: CloudWatchTreeItem, dayOffset: number) => {
+				try {
+					await treeView.RefreshDateNode(dateNode, dayOffset);
+				} catch (error) {
+					ui.showErrorMessage('Failed to refresh date node', error as Error);
+					ui.logToOutput('CloudWatchTreeView.RefreshDateNode Error', error as Error);
+				}
+			})
+		);
+
+		context.subscriptions.push(
 			vscode.commands.registerCommand('CloudWatchTreeView.AddAllLogStreams', async (node: CloudWatchTreeItem) => {
 				try {
 					await treeView.AddAllLogStreams(node);

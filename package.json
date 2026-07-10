@@ -73,6 +73,11 @@
         "title": "Remove Log Stream"
       },
       {
+        "command": "CloudWatchTreeView.RefreshDateNode",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
         "command": "CloudWatchTreeView.PinLogStream",
         "title": "Pin Log Stream",
         "icon": "$(pin)"
@@ -192,6 +197,11 @@
           "command": "CloudWatchTreeView.PinLogStream",
           "when": "view == CloudWatchTreeView && viewItem =~ /#LogStream#/ && viewItem =~ /#NotPinned#/",
           "group": "inline@2"
+        },
+        {
+          "command": "CloudWatchTreeView.RefreshDateNode",
+          "when": "view == CloudWatchTreeView && viewItem =~ /#Today#|#Yesterday#|#History#/",
+          "group": "inline@1"
         }
       ]
     },

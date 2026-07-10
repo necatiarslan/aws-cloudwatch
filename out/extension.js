@@ -162,6 +162,15 @@ function activate(context) {
                 ui.logToOutput('CloudWatchTreeView.PinLogStream Error', error);
             }
         }));
+        context.subscriptions.push(vscode.commands.registerCommand('CloudWatchTreeView.RefreshDateNode', async (dateNode, dayOffset) => {
+            try {
+                await treeView.RefreshDateNode(dateNode, dayOffset);
+            }
+            catch (error) {
+                ui.showErrorMessage('Failed to refresh date node', error);
+                ui.logToOutput('CloudWatchTreeView.RefreshDateNode Error', error);
+            }
+        }));
         context.subscriptions.push(vscode.commands.registerCommand('CloudWatchTreeView.AddAllLogStreams', async (node) => {
             try {
                 await treeView.AddAllLogStreams(node);
