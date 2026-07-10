@@ -1,10 +1,7 @@
 # AWS CloudWatch - VSCode Extension
 
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/NecatiARSLAN.aws-cloudwatch-vscode-extension)](https://marketplace.visualstudio.com/items?itemName=NecatiARSLAN.aws-cloudwatch-vscode-extension)
-[![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/NecatiARSLAN.aws-cloudwatch-vscode-extension)](https://marketplace.visualstudio.com/items?itemName=NecatiARSLAN.aws-cloudwatch-vscode-extension)
-[![License](https://img.shields.io/github/license/necatiarslan/aws-cloudwatch)](https://github.com/necatiarslan/aws-cloudwatch/blob/main/LICENSE)
 
-> **Access and review your AWS CloudWatch logs directly from VSCode - faster, easier, and more convenient than the AWS console.**
+**Access and review your AWS CloudWatch logs directly from VSCode - faster, easier, and more convenient than the AWS console.**
 
 ![Screenshot](media/main-screen.png)
 
